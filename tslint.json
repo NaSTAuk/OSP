@@ -1,0 +1,78 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
+    "semicolon": [
+      true,
+      "never"
+    ],
+    "indent": [
+      true,
+      "tabs",
+      4
+    ],
+    "quotemark": [
+      true,
+      "single",
+      "jsx-single",
+      "avoid-escape"
+    ],
+    "space-before-function-paren": [
+      true,
+      "always"
+    ],
+    "whitespace": [
+      true,
+      "check-decl",
+      "check-rest-spread",
+      "check-type",
+      "check-postbrace",
+      "check-preblock"
+    ],
+    "typedef": [
+      true,
+      "call-signature",
+      "parameter",
+      "property-declaration",
+      "member-variable-declaration"
+    ],
+    "curly": [
+      true,
+      "ignore-same-line"
+    ],
+    "completed-docs": [
+      true,
+      {
+        "classes": true,
+        "methods": {
+          "privacies": [
+            "public"
+          ]
+        }
+      }
+    ],
+    "interface-name": [
+      true,
+      "never-prefix"
+    ],
+    "variable-name": false,
+    "only-arrow-functions": false
+  },
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "node_modules"
+    ],
+    "format": "codeFrame"
+  }
+}
