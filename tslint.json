@@ -41,7 +41,6 @@
     ],
     "typedef": [
       true,
-      "call-signature",
       "parameter",
       "property-declaration",
       "member-variable-declaration"
@@ -66,7 +65,8 @@
       "never-prefix"
     ],
     "variable-name": false,
-    "only-arrow-functions": false
+    "only-arrow-functions": false,
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": [],
   "linterOptions": {

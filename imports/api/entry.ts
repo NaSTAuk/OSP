@@ -1,16 +1,5 @@
 import { Mongo } from 'meteor/mongo'
-
-export enum EntryType {
-	VIDEO = 'entry_video',
-	DOCUMENT = 'entry_document'
-}
-
-export enum VerificationStatus {
-	WAITING = 'status_waiting',
-	VERIFIED = 'status_verified',
-	REJECTED = 'status_rejected',
-	DISPUTED = 'status_disputed'
-}
+import { EntryType, VerificationStatus } from './enums'
 
 /** Base interface for entries, shouldn't be used on its own but as an inherited interface. */
 export interface EntryBase {
