@@ -1,5 +1,4 @@
 import { Mongo } from 'meteor/mongo'
-import { DEFAULT_AWARDS, DEFAULT_CATEGORIES_FOR_AWARDS } from './awards'
 import { MINUTE } from './constants'
 import { DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './enums'
 import { SupportingEvidence } from './supporting-evidence'
