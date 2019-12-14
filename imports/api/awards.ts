@@ -1,5 +1,6 @@
+import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
-import { DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES } from './enums'
+import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES } from './enums'
 
 export interface Award {
 	_id?: string
@@ -11,7 +12,13 @@ export interface Award {
 	submissionsClose?: number
 }
 
-export const Awards = new Mongo.Collection<Award>('awards')
+export const Awards = new Mongo.Collection<Award>(Collections.AWARDS)
+
+if (Meteor.isServer) {
+	Meteor.publish(Collections.AWARDS, function awardsPublictaion () {
+		return Awards.find()
+	})
+}
 
 export const DEFAULT_AWARDS: Award[] = [
 	{

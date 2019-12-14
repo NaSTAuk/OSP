@@ -3,6 +3,13 @@
  *  which can lead to the typescript compiler not evaluating them properly.
  */
 
+export const enum Collections {
+	AWARDS = 'awards',
+	CATEGORIES = 'categories',
+	STATIONS = 'stations',
+	SUPPORTING_EVIDENCE = 'supporting_evidence'
+}
+
 export const enum DEFAULT_AWARDS_NAMES {
 	NASTA = 'NaSTA Awards',
 	PEOPLES_CHOICE = 'People\'s Choice Awards'

@@ -1,5 +1,5 @@
 import { Mongo } from 'meteor/mongo'
-import { SupportingEvidenceType } from './enums'
+import { Collections, SupportingEvidenceType } from './enums'
 
 export interface SupportingEvidenceBase {
 	type: SupportingEvidenceType
@@ -48,4 +48,4 @@ export type SupportingEvidence =
 	SupportingEvidencePDF |
 	SupportingEvidenceCall
 
-export const Evidence = new Mongo.Collection<SupportingEvidence>('supporting_evidence')
+export const Evidence = new Mongo.Collection<SupportingEvidence>(Collections.SUPPORTING_EVIDENCE)

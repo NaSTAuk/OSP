@@ -1,4 +1,5 @@
 import { Mongo } from 'meteor/mongo'
+import { Collections } from './enums'
 
 export interface Station {
 	_id?: string
@@ -10,4 +11,4 @@ export interface Station {
 	authorizedUsers: string[]
 }
 
-export const Stations = new Mongo.Collection<Station>('stations')
+export const Stations = new Mongo.Collection<Station>(Collections.STATIONS)

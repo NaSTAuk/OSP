@@ -1,17 +1,24 @@
+import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { MINUTE } from './constants'
-import { DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './enums'
+import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './enums'
 import { SupportingEvidence } from './supporting-evidence'
 
 export interface Category {
 	_id?: string
 	name: string
-	supportingEvidence: SupportingEvidence[] // TODO: Supporting evidence
+	supportingEvidence: SupportingEvidence[]
 	description: string
 	forAwards: string
 }
 
-export const Categories = new Mongo.Collection<Category>('categories')
+export const Categories = new Mongo.Collection<Category>(Collections.CATEGORIES)
+
+if (Meteor.isServer) {
+	Meteor.publish(Collections.CATEGORIES, function categoriesPublication () {
+		return Categories.find()
+	})
+}
 
 export const DEFAULT_CATEGORIES: Category[] = [
 	{

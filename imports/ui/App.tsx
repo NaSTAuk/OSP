@@ -1,7 +1,9 @@
+import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Award, Awards } from '../api/awards'
 import { Categories, Category } from '../api/categories'
+import { Collections } from '../api/enums'
 
 interface AppProps {
 	awards: Award[]
@@ -47,6 +49,9 @@ class App extends Component<AppProps> {
 }
 
 export default withTracker(() => {
+	Meteor.subscribe(Collections.AWARDS)
+	Meteor.subscribe(Collections.CATEGORIES)
+
 	return {
 		awards: Awards.find().fetch(),
 		categories: Categories.find().fetch()
