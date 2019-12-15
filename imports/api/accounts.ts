@@ -27,5 +27,11 @@ Meteor.methods({
 
 		// TODO: Accounts.sendEnrollmentEmail: https://docs.meteor.com/api/passwords.html
 		Accounts.createUser({ email, password})
+	},
+	'accounts.login' (email: string, password: string) {
+		check(email, String)
+		check(password, String)
+
+		Meteor.loginWithPassword(email, password)
 	}
 })

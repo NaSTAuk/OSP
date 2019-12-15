@@ -25,7 +25,6 @@ class App extends Component<AppProps> {
 				<CreateAccount />
 				<SignIn />
 				<h1>Awards in System</h1>
-				{ Meteor.userId !== null && Meteor.userId.length ? <span>Logged in: { Meteor.userId }</span> : undefined}
 				{ this.renderAwards() }
 			</div>
 		)
