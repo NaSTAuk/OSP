@@ -4,6 +4,8 @@ import React, { Component } from 'react'
 import { Award, Awards } from '../api/awards'
 import { Categories, Category } from '../api/categories'
 import { Collections } from '../api/enums'
+import { CreateAccount } from './CreateAccount'
+import { SignIn } from './SignIn'
 
 interface AppProps {
 	awards: Award[]
@@ -20,7 +22,10 @@ class App extends Component<AppProps> {
 	public render () {
 		return (
 			<div>
+				<CreateAccount />
+				<SignIn />
 				<h1>Awards in System</h1>
+				{ Meteor.userId !== null && Meteor.userId.length ? <span>Logged in: { Meteor.userId }</span> : undefined}
 				{ this.renderAwards() }
 			</div>
 		)

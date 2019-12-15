@@ -10,6 +10,14 @@ export const enum Collections {
 	SUPPORTING_EVIDENCE = 'supporting_evidence'
 }
 
+export const enum Roles {
+	UNASSIGNED = 'unassigned',
+	HOST = 'host',
+	JUDGE = 'judge',
+	STATION = 'station',
+	ADMIN = 'admin'
+}
+
 export const enum DEFAULT_AWARDS_NAMES {
 	NASTA = 'NaSTA Awards',
 	PEOPLES_CHOICE = 'People\'s Choice Awards'

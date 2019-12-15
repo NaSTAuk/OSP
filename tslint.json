@@ -52,12 +52,7 @@
     "completed-docs": [
       true,
       {
-        "classes": true,
-        "methods": {
-          "privacies": [
-            "public"
-          ]
-        }
+        "classes": true
       }
     ],
     "interface-name": [
