@@ -1,16 +1,21 @@
+import history from 'history'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
+import { Route, Router, Switch } from 'react-router'
 import { Award, Awards } from '../api/awards'
 import { Categories, Category } from '../api/categories'
 import { Collections } from '../api/enums'
+import { AwardsList } from './AwardsList'
 import { CreateAccount } from './CreateAccount'
 import { SignIn } from './SignIn'
 
-interface AppProps {
+export interface AppProps {
 	awards: Award[]
 	categories: Category[]
 }
+
+const browserHistory = history.createBrowserHistory()
 
 /** App */
 class App extends Component<AppProps> {
@@ -23,32 +28,20 @@ class App extends Component<AppProps> {
 		return (
 			<div>
 				<CreateAccount />
-				<SignIn />
-				<h1>Awards in System</h1>
-				{ this.renderAwards() }
+				{
+					Meteor.userId() ?
+					<Router history={ browserHistory }>
+						<Switch>
+							<Route exact path='/' render={
+								() => <AwardsList awards={ this.props.awards} categories={ this.props.categories} />
+							} />
+						</Switch>
+					</Router>:
+					<SignIn />
+				}
+
 			</div>
 		)
-	}
-
-	private renderAwards () {
-		return this.props.awards.map((award) => {
-			return (<div>
-				<h4>{ award.name }</h4>
-				<ul>
-					{ this.renderCategories(award) }
-				</ul>
-			</div>)
-		})
-	}
-
-	private renderCategories (award: Award) {
-		return this.props.categories
-			.filter((category) => category._id && award.categories.indexOf(category._id) !== -1)
-			.map((category) => {
-				return (
-					<li>{ category.name }</li>
-				)
-			})
 	}
 }
 

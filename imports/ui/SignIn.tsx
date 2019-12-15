@@ -5,22 +5,16 @@ import ReactDOM from 'react-dom'
 /** Login UI */
 export class SignIn extends Component {
 	public render () {
-		if (Meteor.userId() === null) {
-			return (
-				<div>
-					<h1>Sign in</h1>
-					<form onSubmit={ this.handleSubmit.bind(this) }>
-						<input type='email' ref='emailInput' placeholder='Email' />
-						<input type='password' ref='passwordInput' placeholder='Password' />
-						<input type='submit' value='Login'></input>
-					</form>
-				</div>
-			)
-		} else {
-			return (
-				<span>Logged in: { Meteor.userId() }</span>
-			)
-		}
+		return (
+			<div>
+				<h1>Sign in</h1>
+				<form onSubmit={ this.handleSubmit.bind(this) }>
+					<input type='email' ref='emailInput' placeholder='Email' />
+					<input type='password' ref='passwordInput' placeholder='Password' />
+					<input type='submit' value='Login'></input>
+				</form>
+			</div>
+		)
 	}
 
 	private handleSubmit (event: FormEvent) {
