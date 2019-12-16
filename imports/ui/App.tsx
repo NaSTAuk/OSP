@@ -9,6 +9,7 @@ import { Collections } from '../api/enums'
 import { AwardsList } from './AwardsList'
 import { CreateAccount } from './CreateAccount'
 import { SignIn } from './SignIn'
+import { WithAuth } from './WithAuth'
 
 export interface AppProps {
 	awards: Award[]
@@ -29,15 +30,14 @@ class App extends Component<AppProps> {
 			<div>
 				<CreateAccount />
 				{
-					Meteor.userId() ?
 					<Router history={ browserHistory }>
 						<Switch>
+							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
 							<Route exact path='/' render={
-								() => <AwardsList awards={ this.props.awards} categories={ this.props.categories} />
+								() => WithAuth(<AwardsList awards={ this.props.awards} categories={ this.props.categories} />)
 							} />
 						</Switch>
-					</Router>:
-					<SignIn />
+					</Router>
 				}
 
 			</div>
