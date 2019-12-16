@@ -9,6 +9,7 @@ import { Collections } from '../api/enums'
 import { AwardsList } from './AwardsList'
 import { CreateAccount } from './CreateAccount'
 import { SignIn } from './SignIn'
+import { Submit } from './Submit'
 import { WithAuth } from './WithAuth'
 
 export interface AppProps {
@@ -35,6 +36,21 @@ class App extends Component<AppProps> {
 							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
 							<Route exact path='/' render={
 								() => WithAuth(<AwardsList awards={ this.props.awards} categories={ this.props.categories} />)
+							} />
+							<Route exact path='/submit' render={
+								() => WithAuth(<Submit { ...this.props } />)
+							} />
+							<Route exact path='/submit/:awardId' render={
+								(props) => WithAuth(<Submit awardId={ props.match.params.awardId } { ...this.props } />)
+							} />
+							<Route exact path='/submit/:awardId/:categoryId' render={
+								(props) => WithAuth(
+									<Submit
+										awardId={ props.match.params.awardId }
+										categoryId={ props.match.params.categoryId }
+										{ ...this.props }
+									/>
+								)
 							} />
 						</Switch>
 					</Router>

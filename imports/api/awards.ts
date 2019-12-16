@@ -9,7 +9,8 @@ export interface Award {
 	/** IDs of categories belonging to this awards ceremony. */
 	categories: string[],
 	submissionsOpen?: number,
-	submissionsClose?: number
+	submissionsClose?: number,
+	active: boolean
 }
 
 export const Awards = new Mongo.Collection<Award>(Collections.AWARDS)
@@ -23,11 +24,13 @@ if (Meteor.isServer) {
 export const DEFAULT_AWARDS: Award[] = [
 	{
 		name: DEFAULT_AWARDS_NAMES.NASTA,
-		categories: []
+		categories: [],
+		active: true
 	},
 	{
 		name: DEFAULT_AWARDS_NAMES.PEOPLES_CHOICE,
-		categories: []
+		categories: [],
+		active: false
 	}
 ]
 
