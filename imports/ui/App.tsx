@@ -12,6 +12,8 @@ import { SignIn } from './SignIn'
 import { Submit } from './Submit'
 import { WithAuth } from './WithAuth'
 
+import '/imports/ui/css/App.css'
+
 export interface AppProps {
 	awards: Award[]
 	categories: Category[]

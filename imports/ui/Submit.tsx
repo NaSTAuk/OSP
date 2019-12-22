@@ -4,6 +4,7 @@ import { Award } from '../api/awards'
 import { Category } from '../api/categories'
 import { SupportingEvidenceType } from '../api/enums'
 import { SupportingEvidence } from '../api/supporting-evidence'
+import { Upload } from './Upload'
 
 export interface SubmitProperties {
 	awards: Award[]
@@ -77,7 +78,7 @@ export class Submit extends Component<SubmitProperties> {
 		return (
 			<div>
 				<h1>{ category.name }</h1>
-				<form onSubmit={ this.handleSubmit.bind(this) }>
+				<form encType='multipart/form-data' onSubmit={ this.handleSubmit.bind(this) }>
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }
 					<input type='submit' value='Enter'></input>
 				</form>
@@ -92,7 +93,7 @@ export class Submit extends Component<SubmitProperties> {
 	private renderSupportingEvidence (evidence: SupportingEvidence) {
 		switch (evidence.type) {
 			case SupportingEvidenceType.VIDEO:
-				return (<input type='text' placeholder='Video'></input>)
+				return (<Upload />)
 			case SupportingEvidenceType.TEXT:
 				return (<input type='text' placeholder='Text'></input>)
 			case SupportingEvidenceType.PDF:
