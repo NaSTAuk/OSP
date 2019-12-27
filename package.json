@@ -13,6 +13,7 @@
     "@babel/runtime": "^7.6.0",
     "@types/react-router-dom": "^5.1.3",
     "bcrypt": "^3.0.7",
+    "dropbox": "^4.0.30",
     "history": "^4.10.1",
     "meteor-node-stubs": "^1.0.0",
     "react": "^16.12.0",

@@ -1,3 +1,4 @@
+import { Dropbox } from 'dropbox'
 import React, { Component } from 'react'
 import { Dropzone } from './Dropzone'
 import { Progress } from './Progress'
@@ -115,8 +116,8 @@ export class Upload extends Component<{ }, State> {
 		}
 	}
 
-	private sendRequest (file: File) {
-		return new Promise((resolve, reject) => {
+	private async sendRequest (file: File) {
+		return new Promise(async (resolve, reject) => {
 			const req = new XMLHttpRequest()
 
 			req.upload.addEventListener('progress', (event) => {
@@ -144,11 +145,69 @@ export class Upload extends Component<{ }, State> {
 				reject(req.response)
 			})
 
-			const formData = new FormData()
-			formData.append('file', file, file.name)
+			const ACCESS_TOKEN = ''
+			const dbx = new Dropbox({ accessToken: ACCESS_TOKEN, fetch })
 
-			req.open('POST', 'http://127.0.01:8000/upload')
-			req.send(formData)
+			if (file.size <= 100 * 1024 * 1024) {
+				dbx.filesUpload({
+					contents: file,
+					path: '/' + file.name // TODO: Better path + unique
+				}).catch((error) => {
+					console.log(error)
+				}).then(() => {
+					console.log('Uploaded a small file')
+				})
+			} else {
+				const chunkSize = 8 * 1024 * 1024
+				const chunks = this.chunkFile(file, chunkSize)
+
+				const result = await dbx.filesUploadSessionStart({
+					contents: chunks[0],
+					close: false
+				})
+
+				console.log('Uploading')
+
+				if (result.session_id) {
+					for (let i = 1; i < chunks.length - 1; i++) {
+						console.log(`Appending ${i} of ${chunks.length - 1}`)
+						await dbx.filesUploadSessionAppend({
+							contents: chunks[i],
+							session_id: result.session_id,
+							offset: i*chunkSize
+						})
+					}
+					console.log(chunkSize * (chunks.length))
+					dbx.filesUploadSessionFinish({
+						contents: chunks[chunks.length - 1],
+						cursor: {
+							session_id: result.session_id,
+							offset: chunkSize * (chunks.length - 1)
+						},
+						commit: {
+							path: '/' + file.name, // TODO: Better path + unique
+							mode: {
+								'.tag': 'add'
+							}
+						}
+					} as any).catch((error) => {
+						console.log(error)
+					})
+					console.log('Done')
+				} else {
+					console.log('Retry') // TODO: Be smarter
+				}
+			}
 		})
+	}
+
+	private chunkFile (file: File, chunkSize: number = 8 * 1024 * 1024) {
+		const chunks = Math.ceil(file.size/chunkSize)
+		const fileparts = new Array()
+
+		for (let i = 0; i < chunks; i++) {
+			fileparts[i] = file.slice(chunkSize*i, chunkSize*i + chunkSize)
+		}
+		return fileparts
 	}
 }
