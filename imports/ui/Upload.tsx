@@ -83,6 +83,9 @@ export class Upload extends Component<{ }, State> {
 					}}
 				/>
 				{
+					uploadProgress ? <div>{ Math.floor(uploadProgress.percentage) }%</div> : undefined
+				}
+				{
 					this.state.tries[file.name] > 0 ?
 					this.state.tries[file.name] >= 5 ?
 					<div>
@@ -156,7 +159,13 @@ export class Upload extends Component<{ }, State> {
 
 					console.log('Uploading')
 
+					this.setState(
+						{ uploadProgress: { [file.name]: { percentage: 1, state: 'pending'} }, uploading: true }
+					)
 					const sessionId = await this.startUploadSession(chunks[0])
+					this.setState(
+						{ uploadProgress: { [file.name]: { percentage: (1 / chunks.length) * 100, state: 'pending'} }, uploading: true }
+					)
 
 					if (sessionId) {
 						console.log(`Got session Id: ${sessionId}`)
@@ -165,9 +174,14 @@ export class Upload extends Component<{ }, State> {
 							console.log(file.size)
 							console.log(`Appending ${i} of ${chunks.length - 1}`)
 							await this.uploadChunk(chunks[i], sessionId, chunkSize, i, false, '')
+							this.setState(
+								{ uploadProgress: { [file.name]: { percentage: (i / chunks.length) * 100, state: 'pending'} }, uploading: true }
+							)
 						}
 
+						console.log('Appending final chunk')
 						await this.uploadChunk(chunks[chunks.length - 1], sessionId, chunkSize, chunks.length - 1, true, `/${file.name}`)
+						this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
 					}
 				} catch (err) {
 					console.log(err)
