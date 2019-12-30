@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import '../imports/api/accounts'
+import '../imports/api/methods'
 import { Awards, DEFAULT_AWARDS, DEFAULT_CATEGORIES_FOR_AWARDS } from '/imports/api/awards'
 import { Categories, Category, DEFAULT_CATEGORIES } from '/imports/api/categories'
 

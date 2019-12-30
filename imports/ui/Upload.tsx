@@ -1,8 +1,9 @@
-import { Dropbox } from 'dropbox'
+import { blobToBase64 } from 'base64-blob'
 import React, { Component } from 'react'
 import { Dropzone } from './Dropzone'
 import { Progress } from './Progress'
 
+import { Meteor } from 'meteor/meteor'
 import '/imports/ui/css/Upload.css'
 
 interface State {
@@ -10,6 +11,7 @@ interface State {
 	successfullUploaded: boolean
 	files: File[]
 	uploadProgress: { [name: string]: { percentage: number, state: 'pending' | 'done' | 'error'} }
+	tries: { [name: string]: number }
 }
 
 /**
@@ -23,8 +25,9 @@ export class Upload extends Component<{ }, State> {
 			files: [],
 			uploading: false,
 			uploadProgress: { },
-			successfullUploaded: false
-		  }
+			successfullUploaded: false,
+			tries: { }
+		}
 
 		this.onFilesAdded = this.onFilesAdded.bind(this)
 		this.uploadFiles = this.uploadFiles.bind(this)
@@ -79,6 +82,16 @@ export class Upload extends Component<{ }, State> {
 						uploadProgress && uploadProgress.state === 'done' ? 0.5 : 0
 					}}
 				/>
+				{
+					this.state.tries[file.name] > 0 ?
+					this.state.tries[file.name] >= 5 ?
+					<div>
+						Uploading failed.
+					</div> :
+					<div>
+						Upload failed, retrying. Attempt: { this.state.tries[file.name] + 1 } / 5
+					</div> : undefined
+				}
 			</div>
 			)
 		}
@@ -118,96 +131,95 @@ export class Upload extends Component<{ }, State> {
 
 	private async sendRequest (file: File) {
 		return new Promise(async (resolve, reject) => {
-			const req = new XMLHttpRequest()
-
-			req.upload.addEventListener('progress', (event) => {
-				if (event.lengthComputable) {
-					const copy = { ...this.state.uploadProgress }
-					copy[file.name] = {
-						state: 'pending',
-						percentage: (event.loaded / event.total) * 100
-					}
-					this.setState({ uploadProgress: copy })
-				}
-			})
-
-			req.upload.addEventListener('load', () => {
-				const copy = { ...this.state.uploadProgress }
-				copy[file.name] = { state: 'done', percentage: 100 }
-				this.setState({ uploadProgress: copy })
-				resolve(req.response)
-			})
-
-			req.upload.addEventListener('error', () => {
-				const copy = { ...this.state.uploadProgress }
-				copy[file.name] = { state: 'error', percentage: 0 }
-				this.setState({ uploadProgress: copy })
-				reject(req.response)
-			})
-
-			const ACCESS_TOKEN = ''
-			const dbx = new Dropbox({ accessToken: ACCESS_TOKEN, fetch })
-
 			if (file.size <= 100 * 1024 * 1024) {
-				dbx.filesUpload({
-					contents: file,
-					path: '/' + file.name // TODO: Better path + unique
-				}).catch((error) => {
-					console.log(error)
-				}).then(() => {
-					console.log('Uploaded a small file')
-				})
-			} else {
-				const chunkSize = 8 * 1024 * 1024
-				const chunks = this.chunkFile(file, chunkSize)
-
-				const result = await dbx.filesUploadSessionStart({
-					contents: chunks[0],
-					close: false
-				})
-
-				console.log('Uploading')
-
-				if (result.session_id) {
-					for (let i = 1; i < chunks.length - 1; i++) {
-						console.log(`Appending ${i} of ${chunks.length - 1}`)
-						await dbx.filesUploadSessionAppend({
-							contents: chunks[i],
-							session_id: result.session_id,
-							offset: i*chunkSize
+				this.setState({ uploadProgress: { [file.name]: { percentage: 1, state: 'pending'} }, uploading: true })
+				let uploading = true
+				let tries = 0
+				while (uploading && tries < 5) {
+					try {
+						return this.uploadSmallFile(file).then(() => {
+							uploading = false
+							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
+						}).catch((err) => {
+							tries++
+							this.setState({ tries: { [file.name]: tries } })
+							console.log(err)
 						})
+					} catch (err) {
+						console.log(err)
 					}
-					console.log(chunkSize * (chunks.length))
-					dbx.filesUploadSessionFinish({
-						contents: chunks[chunks.length - 1],
-						cursor: {
-							session_id: result.session_id,
-							offset: chunkSize * (chunks.length - 1)
-						},
-						commit: {
-							path: '/' + file.name, // TODO: Better path + unique
-							mode: {
-								'.tag': 'add'
-							}
+				}
+			} else {
+				try {
+					const chunkSize = 8 * 1024 * 1024
+					const chunks = this.chunkFile(file, chunkSize)
+
+					console.log('Uploading')
+
+					const sessionId = await this.startUploadSession(chunks[0])
+
+					if (sessionId) {
+						console.log(`Got session Id: ${sessionId}`)
+
+						for (let i = 1; i < chunks.length - 1; i++) {
+							console.log(file.size)
+							console.log(`Appending ${i} of ${chunks.length - 1}`)
+							await this.uploadChunk(chunks[i], sessionId, chunkSize, i, false, '')
 						}
-					} as any).catch((error) => {
-						console.log(error)
-					})
-					console.log('Done')
-				} else {
-					console.log('Retry') // TODO: Be smarter
+
+						await this.uploadChunk(chunks[chunks.length - 1], sessionId, chunkSize, chunks.length - 1, true, `/${file.name}`)
+					}
+				} catch (err) {
+					console.log(err)
 				}
 			}
 		})
 	}
 
-	private chunkFile (file: File, chunkSize: number = 8 * 1024 * 1024) {
+	private chunkFile (file: File, chunkSize: number = 8 * 1024 * 1024): Blob[] {
 		const chunks = Math.ceil(file.size/chunkSize)
-		const fileparts = new Array()
+		const fileparts: Blob[] = []
 
 		for (let i = 0; i < chunks; i++) {
 			fileparts[i] = file.slice(chunkSize*i, chunkSize*i + chunkSize)
 		}
 		return fileparts
+	}
+
+	private async uploadSmallFile (file: File): Promise<string> {
+		const b64Encoding = await blobToBase64(file)
+		return new Promise((resolve, reject) => {
+			Meteor.call('submission.uploadFile', b64Encoding, `/${file.name}`, (error: any, result: any) => {
+				if (error) reject(error)
+				resolve(result)
+			}) // TODO: Better path
+		})
+	}
+
+	private async startUploadSession (chunk: Blob): Promise<string> {
+		console.log(chunk.size)
+		const b64Encoding = await blobToBase64(chunk)
+		return new Promise((resolve, reject) => {
+			Meteor.call('submission.startSession', b64Encoding, (error: any, result: any) => {
+				if (error) reject(error)
+				resolve(result)
+			})
+		})
+	}
+
+	private async uploadChunk (
+		chunk: Blob, sessionId: string, chunkSize: number, chunkNumber: number, finish: boolean, path: string
+	): Promise<any> {
+		console.log(chunk.size)
+		const b64Encoding = await blobToBase64(chunk)
+		return new Promise((resolve, reject) => {
+			Meteor.call(
+				'submission.uploadChunk', b64Encoding, sessionId, chunkSize, chunkNumber, finish, path,
+				(error: any, result: any) => {
+					if (error) reject(error)
+					resolve(result)
+				}
+			)
+		})
 	}
 }
