@@ -3,7 +3,7 @@ import { check } from 'meteor/check'
 import { Meteor } from 'meteor/meteor'
 import fetch from 'node-fetch'
 
-export const DROPBOX_TOKEN = ''
+export const DROPBOX_TOKEN = Meteor.settings.dropbox.accessToken
 
 const dbx = new Dropbox({ accessToken: DROPBOX_TOKEN, fetch })
 
