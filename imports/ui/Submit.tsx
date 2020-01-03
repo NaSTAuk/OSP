@@ -2,6 +2,7 @@ import React, { Component, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Award } from '../api/awards'
 import { Category } from '../api/categories'
+import { MINUTE } from '../api/constants'
 import { SupportingEvidenceType } from '../api/enums'
 import { SupportingEvidence } from '../api/supporting-evidence'
 import { Upload } from './Upload'
@@ -93,17 +94,35 @@ export class Submit extends Component<SubmitProperties> {
 	private renderSupportingEvidence (evidence: SupportingEvidence) {
 		switch (evidence.type) {
 			case SupportingEvidenceType.VIDEO:
-				return (<Upload />)
+				return (
+					<div>
+						<h3>
+							Video{ evidence.minLength || evidence.maxLength ? ' |' : undefined }
+							{ evidence.minLength ? ` Min length: ${this.millisToMinutes(evidence.minLength)} minutes` : undefined }
+							{ evidence.maxLength ? ` Max length: ${this.millisToMinutes(evidence.maxLength)} minutes` : undefined }
+						</h3>
+						<Upload format='video/mp4' />
+					</div>
+				)
 			case SupportingEvidenceType.TEXT:
 				return (<input type='text' placeholder='Text'></input>)
 			case SupportingEvidenceType.PDF:
-				return (<input type='text' placeholder='PDF'></input>)
+				return (
+					<div>
+						<h3>
+							PDF{ evidence.minLength || evidence.maxLength ? ' |' : undefined }
+							{ evidence.minLength ? ` Min length: ${evidence.minLength}` : undefined }
+							{ evidence.maxLength ? ` Max length: ${evidence.maxLength}` : undefined }
+						</h3>
+						<Upload format='application/pdf' />
+					</div>
+				)
 			case SupportingEvidenceType.CALL:
 				return <div>A video call will be required as evidence for this entry.</div>
 		}
 	}
 
-	private getRefForSupportingEvidence () {
-
+	private millisToMinutes (millis: number): number {
+		return millis / MINUTE
 	}
 }

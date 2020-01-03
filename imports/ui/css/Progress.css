@@ -1,8 +1,10 @@
 .ProgressBar {
-    width: 100%;
+    width: 45%;
     height: 8px;
     background-color: rgb(183, 155, 229);
     border-radius: 5px;
+    float: left;
+    margin: 5px 20px;
 }
 
 .Progress {

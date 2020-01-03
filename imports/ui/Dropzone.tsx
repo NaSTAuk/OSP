@@ -4,6 +4,7 @@ import '/imports/ui/css/Dropzone.css'
 
 interface Props {
 	disabled: boolean
+	format: string
 	onFilesAdded (arr: any[]): void
 }
 
@@ -28,27 +29,22 @@ export class Dropzone extends Component<Props, State> {
 
 	public render () {
 		return (
-			<div className={ `Dropzone ${this.state.highlight ? 'Highlight' : ''}`}
-				onDragOver={ this.onDragOver}
-				onDragLeave={ this.onDragLeave}
-				onDrop={ this.onDrop}
-				onClick={ this.openFileDialog}
-				style={ { cursor: this.props.disabled ? 'default' : 'pointer' }}
+			<div className={ `Dropzone ${this.state.highlight ? 'Highlight' : ''}` }
+				onDragOver={ this.onDragOver }
+				onDragLeave={ this.onDragLeave }
+				onDrop={ this.onDrop }
+				onClick={ this.openFileDialog }
+				style={ { cursor: this.props.disabled ? 'default' : 'pointer' } }
 			>
-				<img
-					alt='upload'
-					className='Icon'
-					src='baseline-cloud_upload-24px.svg'
-				/>
+				<div className='DropzoneText'>Drag files here or click to upload</div>
 				<input
-					ref={ this.fileInputRef}
+					ref={ this.fileInputRef }
 					className='FileInput'
 					type='file'
-					multiple
+					accept={ this.props.format }
 					onChange={ this.onFilesAdded }
-					style={ { display: 'none'}}
+					style={ { display: 'none'} }
 				/>
-				<span>Upload Files</span>
 			</div>
 		)
 	}

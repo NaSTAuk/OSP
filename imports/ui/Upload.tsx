@@ -6,18 +6,22 @@ import { Progress } from './Progress'
 import { Meteor } from 'meteor/meteor'
 import '/imports/ui/css/Upload.css'
 
+interface Props {
+	format: string
+}
+
 interface State {
 	uploading: boolean
 	successfullUploaded: boolean
 	files: File[]
-	uploadProgress: { [name: string]: { percentage: number, state: 'pending' | 'done' | 'error'} }
+	uploadProgress: { [name: string]: { percentage: number, state: 'pending' | 'uploading' | 'done' | 'error'} }
 	tries: { [name: string]: number }
 }
 
 /**
  * Creates a file upload button.
  */
-export class Upload extends Component<{ }, State> {
+export class Upload extends Component<Props, State> {
 	constructor (props: any) {
 		super (props)
 
@@ -38,32 +42,35 @@ export class Upload extends Component<{ }, State> {
 	public render () {
 		return (
 			<div className='Upload'>
-				<span className='Title'>Upload Files</span>
 				<div className='Content'>
-					<Dropzone onFilesAdded={ this.onFilesAdded} disabled={ this.state.uploading || this.state.successfullUploaded } />
+					<Dropzone
+						onFilesAdded={ this.onFilesAdded}
+						disabled={ this.state.uploading || this.state.successfullUploaded }
+						format={ this.props.format }
+					/>
 				</div>
 				<div className='Files'>
 				{
 					this.state.files.map((file) => {
 						return (
 							<div key={ file.name} className='Row'>
-								<span className='Filename'>{ file.name}</span>
-								{ this.renderProgress(file)}
+								<span className='Filename'>{ file.name }</span>
+								{ this.renderProgress(file) }
 							</div>
 						)
 					})
 				}
 				</div>
 				<div className='Actions'>
-					{ this.renderActions()}
+					{ this.renderActions() }
 				</div>
 			</div>
 		)
 	}
 
 	private onFilesAdded (files: File[]) {
-		this.setState((prevState) => ({
-		  files: prevState.files.concat(files)
+		this.setState((_prevState) => ({
+		  files
 		}))
 	}
 
@@ -73,22 +80,13 @@ export class Upload extends Component<{ }, State> {
 			return (
 			<div className='ProgressWrapper'>
 				<Progress progress={ uploadProgress ? uploadProgress.percentage : 0 } />
-				<img
-					className='CheckIcon'
-					alt='done'
-					src='baseline-check_circle_outline-24px.svg'
-					style={ {
-						opacity:
-						uploadProgress && uploadProgress.state === 'done' ? 0.5 : 0
-					}}
-				/>
 				{
-					uploadProgress ? <div>{ Math.floor(uploadProgress.percentage) }%</div> : undefined
+					uploadProgress ? <div className='UploadPercent'>{ Math.floor(uploadProgress.percentage) }%</div> : undefined
 				}
 				{
 					this.state.tries[file.name] > 0 ?
 					this.state.tries[file.name] >= 5 ?
-					<div>
+					<div className='UploadFailed'>
 						Uploading failed.
 					</div> :
 					<div>
@@ -103,13 +101,11 @@ export class Upload extends Component<{ }, State> {
 	private renderActions () {
 		if (this.state.successfullUploaded) {
 			return (
-				<button onClick={ () =>this.setState({ files: [], successfullUploaded: false }) }>
-					Clear
-				</button>
+				<div>Uploaded!</div>
 			)
 		} else {
 			return (
-				<button disabled={ this.state.files.length < 0 || this.state.uploading } onClick={ this.uploadFiles }>
+				<button disabled={ this.state.files.length < 1 || this.state.uploading } onClick={ this.uploadFiles }>
 					Upload
 				</button>
 			)
@@ -119,23 +115,36 @@ export class Upload extends Component<{ }, State> {
 	private async uploadFiles () {
 		this.setState({ uploadProgress: { }, uploading: true })
 		const promises: Array<Promise<unknown>> = []
+		let valid = true
 		this.state.files.forEach((file) => {
-			promises.push(this.sendRequest(file))
+			console.log(file.type)
+			if (file.type === this.props.format) {
+				promises.push(this.sendRequest(file))
+			} else {
+				valid = false
+			}
 		})
-		try {
-			await Promise.all(promises)
 
-			this.setState({ successfullUploaded: true, uploading: false })
-		} catch (e) {
-			// Not Production ready! Do some error handling here instead...
-			this.setState({ successfullUploaded: true, uploading: false })
+		if (valid) {
+			try {
+				await Promise.all(promises)
+
+				this.setState({ successfullUploaded: true, uploading: false })
+			} catch (e) {
+				// Not Production ready! Do some error handling here instead...
+				this.setState({ successfullUploaded: true, uploading: false })
+			}
+		} else {
+			this.setState({ uploadProgress: { }, uploading: false })
+
+			this.setState({ files: [] })
 		}
 	}
 
 	private async sendRequest (file: File) {
 		return new Promise(async (resolve, reject) => {
 			if (file.size <= 100 * 1024 * 1024) {
-				this.setState({ uploadProgress: { [file.name]: { percentage: 1, state: 'pending'} }, uploading: true })
+				this.setState({ uploadProgress: { [file.name]: { percentage: 1, state: 'uploading'} }, uploading: true })
 				let uploading = true
 				let tries = 0
 				while (uploading && tries < 5) {
@@ -164,7 +173,7 @@ export class Upload extends Component<{ }, State> {
 					)
 					const sessionId = await this.startUploadSession(chunks[0])
 					this.setState(
-						{ uploadProgress: { [file.name]: { percentage: (1 / chunks.length) * 100, state: 'pending'} }, uploading: true }
+						{ uploadProgress: { [file.name]: { percentage: (1 / chunks.length) * 100, state: 'uploading'} }, uploading: true }
 					)
 
 					if (sessionId) {

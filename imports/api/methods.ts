@@ -37,7 +37,6 @@ Meteor.methods({
 		check(path, String)
 
 		console.log(`Uploading offset ${chunkNumber*chunkSize}`)
-		console.log(`Chunk size ${JSON.stringify(chunk.size)}`)
 
 		if (finish) {
 			return dbx.filesUploadSessionFinish({
