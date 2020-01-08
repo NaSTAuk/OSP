@@ -1,3 +1,4 @@
+import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
 import '../imports/api/accounts'
 import '../imports/api/methods'
@@ -28,5 +29,9 @@ Meteor.startup(() => {
 
 			Awards.insert(award)
 		})
+	}
+
+	if (Meteor.users.find({ }).fetch().length === 0) {
+		Accounts.createUser({ email: 'tech@nasta.tv', password: 'password' })
 	}
 })

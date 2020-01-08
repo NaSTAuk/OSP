@@ -31,7 +31,6 @@ class App extends Component<AppProps> {
 	public render () {
 		return (
 			<div>
-				<CreateAccount />
 				{
 					<Router history={ browserHistory }>
 						<Switch>

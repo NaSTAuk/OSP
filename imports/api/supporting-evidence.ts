@@ -2,6 +2,7 @@ import { Mongo } from 'meteor/mongo'
 import { Collections, SupportingEvidenceType } from './enums'
 
 export interface SupportingEvidenceBase {
+	_id: string
 	type: SupportingEvidenceType
 	description?: string
 }

@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
+import { Random } from 'meteor/random'
 import { MINUTE } from './constants'
 import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './enums'
 import { SupportingEvidence } from './supporting-evidence'
@@ -25,10 +26,12 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_BROADCASTER,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			},
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.PDF,
 				maxLength: '500 Words'
 			}
@@ -40,11 +43,13 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_JISC,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.TEXT,
 				maxLength: 750,
 				description: ''
 			},
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.CALL,
 				description: 'Skype call between representatives from Jisc and the entering station.'
 			}
@@ -56,6 +61,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_DRAMATIC_PERFORMANCE,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 5 * MINUTE
 			}
@@ -67,6 +73,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_ON_SCREEN_TALENT,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 5 * MINUTE
 			}
@@ -78,11 +85,13 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_STATION_MARKETING,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE,
 				description: 'A video submission demonstrating the achievements of your station’s marketing recognising how your station recruited members and built audiences across your campus and online, incorporating special events, advertising, social media and on-air branding and idents.'
 			},
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.TEXT,
 				maxLength: 500,
 				description: 'The submission must be accompanied by a written document detailing marketing strategies, tools, and techniques used by your station.'
@@ -95,6 +104,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_TECHNICAL_ACHIEVEMENT,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.PDF,
 				maxLength: '500 Words'
 			}
@@ -106,6 +116,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_FRESHERS_COVERAGE,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -117,6 +128,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_ANIMATION,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -128,6 +140,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_NEWS_AND_CURRENT_AFFAIRS,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -139,6 +152,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_MARS_ELKINS_EL_BROGY,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -150,11 +164,13 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_WRITING,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 5 * MINUTE,
 				description: 'Video entry limit of 5 minutes for reference, demonstrating how the script has been visualized.'
 			},
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.PDF,
 				maxLength: '',
 				description: 'Written entry limit of 30 pages of text at font size 12. This will be what is judged.'
@@ -167,6 +183,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_LIVE_BROADCAST,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -178,6 +195,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_CINEMATOGRAPHY,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -189,6 +207,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_LIGHT_ENTERTAINMENT,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -200,10 +219,12 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_TITLE_SEQUENCE,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 90 * 1000
 			},
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.TEXT,
 				maxLength: 100,
 				description: 'Written entry limit of 100 words, not judged but allowed to help judge how well the entry introduces the program. This is supplementary evidence and not judged in itself.'
@@ -216,6 +237,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_COMEDY,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -227,6 +249,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_DRAMA,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -238,6 +261,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.DOCUMENTARY_AND_FACTUAL,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -249,6 +273,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SPORT,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -260,6 +285,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_POST_PRODUCTION_AWARD,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -271,6 +297,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_OPEN,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -282,6 +309,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_LIVE_BROADCAST,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -293,6 +321,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_CONTENT_INNOVATION,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -304,6 +333,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_TECHNICAL_INNOVATION,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.PDF,
 				maxLength: '500 Words',
 				description: 'A report which gives an account of any technical innovation developed to support your station’s output. Entries will demonstrate both the technical challenges faced, the innovative way(s) in which they were overcome, and the benefits this brought to the production(s).'
@@ -316,6 +346,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_VISUAL_CREATIVITY_AND_QUALITY,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			}
@@ -327,6 +358,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_BEST_ON_SCREEN_TALENT,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 5 * MINUTE
 			}
@@ -338,6 +370,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_UN_SUNG_HERO,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.TEXT,
 				maxLength: 500
 			}
@@ -349,10 +382,12 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		name: DEFAULT_CATEGORY_NAMES.PCAs_STATION_OF_THE_YEAR,
 		supportingEvidence: [
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
 			},
 			{
+				_id: Random.id(),
 				type: SupportingEvidenceType.TEXT,
 				maxLength: 500
 			}
