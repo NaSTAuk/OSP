@@ -19,6 +19,7 @@ export interface SubmitProperties {
 
 interface State {
 	supportingEvidenceRefs: { [key: string]: boolean }
+	values: { [key: string]: string }
 }
 
 /** Creates a menu of awards open for submission */
@@ -27,7 +28,8 @@ export class Submit extends Component<SubmitProperties, State> {
 		super(props)
 
 		this.state = {
-			supportingEvidenceRefs: { }
+			supportingEvidenceRefs: { },
+			values: { }
 		}
 
 		this.setFormFieldValid = this.setFormFieldValid.bind(this)
@@ -77,8 +79,6 @@ export class Submit extends Component<SubmitProperties, State> {
 				supportingEvidenceRefs: refs
 			})
 		}
-
-		// this.forceUpdate()
 	}
 
 	private renderAwards () {
