@@ -1,8 +1,8 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Random } from 'meteor/random'
-import { MINUTE } from './constants'
-import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './enums'
+import { MINUTE } from './helpers/constants'
+import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './helpers/enums'
 import { SupportingEvidence } from './supporting-evidence'
 
 export interface Category {
@@ -17,7 +17,9 @@ export const Categories = new Mongo.Collection<Category>(Collections.CATEGORIES)
 
 if (Meteor.isServer) {
 	Meteor.publish(Collections.CATEGORIES, function categoriesPublication () {
-		return Categories.find()
+		if (Meteor.userId()) {
+			return Categories.find()
+		}
 	})
 }
 

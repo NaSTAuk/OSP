@@ -10,6 +10,7 @@ interface Props {
 	format: string
 	uuid: string
 	onUpload (uuid: string): void
+	onChange (uuid: string, value: string): void
 }
 
 interface State {
@@ -112,10 +113,13 @@ export class Upload extends Component<Props, State> {
 
 		if (valid) {
 			try {
-				await Promise.all(promises)
+				await Promise.all(promises).then((id: any[]) => {
+					if (id[0]) {
+						this.props.onChange(this.props.uuid, id[0].replace(/^id:/, ''))
+					}
+				})
 
 				this.setState({ successfullUploaded: true, uploading: false })
-				console.log('DONE!')
 				this.props.onUpload(this.props.uuid)
 			} catch (e) {
 				console.log(e)
@@ -130,13 +134,14 @@ export class Upload extends Component<Props, State> {
 
 	private async sendRequest (file: File) {
 		return new Promise(async (resolve, reject) => {
-			if (file.size <= 100 * 1024 * 1024) {
+			if (file.size <= 10 * 1024 * 1024) {
 				this.setState({ uploadProgress: { [file.name]: { percentage: 1, state: 'uploading'} }, uploading: true })
 				let uploading = true
 				let tries = 0
 				while (uploading && tries < 5) {
 					try {
-						return this.uploadSmallFile(file).then(() => {
+						return this.uploadSmallFile(file).then((id) => {
+							this.props.onChange(this.props.uuid, id.replace(/^id:/, ''))
 							uploading = false
 							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
 							resolve()
@@ -195,9 +200,10 @@ export class Upload extends Component<Props, State> {
 							}
 
 							console.log('Appending final chunk')
-							await this.uploadChunk(chunks[chunks.length - 1], sessionId, chunkSize, chunks.length - 1, true, `/${file.name}`)
+							const id = await this.uploadChunk(chunks[chunks.length - 1], sessionId, chunkSize, chunks.length - 1, true, `/${file.name}`)
 							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
 							uploading = false
+							resolve(id.replace(/^id:/, ''))
 						}
 					} catch (err) {
 						console.log(err)

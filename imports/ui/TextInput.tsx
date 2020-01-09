@@ -9,6 +9,7 @@ interface Props {
 	uuid: string
 	onValid (uuid: string): void
 	onInvalid (uuid: string): void
+	onChange (uuid: string, value: string): void
 }
 
 interface State {
@@ -43,6 +44,8 @@ export class TextInput extends Component<Props, State> {
 
 	private onType () {
 		this.setState({ wordCount: wordcount(this.textAreaRef.current.value), wordCountClass: this.getCountClass() })
+
+		this.props.onChange(this.props.uuid, this.textAreaRef.current.value)
 
 		setTimeout(() => {
 			if (this.state.wordCount > 0 && (!this.props.maxWords || this.state.wordCount <= this.props.maxWords)) {

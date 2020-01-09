@@ -5,18 +5,22 @@ import React, { Component } from 'react'
 import { Route, Router, Switch } from 'react-router'
 import { Award, Awards } from '../api/awards'
 import { Categories, Category } from '../api/categories'
-import { Collections } from '../api/enums'
+import { Collections } from '../api/helpers/enums'
 import { AwardsList } from './AwardsList'
-import { CreateAccount } from './CreateAccount'
 import { SignIn } from './SignIn'
 import { Submit } from './Submit'
 import { WithAuth } from './WithAuth'
 
+import { Entries, Entry } from '../api/entries'
+import { Station, Stations } from '../api/stations'
 import '/imports/ui/css/App.css'
 
 export interface AppProps {
 	awards: Award[]
 	categories: Category[]
+	stations: Station[],
+	entries: Entry[],
+	userStation?: Station
 }
 
 const browserHistory = history.createBrowserHistory()
@@ -36,7 +40,15 @@ class App extends Component<AppProps> {
 						<Switch>
 							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
 							<Route exact path='/' render={
-								() => WithAuth(<AwardsList awards={ this.props.awards} categories={ this.props.categories} />)
+								() => WithAuth(
+									<AwardsList
+										awards={ this.props.awards }
+										categories={ this.props.categories }
+										stations={ this.props.stations }
+										entries={ this.props.entries }
+										userStation={ this.props.userStation }
+									/>
+								)
 							} />
 							<Route exact path='/submit' render={
 								() => WithAuth(<Submit { ...this.props } />)
@@ -65,9 +77,14 @@ class App extends Component<AppProps> {
 export default withTracker(() => {
 	Meteor.subscribe(Collections.AWARDS)
 	Meteor.subscribe(Collections.CATEGORIES)
+	Meteor.subscribe(Collections.STATIONS)
+	Meteor.subscribe(Collections.ENTRIES)
 
 	return {
 		awards: Awards.find().fetch(),
-		categories: Categories.find().fetch()
+		categories: Categories.find().fetch(),
+		stations: Stations.find().fetch(),
+		entries: Entries.find().fetch(),
+		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0]
 	}
 })(App as any)

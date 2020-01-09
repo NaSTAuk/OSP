@@ -7,7 +7,9 @@ export const enum Collections {
 	AWARDS = 'awards',
 	CATEGORIES = 'categories',
 	STATIONS = 'stations',
-	SUPPORTING_EVIDENCE = 'supporting_evidence'
+	SUPPORTING_EVIDENCE = 'supporting_evidence',
+	ENTRIES = 'entries',
+	EVIDENCE = 'evidence'
 }
 
 export const enum Roles {

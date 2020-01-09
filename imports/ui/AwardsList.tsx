@@ -9,6 +9,8 @@ export class AwardsList extends Component<AppProps> {
 			<div>
 				<h1>Awards in System</h1>
 				{ this.renderAwards() }
+				<h1>Stations Registered</h1>
+				{ this.renderStations() }
 			</div>
 		)
 	}
@@ -32,5 +34,19 @@ export class AwardsList extends Component<AppProps> {
 					<li key={ category._id }>{ category.name }</li>
 				)
 			})
+	}
+
+	private renderStations () {
+		return (
+			<ul>
+				{
+					this.props.stations.map((station) => {
+						return (
+							<li key={ station._id }>{ station.name }</li>
+						)
+					})
+				}
+			</ul>
+		)
 	}
 }

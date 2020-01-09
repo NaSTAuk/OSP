@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
-import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES } from './enums'
+import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES } from './helpers/enums'
 
 export interface Award {
 	_id?: string
@@ -17,7 +17,9 @@ export const Awards = new Mongo.Collection<Award>(Collections.AWARDS)
 
 if (Meteor.isServer) {
 	Meteor.publish(Collections.AWARDS, function awardsPublictaion () {
-		return Awards.find()
+		if (Meteor.userId()) {
+			return Awards.find()
+		}
 	})
 }
 

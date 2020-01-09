@@ -1,43 +1,97 @@
+import { Col, Row } from 'antd'
+import { Meteor } from 'meteor/meteor'
 import React, { Component, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Award } from '../api/awards'
 import { Category } from '../api/categories'
-import { MINUTE } from '../api/constants'
-import { SupportingEvidenceType } from '../api/enums'
+import { Entry } from '../api/entries'
+import { MINUTE } from '../api/helpers/constants'
+import { SupportingEvidenceType } from '../api/helpers/enums'
+import { Station } from '../api/stations'
 import { SupportingEvidence } from '../api/supporting-evidence'
 import { Upload } from './elements/Upload'
 import { TextInput } from './TextInput'
-
 import '/imports/ui/css/Submit.css'
 
 export interface SubmitProperties {
 	awards: Award[]
 	categories: Category[]
+	entries: Entry[]
 	awardId?: string
 	categoryId?: string
+	userStation?: Station
 }
 
 interface State {
 	supportingEvidenceRefs: { [key: string]: boolean }
 	values: { [key: string]: string }
+	init: boolean
+	awardsEntered: string[],
+	error: string
 }
 
 /** Creates a menu of awards open for submission */
 export class Submit extends Component<SubmitProperties, State> {
+
+	public static getDerivedStateFromProps (nextProps: SubmitProperties, prevState: State): State {
+		if (prevState.init && nextProps.userStation) {
+			const entered: string[] = []
+			nextProps.categories.forEach((category) => {
+				if (category._id) {
+					const entry = nextProps.entries.find(
+						(ent) => {
+							return ent.awardId === category._id && nextProps.userStation && ent.stationId === nextProps.userStation._id
+						}
+					)
+
+					if (entry) {
+						entered.push(category._id)
+					}
+				}
+			})
+
+			const cat = nextProps.categories.find((c) => c._id === nextProps.categoryId)
+
+			if (cat) {
+				const refs: { [key: string]: boolean } = { }
+
+				cat.supportingEvidence.filter((ev) => ev.type !== SupportingEvidenceType.CALL).forEach((evidence) => {
+					refs[evidence._id] = false
+				})
+
+				return {
+					...prevState,
+					supportingEvidenceRefs: refs,
+					awardsEntered: entered,
+					init: false
+				}
+			} else {
+				return {
+					...prevState,
+					awardsEntered: entered,
+					init: false
+				}
+			}
+		}
+
+		return prevState
+	}
+
 	constructor (props: SubmitProperties) {
 		super(props)
 
 		this.state = {
 			supportingEvidenceRefs: { },
-			values: { }
+			values: { },
+			init: true,
+			awardsEntered: [],
+			error: ''
 		}
 
 		this.setFormFieldValid = this.setFormFieldValid.bind(this)
 		this.setFormFieldInvalid = this.setFormFieldInvalid.bind(this)
-	}
-
-	public componentDidMount () {
-		setTimeout(() => this.setStateRefs(), 1000)
+		this.fileUploaded = this.fileUploaded.bind(this)
+		this.setFormFieldValue = this.setFormFieldValue.bind(this)
 	}
 
 	public render () {
@@ -47,9 +101,8 @@ export class Submit extends Component<SubmitProperties, State> {
 			} else {
 				return (
 					<div>
-						<ul>
-							{ this.renderCategories(this.props.awardId) }
-						</ul>
+						<h1>Categories open for entry</h1>
+						{ this.renderCategories(this.props.awardId) }
 					</div>
 				)
 			}
@@ -62,22 +115,6 @@ export class Submit extends Component<SubmitProperties, State> {
 					</ul>
 				</div>
 			)
-		}
-	}
-
-	private setStateRefs () {
-		const category = this.props.categories.find((c) => c._id === this.props.categoryId)
-
-		if (category) {
-			const refs: { [key: string]: boolean } = { }
-
-			category.supportingEvidence.filter((ev) => ev.type !== SupportingEvidenceType.CALL).forEach((evidence) => {
-				refs[evidence._id] = false
-			})
-
-			this.setState({
-				supportingEvidenceRefs: refs
-			})
 		}
 	}
 
@@ -103,9 +140,16 @@ export class Submit extends Component<SubmitProperties, State> {
 
 			if (category) {
 				return (
-					<li>
-						<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${category._id}` }>{ category.name }</Link>
-					</li>
+					<Row gutter={ [{ xs: 8, sm: 16, md: 24, lg: 32 }, 4]} style={ { borderBottom: '1px solid black' }}>
+						<Col span={ 10 }>
+							<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${category._id}` }>{ category.name }</Link>
+						</Col>
+						<Col span={ 14 }>
+							{
+								category._id ? this.state.awardsEntered.includes(category._id) ? 'Entered' : 'Not Entered' : 'nyet'
+							}
+						</Col>
+					</Row>
 				)
 			}
 		})
@@ -122,7 +166,7 @@ export class Submit extends Component<SubmitProperties, State> {
 				<h1>{ category.name }</h1>
 				<form encType='multipart/form-data' onSubmit={ this.handleSubmit.bind(this) }>
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }
-					<input type='submit' value='Submit' disabled={ !this.formIsValid() }></input>
+					<input type='submit' value='Submit' disabled={ !this.formIsValid() }></input> { this.state.error }
 				</form>
 			</div>
 		)
@@ -130,6 +174,31 @@ export class Submit extends Component<SubmitProperties, State> {
 
 	private handleSubmit (event: FormEvent) {
 		event.preventDefault()
+
+		this.callSubmit().then(() => {
+			document.location.href = `/submit/${this.props.awardId}`
+		}).catch((error: Meteor.Error) => {
+			if (error) {
+				this.setState({
+					error: error.error.toString()
+				})
+			}
+		})
+	}
+
+	private async callSubmit (): Promise<boolean> {
+		const values = this.state.values
+		return new Promise((resolve, reject) => {
+			Meteor.call(
+				'submission.submit',
+				JSON.parse(JSON.stringify(values)),
+				this.props.categoryId,
+				(error: string, result: boolean) => {
+					if (error) reject(error)
+					resolve(result)
+				}
+			)
+		})
 	}
 
 	private formIsValid (): boolean {
@@ -156,6 +225,17 @@ export class Submit extends Component<SubmitProperties, State> {
 		})
 	}
 
+	private fileUploaded (uuid: any, fileId: string) {
+		this.setFormFieldValid(uuid)
+		this.setFormFieldValue(uuid, fileId)
+	}
+
+	private setFormFieldValue (uuid: any, value: string) {
+		this.setState({
+			values: { ...this.state.values, ...{ [uuid]: value } }
+		})
+	}
+
 	private renderSupportingEvidence (evidence: SupportingEvidence) {
 		switch (evidence.type) {
 			case SupportingEvidenceType.VIDEO:
@@ -166,7 +246,12 @@ export class Submit extends Component<SubmitProperties, State> {
 							{ evidence.minLength ? ` Min length: ${this.millisToMinutes(evidence.minLength)} minutes` : undefined }
 							{ evidence.maxLength ? ` Max length: ${this.millisToMinutes(evidence.maxLength)} minutes` : undefined }
 						</h3>
-						<Upload onUpload={ this.setFormFieldValid } uuid={ evidence._id } format='video/mp4' />
+						<Upload
+							onUpload={ this.setFormFieldValid }
+							uuid={ evidence._id }
+							format='video/mp4'
+							onChange={ this.setFormFieldValue }
+						/>
 					</div>
 				)
 			case SupportingEvidenceType.TEXT:
@@ -175,7 +260,8 @@ export class Submit extends Component<SubmitProperties, State> {
 						maxWords={ evidence.maxLength }
 						uuid={ evidence._id }
 						onValid={ this.setFormFieldValid }
-						onInvalid={ this.setFormFieldInvalid}
+						onInvalid={ this.setFormFieldInvalid }
+						onChange={ this.setFormFieldValue }
 					/>
 				)
 			case SupportingEvidenceType.PDF:
@@ -186,7 +272,12 @@ export class Submit extends Component<SubmitProperties, State> {
 							{ evidence.minLength ? ` Min length: ${evidence.minLength}` : undefined }
 							{ evidence.maxLength ? ` Max length: ${evidence.maxLength}` : undefined }
 						</h3>
-						<Upload onUpload={ this.setFormFieldValid } uuid={ evidence._id } format='application/pdf' />
+						<Upload
+							onUpload={ this.setFormFieldValid }
+							uuid={ evidence._id }
+							format='application/pdf'
+							onChange={ this.setFormFieldValue }
+						/>
 					</div>
 				)
 			case SupportingEvidenceType.CALL:
