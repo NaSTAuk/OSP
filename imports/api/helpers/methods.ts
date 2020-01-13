@@ -2,12 +2,12 @@ import { Dropbox } from 'dropbox'
 import { check } from 'meteor/check'
 import { Meteor } from 'meteor/meteor'
 import fetch from 'node-fetch'
+import { NaSTAUser, UserHasRole } from '../accounts'
 import { Categories } from '../categories'
 import { Entries } from '../entries'
-import { Evidence, InsertEvidence } from '../evidence'
-import { GetStationForUser } from '../stations'
-import { SupportingEvidence } from '../supporting-evidence'
-import { SupportingEvidenceType } from './enums'
+import { InsertEvidence } from '../evidence'
+import { GetStationForUser, Stations } from '../stations'
+import { Roles, SupportingEvidenceType } from './enums'
 
 export const DROPBOX_TOKEN = Meteor.settings.dropbox.accessToken
 
@@ -173,5 +173,71 @@ Meteor.methods({
 		} else {
 			return new Meteor.Error('You\'re not logged in')
 		}
+	},
+	'role.add' (role: Roles, userId: string) {
+		check(userId, String)
+
+		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+
+		const user = Meteor.users.findOne({ _id: userId }) as NaSTAUser
+
+		if (!user) return
+
+		if (user.roles.includes(role)) return
+
+		Meteor.users.update(userId, {
+			$set: {
+				roles: [...user.roles, role]
+			}
+		})
+	},
+	'role.remove' (role: Roles, userId: string) {
+		check(userId, String)
+
+		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+
+		const user = Meteor.users.findOne({ _id: userId }) as NaSTAUser
+
+		if (!user) return
+
+		if (user.roles.includes(role)) {
+			Meteor.users.update(userId, {
+				$set: {
+					roles: user.roles.filter((r) => r !== role)
+				}
+			})
+		}
+	},
+	'station.add' (name: string) {
+		check(name, String)
+
+		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+
+		const exists = Stations.find({ name }).fetch()
+
+		if (exists.length) return
+
+		Stations.insert({
+			name,
+			eligibleForEntry: true,
+			authorizedUsers: []
+		})
+	},
+	'station.delete' (id: string) {
+		check (id, String)
+
+		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+
+		const exists = Stations.find({ _id: id }).fetch()
+
+		if (!exists.length) return
+
+		Stations.remove({ _id: id })
+
+		Meteor.subscribe('users')
+
+		Meteor.users.find({ stationId: id }).fetch().forEach((user) => {
+			Meteor.users.remove({ _id: user._id })
+		})
 	}
 })

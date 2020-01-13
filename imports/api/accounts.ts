@@ -22,6 +22,10 @@ if (Meteor.isServer) {
 
 		return nastaUser
 	})
+
+	Meteor.publish('users', () => {
+		return Meteor.users.find({ }, { fields: { stationId: 1, emails: 1, roles: 1 } })
+	})
 }
 
 Meteor.methods({
@@ -31,6 +35,11 @@ Meteor.methods({
 
 		// TODO: Accounts.sendEnrollmentEmail: https://docs.meteor.com/api/passwords.html
 		Accounts.createUser({ email, password})
+	},
+	async 'accounts.new' (email: string): Promise<any> {
+		check(email, String)
+
+		throw new Meteor.Error('Not implemented!')
 	},
 	'accounts.login' (email: string, password: string) {
 		check(email, String)

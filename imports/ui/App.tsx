@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 import { Route, Router, Switch } from 'react-router'
 import { Award, Awards } from '../api/awards'
 import { Categories, Category } from '../api/categories'
-import { Collections } from '../api/helpers/enums'
+import { Collections, Roles } from '../api/helpers/enums'
 import { AwardsList } from './AwardsList'
 import { SignIn } from './SignIn'
 import { Submit } from './Submit'
@@ -13,6 +13,10 @@ import { WithAuth } from './WithAuth'
 
 import { Entries, Entry } from '../api/entries'
 import { Station, Stations } from '../api/stations'
+import { Judge } from './Judge'
+import { Manage } from './manage/Manage'
+import ManageStations from './manage/Stations'
+import ManageUsers from './manage/Users'
 import '/imports/ui/css/App.css'
 
 export interface AppProps {
@@ -65,6 +69,30 @@ class App extends Component<AppProps> {
 									/>
 								)
 							} />
+							<Route exact path='/judge' render={
+								() => WithAuth(
+									<Judge />,
+									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
+								)
+							} />
+							<Route exact path='/manage' render={
+								() => WithAuth(
+									<Manage />,
+									[Roles.ADMIN]
+								)
+							} />
+							<Route exact path='/manage/users' render={
+								() => WithAuth(
+									<ManageUsers />,
+									[Roles.ADMIN]
+								)
+							} />
+							<Route exact path='/manage/stations' render={
+								() => WithAuth(
+									<ManageStations />,
+									[Roles.ADMIN]
+								)
+							} />
 						</Switch>
 					</Router>
 				}
@@ -79,6 +107,7 @@ export default withTracker(() => {
 	Meteor.subscribe(Collections.CATEGORIES)
 	Meteor.subscribe(Collections.STATIONS)
 	Meteor.subscribe(Collections.ENTRIES)
+	Meteor.subscribe('users')
 
 	return {
 		awards: Awards.find().fetch(),

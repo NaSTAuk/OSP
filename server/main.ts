@@ -1,6 +1,7 @@
 import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
 import '../imports/api/accounts'
+import '../imports/api/accounts'
 import { NaSTAUser } from '../imports/api/accounts'
 import '../imports/api/entries'
 import '../imports/api/evidence'

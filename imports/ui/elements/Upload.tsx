@@ -104,7 +104,8 @@ export class Upload extends Component<Props, State> {
 		const promises: Array<Promise<unknown>> = []
 		let valid = true
 		this.state.files.forEach((file) => {
-			if (file.type === this.props.format) {
+			// Files are limited to 1GB
+			if (file.type === this.props.format && file.size <= 1000 * 1024 * 1024) {
 				promises.push(this.sendRequest(file))
 			} else {
 				valid = false
