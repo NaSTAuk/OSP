@@ -9,6 +9,8 @@ import '/imports/ui/css/Upload.css'
 interface Props {
 	format: string
 	uuid: string
+	stationName: string
+	categoryName: string
 	onUpload (uuid: string): void
 	onChange (uuid: string, value: string): void
 }
@@ -141,7 +143,7 @@ export class Upload extends Component<Props, State> {
 				let tries = 0
 				while (uploading && tries < 5) {
 					try {
-						return this.uploadSmallFile(file).then((id) => {
+						return this.uploadSmallFile(file, this.props.stationName, this.props.categoryName).then((id) => {
 							this.props.onChange(this.props.uuid, id.replace(/^id:/, ''))
 							uploading = false
 							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
@@ -182,11 +184,18 @@ export class Upload extends Component<Props, State> {
 						)
 
 						if (sessionId) {
-							console.log(`Got session Id: ${sessionId}`)
-
 							for (let i = 1; i < chunks.length - 1; i++) {
 								console.log(`Appending ${i} of ${chunks.length - 1}`)
-								await this.uploadChunk(chunks[i], sessionId, chunkSize, i, false, '')
+								await this.uploadChunk(
+									chunks[i],
+									sessionId,
+									chunkSize,
+									i,
+									false,
+									'',
+									this.props.stationName,
+									this.props.categoryName
+								)
 								this.setState(
 									{
 										uploadProgress: {
@@ -201,7 +210,16 @@ export class Upload extends Component<Props, State> {
 							}
 
 							console.log('Appending final chunk')
-							const id = await this.uploadChunk(chunks[chunks.length - 1], sessionId, chunkSize, chunks.length - 1, true, `/${file.name}`)
+							const id = await this.uploadChunk(
+								chunks[chunks.length - 1],
+								sessionId,
+								chunkSize,
+								chunks.length - 1,
+								true,
+								`/${file.name}`,
+								this.props.stationName,
+								this.props.categoryName
+							)
 							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
 							uploading = false
 							resolve(id.replace(/^id:/, ''))
@@ -225,13 +243,19 @@ export class Upload extends Component<Props, State> {
 		return fileparts
 	}
 
-	private async uploadSmallFile (file: File): Promise<string> {
+	private async uploadSmallFile (file: File, stationName: string, categoryName: string): Promise<string> {
 		const b64Encoding = await blobToBase64(file)
 		return new Promise((resolve, reject) => {
-			Meteor.call('submission.uploadFile', b64Encoding, `/${file.name}`, (error: any, result: any) => {
-				if (error) reject(error)
-				resolve(result)
-			}) // TODO: Better path
+			Meteor.call(
+				'submission.uploadFile',
+				b64Encoding,
+				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${file.name.replace(/$\//, '')}`,
+
+				(error: any, result: any) => {
+					if (error) reject(error)
+					resolve(result)
+				}
+			) // TODO: Better path
 		})
 	}
 
@@ -246,12 +270,26 @@ export class Upload extends Component<Props, State> {
 	}
 
 	private async uploadChunk (
-		chunk: Blob, sessionId: string, chunkSize: number, chunkNumber: number, finish: boolean, path: string
+		chunk: Blob,
+		sessionId: string,
+		chunkSize: number,
+		chunkNumber: number,
+		finish: boolean,
+		path: string,
+		stationName: string,
+		categoryName: string
 	): Promise<any> {
 		const b64Encoding = await blobToBase64(chunk)
 		return new Promise((resolve, reject) => {
 			Meteor.call(
-				'submission.uploadChunk', b64Encoding, sessionId, chunkSize, chunkNumber, finish, path,
+				'submission.uploadChunk',
+				b64Encoding,
+				sessionId,
+				chunkSize,
+				chunkNumber,
+				finish,
+				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${path.replace(/^\/+/, '').replace(/\s/g, '_')}`,
+
 				(error: any, result: any) => {
 					if (error) reject(error)
 					resolve(result)

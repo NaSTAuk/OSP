@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Random } from 'meteor/random'
+import { NaSTAUser } from './accounts'
 import { MINUTE } from './helpers/constants'
 import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from './helpers/enums'
 import { SupportingEvidence } from './supporting-evidence'

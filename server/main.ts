@@ -6,8 +6,13 @@ import { NaSTAUser } from '../imports/api/accounts'
 import '../imports/api/entries'
 import '../imports/api/evidence'
 import '../imports/api/helpers/methods'
+import '../imports/api/judgeToCategory'
+import { JudgeToCategory } from '../imports/api/judgeToCategory'
+import '../imports/api/scores'
+import '../imports/api/stations'
 import { Awards, DEFAULT_AWARDS, DEFAULT_CATEGORIES_FOR_AWARDS } from '/imports/api/awards'
 import { Categories, Category, DEFAULT_CATEGORIES } from '/imports/api/categories'
+import { DEFAULT_CATEGORY_NAMES, Roles } from '/imports/api/helpers/enums'
 import { DEFAULT_STATIONS, Stations } from '/imports/api/stations'
 
 function insertCategory (category: Category) {
@@ -57,9 +62,23 @@ Meteor.startup(() => {
 			if (nasta) {
 				Meteor.users.update(user._id, {
 					...user,
-					stationId: nasta._id
+					stationId: nasta._id,
+					roles: [Roles.ADMIN, Roles.JUDGE, Roles.HOST, Roles.STATION]
 				} as NaSTAUser as Meteor.User)
+
+				const bestBroadcaster = Categories.findOne({ name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_BROADCASTER })
+				if (bestBroadcaster && nasta._id && bestBroadcaster._id) {
+					JudgeToCategory.insert({
+						judgeId: user._id,
+						categoryId: bestBroadcaster._id
+					})
+				}
 			}
 		}
+	}
+
+	// Clear auth tokens after deploying new version
+	if (Meteor.isProduction) {
+		Meteor.users.update({ }, { $set: { 'services.resume.loginTokens': [] } }, { multi: true })
 	}
 })

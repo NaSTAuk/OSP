@@ -3,20 +3,23 @@ import { Mongo } from 'meteor/mongo'
 import { UserHasRole } from './accounts'
 import { Collections, Roles } from './helpers/enums'
 
-export interface Entry {
+export interface Score {
 	_id?: string
 	stationId: string
 	categoryId: string
+	judgedBy: string
+	/** Range: 0 - 20 */
+	score: number
+	comments: string
 	date: number
-	evidenceIds: string[]
 }
 
-export const Entries = new Mongo.Collection<Entry>(Collections.ENTRIES)
+export const Scores = new Mongo.Collection<Score>(Collections.SCORES)
 
 if (Meteor.isServer) {
-	Meteor.publish(Collections.ENTRIES, function entriesPublictaion () {
+	Meteor.publish(Collections.SCORES, () => {
 		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE])) {
-			return Entries.find()
+			return Scores.find({ })
 		}
 	})
 }

@@ -9,7 +9,9 @@ export const enum Collections {
 	STATIONS = 'stations',
 	SUPPORTING_EVIDENCE = 'supporting_evidence',
 	ENTRIES = 'entries',
-	EVIDENCE = 'evidence'
+	EVIDENCE = 'evidence',
+	JudgeToCategory = 'judgeToCategory',
+	SCORES = 'scores'
 }
 
 export const enum Roles {

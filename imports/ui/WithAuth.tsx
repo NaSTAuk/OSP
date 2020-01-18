@@ -15,8 +15,6 @@ export function WithAuth (element: ReactFragment, acceptedRoles?: Roles[]) {
 
 	if (!acceptedRoles) return element
 
-	console.log(user)
-
 	if (!user.roles) return
 
 	if(user.roles.filter((r) => acceptedRoles.includes(r)).length) return element

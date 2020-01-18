@@ -5,8 +5,10 @@ import fetch from 'node-fetch'
 import { NaSTAUser, UserHasRole } from '../accounts'
 import { Categories } from '../categories'
 import { Entries } from '../entries'
-import { InsertEvidence } from '../evidence'
+import { Evidence, EvidencePDF, EvidenceVideo, InsertEvidence } from '../evidence'
+import { Scores } from '../scores'
 import { GetStationForUser, Stations } from '../stations'
+import { SupportingEvidencePDF, SupportingEvidenceVideo } from '../supporting-evidence'
 import { Roles, SupportingEvidenceType } from './enums'
 
 export const DROPBOX_TOKEN = Meteor.settings.dropbox.accessToken
@@ -17,6 +19,26 @@ function b64ToBuffer (b64Encoding: string): Buffer {
 	const index = b64Encoding.indexOf(';base64,')
 
 	return new Buffer(b64Encoding.slice(index + ';base64,'.length), 'base64')
+}
+
+function GetSharingLink (filePathLower: string): Promise<string> {
+	return new Promise((resolve, reject) => {
+		dbx.sharingCreateSharedLinkWithSettings({
+			path: filePathLower,
+			settings: {
+				requested_visibility: {
+					'.tag': 'public'
+				},
+				audience: {
+					'.tag': 'public'
+				}
+			}
+		}).then((result) => {
+			resolve(result.url)
+		}).catch((err) => {
+			reject(err)
+		})
+	})
 }
 
 Meteor.methods({
@@ -52,7 +74,7 @@ Meteor.methods({
 					offset: chunkSize * chunkNumber
 				},
 				commit: {
-					path, // TODO: Better path + unique
+					path,
 					mode: {
 						'.tag': 'add'
 					}
@@ -60,7 +82,7 @@ Meteor.methods({
 			} as any).catch((err) => {
 				return Promise.reject(err)
 			}).then((result) => {
-				return Promise.resolve(result.id)
+				return Promise.resolve(result.path_lower)
 			})
 		} else {
 			return dbx.filesUploadSessionAppend({
@@ -74,7 +96,7 @@ Meteor.methods({
 			})
 		}
 	},
-	async 'submission.uploadFile' (b64Encoding: string, path: string) {
+	async 'submission.uploadFile' (b64Encoding: string, path: string): Promise<any> {
 		check(b64Encoding, String)
 		check(path, String)
 
@@ -87,18 +109,15 @@ Meteor.methods({
 
 		return dbx.filesUpload({
 			contents: file,
-			path // TODO: Better path + unique
+			path
 		}).catch((error) => {
 			console.log(error)
 		}).then((result) => {
 			if (result) {
-				return result.id
+				return Promise.resolve(result.path_lower)
 			}
 			console.log('Uploaded a small file')
 		})
-	},
-	'award.entered' (awardId: string) {
-		return true
 	},
 	async 'submission.submit' (values: { [key: string]: string }, categoryId: string): Promise<any> {
 		check(categoryId, String)
@@ -142,6 +161,7 @@ Meteor.methods({
 				let id = ''
 				if (support.type === SupportingEvidenceType.CALL) {
 					id = await InsertEvidence({
+						type: SupportingEvidenceType.CALL,
 						content: 'Call Required',
 						verified: false,
 						supportingEvidenceId: support._id,
@@ -149,13 +169,47 @@ Meteor.methods({
 						stationId: station._id
 					})
 				} else {
-					id = await InsertEvidence({
-						content: values[support._id],
-						verified: support.type === SupportingEvidenceType.TEXT,
-						supportingEvidenceId: support._id,
-						awardId: categoryId,
-						stationId: station._id
-					})
+					if (support.type === SupportingEvidenceType.VIDEO || support.type === SupportingEvidenceType.PDF) {
+
+						let sharingLink = ''
+
+						try {
+							sharingLink = await GetSharingLink(values[support._id])
+						} catch (error) {
+							if (error.error.error['.tag'] === 'shared_link_already_exists') {
+								const prev = Evidence.findOne({
+									stationId: station._id,
+									awardId: categoryId,
+									supportingEvidenceId: support._id
+								}) as EvidenceVideo | EvidencePDF | undefined
+
+								if (prev && prev.sharingLink.length) {
+									sharingLink = prev.sharingLink
+								} else {
+									throw new Error('Something went wrong, please try again')
+								}
+							}
+						}
+
+						id = await InsertEvidence({
+							type: support.type,
+							content: values[support._id],
+							verified: false,
+							supportingEvidenceId: support._id,
+							awardId: categoryId,
+							stationId: station._id,
+							sharingLink
+						})
+					} else {
+						id = await InsertEvidence({
+							type: support.type,
+							content: values[support._id],
+							verified: support.type === SupportingEvidenceType.TEXT,
+							supportingEvidenceId: support._id,
+							awardId: categoryId,
+							stationId: station._id
+						})
+					}
 				}
 
 				evidence.push(id)
@@ -163,7 +217,7 @@ Meteor.methods({
 
 			Entries.insert({
 				stationId: station._id,
-				awardId: categoryId,
+				categoryId,
 				date: Date.now(),
 				evidenceIds: evidence
 			}, (error: string) => {
@@ -177,7 +231,7 @@ Meteor.methods({
 	'role.add' (role: Roles, userId: string) {
 		check(userId, String)
 
-		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+		if (!Meteor.userId() || !UserHasRole([Roles.ADMIN])) return
 
 		const user = Meteor.users.findOne({ _id: userId }) as NaSTAUser
 
@@ -194,7 +248,7 @@ Meteor.methods({
 	'role.remove' (role: Roles, userId: string) {
 		check(userId, String)
 
-		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+		if (!Meteor.userId() || !UserHasRole([Roles.ADMIN])) return
 
 		const user = Meteor.users.findOne({ _id: userId }) as NaSTAUser
 
@@ -211,7 +265,7 @@ Meteor.methods({
 	'station.add' (name: string) {
 		check(name, String)
 
-		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+		if (!Meteor.userId() || !UserHasRole([Roles.ADMIN])) return
 
 		const exists = Stations.find({ name }).fetch()
 
@@ -226,7 +280,7 @@ Meteor.methods({
 	'station.delete' (id: string) {
 		check (id, String)
 
-		if (!Meteor.userId() || !UserHasRole(Roles.ADMIN)) return
+		if (!Meteor.userId() || !UserHasRole([Roles.ADMIN])) return
 
 		const exists = Stations.find({ _id: id }).fetch()
 
@@ -238,6 +292,37 @@ Meteor.methods({
 
 		Meteor.users.find({ stationId: id }).fetch().forEach((user) => {
 			Meteor.users.remove({ _id: user._id })
+		})
+	},
+	async 'score.add' (stationId: string, categoryId: string, judgedBy: string, comments: string, score: number) {
+		return new Promise((resolve, reject) => {
+			const existing = Scores.findOne({ stationId, categoryId, judgedBy })
+
+			if (existing) {
+				Scores.update({ _id: existing._id }, {
+					stationId,
+					categoryId,
+					judgedBy,
+					comments,
+					score,
+					date: Date.now()
+				}, { }, (error: string) => {
+					if (error) reject(error)
+					resolve()
+				})
+			} else {
+				Scores.insert({
+					stationId,
+					categoryId,
+					judgedBy,
+					comments,
+					score,
+					date: Date.now()
+				}, (error: string) => {
+					if (error) reject(error)
+					resolve()
+				})
+			}
 		})
 	}
 })

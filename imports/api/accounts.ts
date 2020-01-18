@@ -59,11 +59,13 @@ export function GetUserFromId (): NaSTAUser | undefined {
 	}
 }
 
-export function UserHasRole (role: Roles) {
+export function UserHasRole (roles: Roles[]) {
 	const user = GetUserFromId()
 	if (user) {
-		if (user.roles.includes(role)) {
-			return true
-		}
+		return !!roles.map((role) => {
+			if (user.roles.includes(role)) {
+				return true
+			}
+		}).length
 	}
 }

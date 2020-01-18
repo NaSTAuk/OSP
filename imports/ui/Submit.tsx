@@ -28,6 +28,7 @@ interface State {
 	init: boolean
 	awardsEntered: string[],
 	error: string
+	category?: Category
 }
 
 /** Creates a menu of awards open for submission */
@@ -40,7 +41,7 @@ export class Submit extends Component<SubmitProperties, State> {
 				if (category._id) {
 					const entry = nextProps.entries.find(
 						(ent) => {
-							return ent.awardId === category._id && nextProps.userStation && ent.stationId === nextProps.userStation._id
+							return ent.categoryId === category._id && nextProps.userStation && ent.stationId === nextProps.userStation._id
 						}
 					)
 
@@ -63,6 +64,7 @@ export class Submit extends Component<SubmitProperties, State> {
 					...prevState,
 					supportingEvidenceRefs: refs,
 					awardsEntered: entered,
+					category: cat,
 					init: false
 				}
 			} else {
@@ -251,6 +253,8 @@ export class Submit extends Component<SubmitProperties, State> {
 							uuid={ evidence._id }
 							format='video/mp4'
 							onChange={ this.setFormFieldValue }
+							categoryName={ this.state.category ? this.state.category.name : '' }
+							stationName={ this.props.userStation ? this.props.userStation.name : '' }
 						/>
 					</div>
 				)
@@ -277,6 +281,8 @@ export class Submit extends Component<SubmitProperties, State> {
 							uuid={ evidence._id }
 							format='application/pdf'
 							onChange={ this.setFormFieldValue }
+							categoryName={ this.state.category ? this.state.category.name : '' }
+							stationName={ this.props.userStation ? this.props.userStation.name : '' }
 						/>
 					</div>
 				)

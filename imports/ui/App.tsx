@@ -13,17 +13,19 @@ import { WithAuth } from './WithAuth'
 
 import { Entries, Entry } from '../api/entries'
 import { Station, Stations } from '../api/stations'
-import { Judge } from './Judge'
+import Judge from './Judge'
+import JudgeCategory from './JudgeCategory'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
 import '/imports/ui/css/App.css'
 
 export interface AppProps {
+	loading: boolean
 	awards: Award[]
 	categories: Category[]
-	stations: Station[],
-	entries: Entry[],
+	stations: Station[]
+	entries: Entry[]
 	userStation?: Station
 }
 
@@ -35,8 +37,13 @@ class App extends Component<AppProps> {
 		super (props)
 	}
 
+	public shouldComponentUpdate (nextProps: AppProps, _nextState: any) {
+		return !nextProps.loading
+	}
+
 	/** Render */
 	public render () {
+		if (Meteor.userId() && this.props.loading) return <div></div>
 		return (
 			<div>
 				{
@@ -51,6 +58,7 @@ class App extends Component<AppProps> {
 										stations={ this.props.stations }
 										entries={ this.props.entries }
 										userStation={ this.props.userStation }
+										loading={ this.props.loading }
 									/>
 								)
 							} />
@@ -72,6 +80,15 @@ class App extends Component<AppProps> {
 							<Route exact path='/judge' render={
 								() => WithAuth(
 									<Judge />,
+									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
+								)
+							} />
+							<Route exact path='/judge/:stationId/:categoryId' render={
+								(props) => WithAuth(
+									<JudgeCategory
+										stationId={ props.match.params.stationId }
+										categoryId={ props.match.params.categoryId }
+									/>,
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
 								)
 							} />
@@ -103,13 +120,19 @@ class App extends Component<AppProps> {
 }
 
 export default withTracker(() => {
-	Meteor.subscribe(Collections.AWARDS)
-	Meteor.subscribe(Collections.CATEGORIES)
-	Meteor.subscribe(Collections.STATIONS)
-	Meteor.subscribe(Collections.ENTRIES)
-	Meteor.subscribe('users')
+	const handles = [
+		Meteor.subscribe(Collections.AWARDS),
+		Meteor.subscribe(Collections.CATEGORIES),
+		Meteor.subscribe(Collections.STATIONS),
+		Meteor.subscribe(Collections.ENTRIES),
+		Meteor.subscribe(Collections.JudgeToCategory),
+		Meteor.subscribe('users')
+	]
+
+	const loading = handles.some((handle) => !handle.ready())
 
 	return {
+		loading,
 		awards: Awards.find().fetch(),
 		categories: Categories.find().fetch(),
 		stations: Stations.find().fetch(),

@@ -1,0 +1,13 @@
+.judge {
+    margin: 1%;
+}
+
+.judge .list {
+    min-height: 350px
+}
+
+.judge .list .item {
+    background-color: rgb(251, 251, 251);
+    padding: 1%;
+    cursor: pointer
+}

@@ -21,8 +21,10 @@ if (Meteor.isServer) {
 		if (id) {
 			const user = GetUserFromId()
 			if (user) {
-				if (UserHasRole(Roles.ADMIN)) {
+				if (UserHasRole([Roles.ADMIN, Roles.HOST])) {
 					return Stations.find()
+				} else if (UserHasRole([Roles.JUDGE])) {
+					return Stations.find({ name: { $ne: 'NaSTA' } })
 				} else {
 					return Stations.find({ _id: user.stationId, authorizedUsers: id })
 				}
