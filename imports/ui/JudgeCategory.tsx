@@ -138,7 +138,12 @@ class JudgeCategory extends Component<Props, State> {
 					<Form.Item>
 						<h3>Comments</h3>
 						Min 100 characters, current length: { this.state.comments.length }
-						<TextArea value={ this.state.comments } rows={ 20 } placeholder='Comments' onChange={ (event) => this.commentsChange(event)}>
+						<TextArea
+							value={ this.state.comments }
+							rows={ 20 }
+							placeholder='Comments'
+							onChange={ (event) => this.commentsChange(event)}
+						>
 
 						</TextArea>
 					</Form.Item>
@@ -207,7 +212,7 @@ export default withTracker((props: Props) => {
 
 	const loading = handles.some((handle) => !handle.ready())
 
-	const entry = Entries.findOne({ stationId: props.stationId, categoryId: props.categoryId }{
+	const entry = Entries.findOne({ stationId: props.stationId, categoryId: props.categoryId }, {
 		sort: { date: -1 }
 	})
 
