@@ -1,19 +1,21 @@
 import { Col, Row } from 'antd'
 import { Meteor } from 'meteor/meteor'
+import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component, FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { Award } from '../api/awards'
-import { Category } from '../api/categories'
-import { Entry } from '../api/entries'
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
+import { Award, Awards } from '../api/awards'
+import { Categories, Category } from '../api/categories'
+import { Entries, Entry } from '../api/entries'
 import { MINUTE } from '../api/helpers/constants'
-import { SupportingEvidenceType } from '../api/helpers/enums'
-import { Station } from '../api/stations'
+import { Collections, SupportingEvidenceType } from '../api/helpers/enums'
+import { Station, Stations } from '../api/stations'
 import { SupportingEvidence } from '../api/supporting-evidence'
 import { Upload } from './elements/Upload'
 import { TextInput } from './TextInput'
 import '/imports/ui/css/Submit.css'
 
-export interface SubmitProperties {
+export interface SubmitProperties extends RouteComponentProps {
+	loading: boolean
 	awards: Award[]
 	categories: Category[]
 	entries: Entry[]
@@ -32,7 +34,7 @@ interface State {
 }
 
 /** Creates a menu of awards open for submission */
-export class Submit extends Component<SubmitProperties, State> {
+class Submit extends Component<SubmitProperties, State> {
 
 	public static getDerivedStateFromProps (nextProps: SubmitProperties, prevState: State): State {
 		if (prevState.init && nextProps.userStation) {
@@ -97,6 +99,7 @@ export class Submit extends Component<SubmitProperties, State> {
 	}
 
 	public render () {
+		if (this.props.loading) return <div></div>
 		if (this.props.awardId) {
 			if (this.props.categoryId) {
 				return this.renderEntryForm(this.props.categoryId)
@@ -142,7 +145,7 @@ export class Submit extends Component<SubmitProperties, State> {
 
 			if (category) {
 				return (
-					<Row gutter={ [{ xs: 8, sm: 16, md: 24, lg: 32 }, 4]} style={ { borderBottom: '1px solid black' }}>
+					<Row gutter={ [32, 4]} style={ { borderBottom: '1px solid black', width: '100%' }}>
 						<Col span={ 10 }>
 							<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${category._id}` }>{ category.name }</Link>
 						</Col>
@@ -178,7 +181,8 @@ export class Submit extends Component<SubmitProperties, State> {
 		event.preventDefault()
 
 		this.callSubmit().then(() => {
-			document.location.href = `/submit/${this.props.awardId}`
+
+			this.props.history.push(`/submit/${this.props.awardId}`)
 		}).catch((error: Meteor.Error) => {
 			if (error) {
 				this.setState({
@@ -299,3 +303,25 @@ export class Submit extends Component<SubmitProperties, State> {
 		return millis / MINUTE
 	}
 }
+
+export default withTracker(() => {
+	const handles = [
+		Meteor.subscribe(Collections.AWARDS),
+		Meteor.subscribe(Collections.CATEGORIES),
+		Meteor.subscribe(Collections.STATIONS),
+		Meteor.subscribe(Collections.ENTRIES),
+		Meteor.subscribe(Collections.JudgeToCategory),
+		Meteor.subscribe('users')
+	]
+
+	const loading = handles.some((handle) => !handle.ready())
+
+	return {
+		loading,
+		awards: Awards.find().fetch(),
+		categories: Categories.find().fetch(),
+		stations: Stations.find().fetch(),
+		entries: Entries.find().fetch(),
+		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0]
+	}
+})(withRouter(Submit) as any)

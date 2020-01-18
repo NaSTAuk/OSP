@@ -8,7 +8,7 @@ import { Categories, Category } from '../api/categories'
 import { Collections, Roles } from '../api/helpers/enums'
 import { AwardsList } from './AwardsList'
 import { SignIn } from './SignIn'
-import { Submit } from './Submit'
+import Submit from './Submit'
 import { WithAuth } from './WithAuth'
 
 import { Entries, Entry } from '../api/entries'
@@ -22,11 +22,6 @@ import '/imports/ui/css/App.css'
 
 export interface AppProps {
 	loading: boolean
-	awards: Award[]
-	categories: Category[]
-	stations: Station[]
-	entries: Entry[]
-	userStation?: Station
 }
 
 const browserHistory = history.createBrowserHistory()
@@ -52,29 +47,18 @@ class App extends Component<AppProps> {
 							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
 							<Route exact path='/' render={
 								() => WithAuth(
-									<AwardsList
-										awards={ this.props.awards }
-										categories={ this.props.categories }
-										stations={ this.props.stations }
-										entries={ this.props.entries }
-										userStation={ this.props.userStation }
-										loading={ this.props.loading }
-									/>
+									<div>Welcome</div>
 								)
 							} />
 							<Route exact path='/submit' render={
-								() => WithAuth(<Submit { ...this.props } />)
+								() => WithAuth(<Submit />)
 							} />
 							<Route exact path='/submit/:awardId' render={
-								(props) => WithAuth(<Submit awardId={ props.match.params.awardId } { ...this.props } />)
+								(props) => WithAuth(<Submit awardId={ props.match.params.awardId } />)
 							} />
 							<Route exact path='/submit/:awardId/:categoryId' render={
 								(props) => WithAuth(
-									<Submit
-										awardId={ props.match.params.awardId }
-										categoryId={ props.match.params.categoryId }
-										{ ...this.props }
-									/>
+									<Submit awardId={ props.match.params.awardId } categoryId={ props.match.params.categoryId } />
 								)
 							} />
 							<Route exact path='/judge' render={
@@ -121,22 +105,12 @@ class App extends Component<AppProps> {
 
 export default withTracker(() => {
 	const handles = [
-		Meteor.subscribe(Collections.AWARDS),
-		Meteor.subscribe(Collections.CATEGORIES),
-		Meteor.subscribe(Collections.STATIONS),
-		Meteor.subscribe(Collections.ENTRIES),
-		Meteor.subscribe(Collections.JudgeToCategory),
 		Meteor.subscribe('users')
 	]
 
 	const loading = handles.some((handle) => !handle.ready())
 
 	return {
-		loading,
-		awards: Awards.find().fetch(),
-		categories: Categories.find().fetch(),
-		stations: Stations.find().fetch(),
-		entries: Entries.find().fetch(),
-		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0]
+		loading
 	}
 })(App as any)
