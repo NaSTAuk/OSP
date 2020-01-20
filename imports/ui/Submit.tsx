@@ -16,42 +16,28 @@ import '/imports/ui/css/Submit.css'
 
 export interface SubmitProperties extends RouteComponentProps {
 	loading: boolean
-	awards: Award[]
-	categories: Category[]
-	entries: Entry[]
-	awardId?: string
-	categoryId?: string
+	awardId: string
+	categoryId: string
 	userStation?: Station
+	categories?: Category[]
+	entries?: Entry[]
 }
 
 interface State {
 	supportingEvidenceRefs: { [key: string]: boolean }
 	values: { [key: string]: string }
 	init: boolean
-	awardsEntered: string[],
 	error: string
 	category?: Category
+	valid: boolean
 }
 
 /** Creates a menu of awards open for submission */
 class Submit extends Component<SubmitProperties, State> {
 
 	public static getDerivedStateFromProps (nextProps: SubmitProperties, prevState: State): State {
-		if (prevState.init && nextProps.userStation) {
-			const entered: string[] = []
-			nextProps.categories.forEach((category) => {
-				if (category._id) {
-					const entry = nextProps.entries.find(
-						(ent) => {
-							return ent.categoryId === category._id && nextProps.userStation && ent.stationId === nextProps.userStation._id
-						}
-					)
-
-					if (entry) {
-						entered.push(category._id)
-					}
-				}
-			})
+		if (prevState.init && nextProps.userStation && !nextProps.loading) {
+			if (!nextProps.categories) return prevState
 
 			const cat = nextProps.categories.find((c) => c._id === nextProps.categoryId)
 
@@ -65,14 +51,7 @@ class Submit extends Component<SubmitProperties, State> {
 				return {
 					...prevState,
 					supportingEvidenceRefs: refs,
-					awardsEntered: entered,
 					category: cat,
-					init: false
-				}
-			} else {
-				return {
-					...prevState,
-					awardsEntered: entered,
 					init: false
 				}
 			}
@@ -88,8 +67,8 @@ class Submit extends Component<SubmitProperties, State> {
 			supportingEvidenceRefs: { },
 			values: { },
 			init: true,
-			awardsEntered: [],
-			error: ''
+			error: '',
+			valid: false
 		}
 
 		this.setFormFieldValid = this.setFormFieldValid.bind(this)
@@ -100,68 +79,11 @@ class Submit extends Component<SubmitProperties, State> {
 
 	public render () {
 		if (this.props.loading) return <div></div>
-		if (this.props.awardId) {
-			if (this.props.categoryId) {
-				return this.renderEntryForm(this.props.categoryId)
-			} else {
-				return (
-					<div>
-						<h1>Categories open for entry</h1>
-						{ this.renderCategories(this.props.awardId) }
-					</div>
-				)
-			}
-		} else {
-			return (
-				<div>
-					<h1>Awards Open For Entry</h1>
-					<ul>
-						{ this.renderAwards() }
-					</ul>
-				</div>
-			)
-		}
-	}
-
-	private renderAwards () {
-		return this.props.awards.filter((award) => award.active).map((award) => {
-			return (
-				<li key={ award._id }>
-					<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${award._id}` }>{ award.name }</Link>
-				</li>
-			)
-		})
-	}
-
-	private renderCategories (awardId: string) {
-		const award = this.props.awards.find((a) => a._id === awardId)
-
-		if (!award) {
-			return (<div>Unknown award. <Link to='/submit' >Back to safety</Link></div>)
-		}
-
-		return award.categories.map((categoryId) => {
-			const category = this.props.categories.find((c) => c._id === categoryId)
-
-			if (category) {
-				return (
-					<Row gutter={ [32, 4]} style={ { borderBottom: '1px solid black', width: '100%' }}>
-						<Col span={ 10 }>
-							<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${category._id}` }>{ category.name }</Link>
-						</Col>
-						<Col span={ 14 }>
-							{
-								category._id ? this.state.awardsEntered.includes(category._id) ? 'Entered' : 'Not Entered' : 'nyet'
-							}
-						</Col>
-					</Row>
-				)
-			}
-		})
+		return this.renderEntryForm(this.props.categoryId)
 	}
 
 	private renderEntryForm (categoryId: string) {
-		const category = this.props.categories.find((c) => c._id === categoryId)
+		const category = this.props.categories ? this.props.categories.find((c) => c._id === categoryId) : undefined
 
 		if (!category) {
 			return (<div>Unknown category. <Link to='/submit' >Back to safety</Link></div>)
@@ -171,7 +93,7 @@ class Submit extends Component<SubmitProperties, State> {
 				<h1>{ category.name }</h1>
 				<form encType='multipart/form-data' onSubmit={ this.handleSubmit.bind(this) }>
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }
-					<input type='submit' value='Submit' disabled={ !this.formIsValid() }></input> { this.state.error }
+					<input type='submit' value='Submit' disabled={ !this.state.valid }></input> { this.state.error }
 				</form>
 			</div>
 		)
@@ -207,7 +129,7 @@ class Submit extends Component<SubmitProperties, State> {
 		})
 	}
 
-	private formIsValid (): boolean {
+	private formIsValid () {
 		let valid = true
 
 		for (const key in this.state.supportingEvidenceRefs) {
@@ -216,19 +138,25 @@ class Submit extends Component<SubmitProperties, State> {
 			}
 		}
 
-		return valid
+		this.setState({
+			valid
+		})
 	}
 
 	private setFormFieldValid (uuid: any) {
 		this.setState({
 			supportingEvidenceRefs: { ...this.state.supportingEvidenceRefs, ...{ [uuid]: true }}
 		})
+
+		this.formIsValid()
 	}
 
 	private setFormFieldInvalid (uuid: any) {
 		this.setState({
 			supportingEvidenceRefs: { ...this.state.supportingEvidenceRefs, ...{ [uuid]: false }}
 		})
+
+		this.formIsValid()
 	}
 
 	private fileUploaded (uuid: any, fileId: string) {
@@ -310,7 +238,6 @@ export default withTracker(() => {
 		Meteor.subscribe(Collections.CATEGORIES),
 		Meteor.subscribe(Collections.STATIONS),
 		Meteor.subscribe(Collections.ENTRIES),
-		Meteor.subscribe(Collections.JudgeToCategory),
 		Meteor.subscribe('users')
 	]
 

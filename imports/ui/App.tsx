@@ -3,21 +3,18 @@ import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Route, Router, Switch } from 'react-router'
-import { Award, Awards } from '../api/awards'
-import { Categories, Category } from '../api/categories'
-import { Collections, Roles } from '../api/helpers/enums'
-import { AwardsList } from './AwardsList'
-import { SignIn } from './SignIn'
-import Submit from './Submit'
-import { WithAuth } from './WithAuth'
-
-import { Entries, Entry } from '../api/entries'
-import { Station, Stations } from '../api/stations'
+import { Roles } from '../api/helpers/enums'
+import { GetDefaultRoute } from './DefaultRoute'
 import Judge from './Judge'
 import JudgeCategory from './JudgeCategory'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
+import { SignIn } from './SignIn'
+import Submit from './Submit'
+import SubmitListAwards from './SubmitListAwards'
+import SubmitListCategories from './SubmitListCategories'
+import { WithAuth } from './WithAuth'
 import '/imports/ui/css/App.css'
 
 export interface AppProps {
@@ -47,23 +44,23 @@ class App extends Component<AppProps> {
 							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
 							<Route exact path='/' render={
 								() => WithAuth(
-									<div>Welcome</div>
+									GetDefaultRoute()
 								)
 							} />
 							<Route exact path='/submit' render={
-								() => WithAuth(<Submit />)
+								() => WithAuth(<SubmitListAwards />)
 							} />
 							<Route exact path='/submit/:awardId' render={
-								(props) => WithAuth(<Submit awardId={ props.match.params.awardId } />)
+								(props) => WithAuth(<SubmitListCategories awardId={ props.match.params.awardId } { ...props } />)
 							} />
 							<Route exact path='/submit/:awardId/:categoryId' render={
 								(props) => WithAuth(
-									<Submit awardId={ props.match.params.awardId } categoryId={ props.match.params.categoryId } />
+									<Submit awardId={ props.match.params.awardId } categoryId={ props.match.params.categoryId } { ...props } />
 								)
 							} />
 							<Route exact path='/judge' render={
-								() => WithAuth(
-									<Judge />,
+								(props) => WithAuth(
+									<Judge { ...props } />,
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
 								)
 							} />

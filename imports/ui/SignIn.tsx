@@ -24,6 +24,6 @@ export class SignIn extends Component {
 		Meteor.loginWithPassword(email, password);
 		(ReactDOM.findDOMNode(this.refs.emailInput) as HTMLInputElement).value = '';
 		(ReactDOM.findDOMNode(this.refs.passwordInput) as HTMLInputElement).value = ''
-		// setTimeout(() => document.location.reload(true), 1000)
+		setTimeout(() => document.location.reload(true), 1000)
 	}
 }
