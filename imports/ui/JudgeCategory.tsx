@@ -12,7 +12,7 @@ import { Score, Scores } from '../api/scores'
 import { Station, Stations } from '../api/stations'
 
 interface Props extends RouteComponentProps {
-	loading: boolean
+	loading?: boolean
 	stationId: string
 	categoryId: string
 	station?: Station

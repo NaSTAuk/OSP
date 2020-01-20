@@ -1,9 +1,7 @@
-import { Col, Row } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component, FormEvent } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
-import { Award, Awards } from '../api/awards'
 import { Categories, Category } from '../api/categories'
 import { Entries, Entry } from '../api/entries'
 import { MINUTE } from '../api/helpers/constants'
@@ -14,8 +12,8 @@ import { Upload } from './elements/Upload'
 import { TextInput } from './TextInput'
 import '/imports/ui/css/Submit.css'
 
-export interface SubmitProperties extends RouteComponentProps {
-	loading: boolean
+interface Props extends RouteComponentProps {
+	loading?: boolean
 	awardId: string
 	categoryId: string
 	userStation?: Station
@@ -33,9 +31,9 @@ interface State {
 }
 
 /** Creates a menu of awards open for submission */
-class Submit extends Component<SubmitProperties, State> {
+class Submit extends Component<Props, State> {
 
-	public static getDerivedStateFromProps (nextProps: SubmitProperties, prevState: State): State {
+	public static getDerivedStateFromProps (nextProps: Props, prevState: State): State {
 		if (prevState.init && nextProps.userStation && !nextProps.loading) {
 			if (!nextProps.categories) return prevState
 
@@ -60,7 +58,7 @@ class Submit extends Component<SubmitProperties, State> {
 		return prevState
 	}
 
-	constructor (props: SubmitProperties) {
+	constructor (props: Props) {
 		super(props)
 
 		this.state = {
@@ -232,11 +230,9 @@ class Submit extends Component<SubmitProperties, State> {
 	}
 }
 
-export default withTracker(() => {
+export default withTracker((props: Props): Props => {
 	const handles = [
-		Meteor.subscribe(Collections.AWARDS),
 		Meteor.subscribe(Collections.CATEGORIES),
-		Meteor.subscribe(Collections.STATIONS),
 		Meteor.subscribe(Collections.ENTRIES),
 		Meteor.subscribe('users')
 	]
@@ -244,10 +240,9 @@ export default withTracker(() => {
 	const loading = handles.some((handle) => !handle.ready())
 
 	return {
+		...props,
 		loading,
-		awards: Awards.find().fetch(),
 		categories: Categories.find().fetch(),
-		stations: Stations.find().fetch(),
 		entries: Entries.find().fetch(),
 		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0]
 	}

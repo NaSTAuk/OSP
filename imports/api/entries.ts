@@ -17,7 +17,7 @@ if (Meteor.isServer) {
 	Meteor.publish(Collections.ENTRIES, function entriesPublictaion () {
 		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE])) {
 			return Entries.find()
-		} else {
+		} else if (Meteor.userId() && UserHasRole([Roles.STATION])) {
 			return Entries.find({ stationId: (Meteor.user() as NaSTAUser).stationId })
 		}
 	})

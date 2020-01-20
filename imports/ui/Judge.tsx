@@ -9,17 +9,15 @@ import { Categories, Category } from '../api/categories'
 import { Entries, Entry } from '../api/entries'
 import { Collections, Roles } from '../api/helpers/enums'
 import { JudgeToCategory } from '../api/judgeToCategory'
-import { Score, Scores } from '../api/scores'
-import { Station, Stations } from '../api/stations'
+import { Scores } from '../api/scores'
+import { Stations } from '../api/stations'
 import '/imports/ui/css/Judge.css'
 
 interface Props extends RouteComponentProps {
-	loading: boolean
+	loading?: boolean
 	user?: NaSTAUser
 	category?: Category
-	stations: Station[]
-	entries: Entry[]
-	scores: Score[]
+	entries?: Entry[]
 }
 
 class Judge extends Component<Props> {
@@ -124,8 +122,6 @@ export default withTracker((props: Props) => {
 		loading,
 		category,
 		entries,
-		stations: Stations.find({ }).fetch(),
-		scores: Scores.find({ }).fetch(),
 		user
 	}
 })(withRouter(Judge) as any)

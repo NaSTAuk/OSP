@@ -69,6 +69,7 @@ class App extends Component<AppProps> {
 									<JudgeCategory
 										stationId={ props.match.params.stationId }
 										categoryId={ props.match.params.categoryId }
+										{ ...props }
 									/>,
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
 								)
