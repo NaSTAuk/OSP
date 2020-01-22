@@ -17,6 +17,7 @@ interface State {
 	addUserFormStationName?: string
 	addUserFormEmail?: string
 	addUserFormError?: string
+	addUserFormPassword?: string
 }
 
 /** User management table */
@@ -72,7 +73,7 @@ class ManageUsers extends Component<Props, State> {
 			return !valid
 		}
 
-		const handleChange = (e: any) => {
+		const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			this.setState({
 				addUserFormEmail: e.target.value
 			})
@@ -84,7 +85,8 @@ class ManageUsers extends Component<Props, State> {
 					<Form.Item>
 						<Input
 							placeholder='Email'
-							onChange={ (event: any) => handleChange(event) }
+							type='email'
+							onChange={ (event) => handleEmailChange(event) }
 						/>
 					</Form.Item>
 					<Form.Item>
@@ -116,7 +118,7 @@ class ManageUsers extends Component<Props, State> {
 		event.preventDefault()
 
 		try {
-			const result = await this.addUser()
+			await this.addUser()
 		} catch (error) {
 			this.setState({
 				addUserFormError: error.error.toString()
@@ -190,7 +192,10 @@ class ManageUsers extends Component<Props, State> {
 				title: 'Action',
 				dataIndex: '',
 				key: 'x',
-				render: (record: NaSTAUser) => <a>Delete { JSON.stringify(record)}</a>
+				render: (record: NaSTAUser) => {
+					if (record.emails && record.emails.some((email) => email.address === 'tech@nasta.tv')) return ''
+					return <Button type='danger' onClick={ () => Meteor.call('accounts.delete', record._id) }>Delete</Button>
+				}
 			}
 		]
 

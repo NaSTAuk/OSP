@@ -1,3 +1,4 @@
+import { Button } from 'antd'
 import history from 'history'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
@@ -10,6 +11,7 @@ import JudgeCategory from './JudgeCategory'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
+import ResetPassword from './ResetPassword'
 import { SignIn } from './SignIn'
 import Submit from './Submit'
 import SubmitListAwards from './SubmitListAwards'
@@ -39,6 +41,11 @@ class App extends Component<AppProps> {
 		return (
 			<div>
 				{
+					Meteor.userId() ?
+					<Button type='link' onClick={ () => this.logoutUser()}>Logout</Button> :
+					undefined
+				}
+				{
 					<Router history={ browserHistory }>
 						<Switch>
 							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
@@ -47,6 +54,9 @@ class App extends Component<AppProps> {
 									GetDefaultRoute()
 								)
 							} />
+							<Route exact path='/enroll-account/:token' render={
+								(props) => <ResetPassword token={ props.match.params.token } />
+							}/>
 							<Route exact path='/submit' render={
 								() => WithAuth(<SubmitListAwards />)
 							} />
@@ -98,6 +108,12 @@ class App extends Component<AppProps> {
 
 			</div>
 		)
+	}
+
+	private logoutUser () {
+		Meteor.logout(((error) => {
+			if (!error) setTimeout(() => document.location.reload(true), 1000)
+		}))
 	}
 }
 

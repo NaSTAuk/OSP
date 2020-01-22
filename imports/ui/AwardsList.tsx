@@ -1,9 +1,16 @@
 import React, { Component } from 'react'
 import { Award } from '../api/awards'
-import { AppProps } from './App'
+import { Category } from '../api/categories'
+import { Station } from '../api/stations'
+
+interface Props {
+	awards: Award[]
+	categories: Category[]
+	stations: Station[]
+}
 
 /** Renders a list of registered awards in the system. */
-export class AwardsList extends Component<AppProps> {
+export class AwardsList extends Component<Props> {
 	public render () {
 		return (
 			<div>
