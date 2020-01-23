@@ -1,15 +1,16 @@
+import { Button } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component, FormEvent } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
-import { Categories, Category } from '../api/categories'
-import { Entries, Entry } from '../api/entries'
-import { MINUTE } from '../api/helpers/constants'
-import { Collections, SupportingEvidenceType } from '../api/helpers/enums'
-import { Station, Stations } from '../api/stations'
-import { SupportingEvidence } from '../api/supporting-evidence'
-import { Upload } from './elements/Upload'
-import { TextInput } from './TextInput'
+import { Categories, Category } from '../../api/categories'
+import { Entries, Entry } from '../../api/entries'
+import { MINUTE } from '../../api/helpers/constants'
+import { Collections, SupportingEvidenceType } from '../../api/helpers/enums'
+import { Station, Stations } from '../../api/stations'
+import { SupportingEvidence } from '../../api/supporting-evidence'
+import { Upload } from '../elements/Upload'
+import { TextInput } from '../TextInput'
 import '/imports/ui/css/Submit.css'
 
 interface Props extends RouteComponentProps {
@@ -88,6 +89,9 @@ class Submit extends Component<Props, State> {
 		}
 		return (
 			<div>
+				<Button type='link' onClick={ () => this.props.history.push(`/submit/${this.props.awardId}`) }>
+					Back To List
+				</Button>
 				<h1>{ category.name }</h1>
 				<form encType='multipart/form-data' onSubmit={ this.handleSubmit.bind(this) }>
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }

@@ -2,6 +2,7 @@ import { Button, Form, Input } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import { Station, Stations } from '/imports/api/stations'
 
 interface Props {
@@ -23,6 +24,7 @@ class ManageStations extends Component<Props, State> {
 	public render () {
 		return (
 			<div>
+				<Link to='/manage'>Back</Link>
 				<h1>Stations</h1>
 				{ this.renderAddStationForm() }
 				<h2>Registered Stations</h2>

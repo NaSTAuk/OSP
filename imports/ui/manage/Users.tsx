@@ -3,6 +3,7 @@ import { ColumnProps } from 'antd/lib/table'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import { NaSTAUser } from '../../api/accounts'
 import { Station, Stations } from '../../api/stations'
 import { UserTableExpander } from '../elements/UserTableExpander'
@@ -31,7 +32,8 @@ class ManageUsers extends Component<Props, State> {
 
 	public render () {
 		return (
-			<div >
+			<div>
+				<Link to='/manage'>Back</Link>
 				<h1>Users</h1>
 				{ this.renderAddUserForm() }
 				{ this.renderUserTable() }

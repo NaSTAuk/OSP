@@ -2,8 +2,8 @@ import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
-import { Award, Awards } from '../api/awards'
-import { Collections } from '../api/helpers/enums'
+import { Award, Awards } from '../../api/awards'
+import { Collections } from '../../api/helpers/enums'
 
 interface Props extends RouteComponentProps {
 	loading: boolean
@@ -15,6 +15,7 @@ class SubmitListAwards extends Component<Props> {
 		if (this.props.loading) return <div></div>
 		return (
 			<div>
+				<Link to='/'>Back</Link>
 				<h1>Awards Open For Entry</h1>
 				<ul>
 					{ this.renderAwards() }

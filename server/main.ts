@@ -77,6 +77,24 @@ Meteor.startup(() => {
 		}
 	}
 
+	if (JudgeToCategory.find().count() === 1) {
+		// TODO: Remove, temporary during testing
+
+		const user = Meteor.users.findOne({ emails: { address: 'tech@nasta.tv', verified: false } })
+
+		if (user) {
+			const categories = Categories.find({ }).fetch()
+
+			categories.forEach((category) => {
+				if (category.name === DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_BROADCASTER) return
+				JudgeToCategory.insert({
+					judgeId: user._id,
+					categoryId: category._id || ''
+				})
+			})
+		}
+	}
+
 	// Clear auth tokens after deploying new version
 	if (Meteor.isProduction) {
 		Meteor.users.update({ }, { $set: { 'services.resume.loginTokens': [] } }, { multi: true })

@@ -1,13 +1,13 @@
-import { Col, Row } from 'antd'
+import { Button, Col, Row } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
-import { Award, Awards } from '../api/awards'
-import { Categories, Category } from '../api/categories'
-import { Entries, Entry } from '../api/entries'
-import { Collections } from '../api/helpers/enums'
-import { Station, Stations } from '../api/stations'
+import { Award, Awards } from '../../api/awards'
+import { Categories, Category } from '../../api/categories'
+import { Entries, Entry } from '../../api/entries'
+import { Collections } from '../../api/helpers/enums'
+import { Station, Stations } from '../../api/stations'
 
 interface Props extends RouteComponentProps {
 	loading?: boolean,
@@ -67,6 +67,9 @@ class SubmitListCategories extends Component<Props, State> {
 		if (this.props.loading || this.state.init) return <div></div>
 		return (
 			<div>
+				<Button type='link' onClick={ () => this.props.history.push(`/submit`) }>
+					Back To Awards
+				</Button>
 				<h1>Categories open for entry</h1>
 				{ this.renderCategories(this.props.awardId) }
 			</div>

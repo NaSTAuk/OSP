@@ -4,6 +4,7 @@ import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { withRouter } from 'react-router'
 import { RouteComponentProps } from 'react-router'
+import { Link } from 'react-router-dom'
 import { NaSTAUser } from '../api/accounts'
 import { Categories, Category } from '../api/categories'
 import { Entries, Entry } from '../api/entries'
@@ -36,6 +37,7 @@ class Judge extends Component<Props> {
 		if (this.props.loading) return <div></div>
 		return (
 			<div className='judge'>
+				<Link to='/'>Home</Link>
 				<h1>
 					Judging{ this.props.category ? ` ${this.props.category.name}` : '' }
 				</h1>

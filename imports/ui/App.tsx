@@ -4,18 +4,20 @@ import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Route, Router, Switch } from 'react-router'
+import { Link } from 'react-router-dom'
 import { Roles } from '../api/helpers/enums'
 import { GetDefaultRoute } from './DefaultRoute'
 import Judge from './Judge'
+import JudgeCategoriesList from './JudgeCategoriesList'
 import JudgeCategory from './JudgeCategory'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
 import ResetPassword from './ResetPassword'
 import { SignIn } from './SignIn'
-import Submit from './Submit'
-import SubmitListAwards from './SubmitListAwards'
-import SubmitListCategories from './SubmitListCategories'
+import Submit from './submit/Submit'
+import SubmitListAwards from './submit/SubmitListAwards'
+import SubmitListCategories from './submit/SubmitListCategories'
 import { WithAuth } from './WithAuth'
 import '/imports/ui/css/App.css'
 
@@ -42,13 +44,13 @@ class App extends Component<AppProps> {
 			<div>
 				{
 					Meteor.userId() ?
-					<Button type='link' onClick={ () => this.logoutUser()}>Logout</Button> :
+					<Button type='link' onClick={ () => this.logoutUser() } style={ { float: 'right'} }>Logout</Button> :
 					undefined
 				}
 				{
 					<Router history={ browserHistory }>
 						<Switch>
-							<Route exact path='/signin' component={ SignIn } />{ /* TODO: Redirect */ }
+							<Route exact path='/signin' component={ SignIn } />
 							<Route exact path='/' render={
 								() => WithAuth(
 									GetDefaultRoute()
@@ -70,10 +72,17 @@ class App extends Component<AppProps> {
 							} />
 							<Route exact path='/judge' render={
 								(props) => WithAuth(
+									<JudgeCategoriesList { ...props }  />,
+									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
+								)
+							} />
+							<Route exact path='/judge/:categoryId' render={
+								(props) => WithAuth(
 									<Judge { ...props } />,
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
 								)
 							} />
+							{ /* TODO: swap stationId and categoryId */ }
 							<Route exact path='/judge/:stationId/:categoryId' render={
 								(props) => WithAuth(
 									<JudgeCategory
