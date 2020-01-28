@@ -60,13 +60,13 @@ Meteor.methods({
 
 		Meteor.users.remove({ _id: userId })
 	},
-	async 'accounts.new.withStation' (email: string, station: string): Promise<any> {
+	async 'accounts.new.withStation' (email: string, stationId: string): Promise<any> {
 		const id = await createAccount(email)
 
-		const stationdb = Stations.findOne({ _id: id })
+		const stationdb = Stations.findOne({ _id: stationId })
 
 		if (!stationdb || !stationdb._id) {
-			return Promise.reject(`Failed to find station: ${station}`)
+			return Promise.reject(`Failed to find station: ${stationId}`)
 		}
 
 		await addStationIdToUser(id, stationdb._id)
@@ -99,6 +99,14 @@ Meteor.methods({
 		check(password, String)
 
 		Meteor.loginWithPassword(email, password)
+	},
+	'accounts.setPassword' (userId: string, password: string) {
+		check (userId, String)
+		check (password, String)
+
+		if (!this.isSimulation) {
+			Accounts.setPassword(userId, password)
+		}
 	}
 })
 

@@ -1,4 +1,4 @@
-import { Button, Form, Input } from 'antd'
+import { Button, Form, Input, message, Popconfirm } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
@@ -30,12 +30,24 @@ class ManageStations extends Component<Props, State> {
 				<h2>Registered Stations</h2>
 				{
 					this.props.stations.map((station) => {
+						const deleteStation = () => {
+							this.deleteStation(station._id)
+							message.success('Station deleted')
+						}
 						return (
 							<div key={ station._id }>
 								{ station.name }
 								{
 									station.name !== 'NaSTA' ?
-									<Button type= 'danger' onClick= { () => this.deleteStation(station._id) }>Remove</Button> :
+
+									<Popconfirm
+										title='Are you sure you want to delete this station?'
+										onConfirm={ () => deleteStation() }
+										okText='Yes'
+										cancelText='No'
+									>
+										<Button type= 'danger'>Remove</Button>
+									</Popconfirm> :
 									undefined
 								}
 							</div>

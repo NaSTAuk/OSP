@@ -11,7 +11,8 @@ export const enum Collections {
 	ENTRIES = 'entries',
 	EVIDENCE = 'evidence',
 	JudgeToCategory = 'judgeToCategory',
-	SCORES = 'scores'
+	SCORES = 'scores',
+	RESULTS = 'results'
 }
 
 export const enum Roles {

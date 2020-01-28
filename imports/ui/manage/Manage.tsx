@@ -11,6 +11,7 @@ export class Manage extends Component {
 				<div key='manageMenu' className='menu'>
 					<Link to='/manage/users'>Manage Users</Link>
 					<Link to='/manage/stations'>Manage Stations</Link>
+					<Link to='/manage/judges'>Manage Judges</Link>
 				</div>
 			</div>
 		)

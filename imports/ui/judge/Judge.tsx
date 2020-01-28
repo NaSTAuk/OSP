@@ -5,16 +5,17 @@ import React, { Component } from 'react'
 import { withRouter } from 'react-router'
 import { RouteComponentProps } from 'react-router'
 import { Link } from 'react-router-dom'
-import { NaSTAUser } from '../api/accounts'
-import { Categories, Category } from '../api/categories'
-import { Entries, Entry } from '../api/entries'
-import { Collections, Roles } from '../api/helpers/enums'
-import { JudgeToCategory } from '../api/judgeToCategory'
-import { Scores } from '../api/scores'
-import { Stations } from '../api/stations'
+import { NaSTAUser } from '../../api/accounts'
+import { Categories, Category } from '../../api/categories'
+import { Entries, Entry } from '../../api/entries'
+import { Collections, Roles } from '../../api/helpers/enums'
+import { JudgeToCategory } from '../../api/judgeToCategory'
+import { Scores } from '../../api/scores'
+import { Stations } from '../../api/stations'
 import '/imports/ui/css/Judge.css'
 
 interface Props extends RouteComponentProps {
+	categoryId: string
 	loading?: boolean
 	user?: NaSTAUser
 	category?: Category
@@ -41,6 +42,12 @@ class Judge extends Component<Props> {
 				<h1>
 					Judging{ this.props.category ? ` ${this.props.category.name}` : '' }
 				</h1>
+				<h2>Provide Final Ranking</h2>
+				<p>
+					After providing scores for all entries, follow&nbsp;
+					{ this.props.category ? <Link to={ `/judge/rank/${this.props.category._id}`}>this link</Link> : undefined }&nbsp;
+					to provide your final ranking of entrants, which will be used as the overall results.
+				</p>
 				<h2>Entries to judge</h2>
 				<List
 					itemLayout='horizontal'
@@ -96,7 +103,7 @@ export default withTracker((props: Props) => {
 
 	if (!user.roles.includes(Roles.JUDGE)) return props
 
-	const judgeToCat = JudgeToCategory.findOne({ judgeId: user._id })
+	const judgeToCat = JudgeToCategory.findOne({ judgeId: user._id, categoryId: props.categoryId })
 
 	if (!judgeToCat) return props
 

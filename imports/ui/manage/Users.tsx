@@ -1,4 +1,4 @@
-import { Button, Dropdown, Form, Icon, Input, Menu, Table } from 'antd'
+import { Button, Dropdown, Form, Icon, Input, Menu, message, Popconfirm, Table } from 'antd'
 import { ColumnProps } from 'antd/lib/table'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
@@ -131,8 +131,9 @@ class ManageUsers extends Component<Props, State> {
 	private async addUser (): Promise<boolean> {
 		return new Promise((resolve, reject) => {
 			Meteor.call(
-				'accounts.new',
+				'accounts.new.withStation',
 				this.state.addUserFormEmail,
+				this.state.addUserFormStationId,
 				(error: string, result: boolean) => {
 					if (error) reject(error)
 					resolve(result)
@@ -191,12 +192,27 @@ class ManageUsers extends Component<Props, State> {
 				}
 			},
 			{
-				title: 'Action',
+				title: '',
 				dataIndex: '',
 				key: 'x',
 				render: (record: NaSTAUser) => {
 					if (record.emails && record.emails.some((email) => email.address === 'tech@nasta.tv')) return ''
-					return <Button type='danger' onClick={ () => Meteor.call('accounts.delete', record._id) }>Delete</Button>
+
+					const deleteAccount = () => {
+						Meteor.call('accounts.delete', record._id)
+						message.success('Account deleted')
+					}
+
+					return (
+						<Popconfirm
+							title='Are you sure you want to delete this account?'
+							onConfirm={ () => deleteAccount() }
+							okText='Yes'
+							cancelText='No'
+						>
+							<Button type='danger'>Delete</Button>
+						</Popconfirm>
+					)
 				}
 			}
 		]

@@ -5,7 +5,9 @@ import fetch from 'node-fetch'
 import { NaSTAUser, UserHasRole } from '../accounts'
 import { Categories } from '../categories'
 import { Entries } from '../entries'
-import { Evidence, EvidencePDF, EvidenceVideo, InsertEvidence } from '../evidence'
+import { EvidenceCollection, EvidencePDF, EvidenceVideo, InsertEvidence } from '../evidence'
+import { JudgeToCategory } from '../judgeToCategory'
+import { Result, Results } from '../results'
 import { Scores } from '../scores'
 import { GetStationForUser, Stations } from '../stations'
 import { SupportingEvidencePDF, SupportingEvidenceVideo } from '../supporting-evidence'
@@ -177,7 +179,7 @@ Meteor.methods({
 							sharingLink = await GetSharingLink(values[support._id])
 						} catch (error) {
 							if (error.error.error['.tag'] === 'shared_link_already_exists') {
-								const prev = Evidence.findOne({
+								const prev = EvidenceCollection.findOne({
 									stationId: station._id,
 									awardId: categoryId,
 									supportingEvidenceId: support._id
@@ -288,8 +290,6 @@ Meteor.methods({
 
 		Stations.remove({ _id: id })
 
-		Meteor.subscribe('users')
-
 		Meteor.users.find({ stationId: id }).fetch().forEach((user) => {
 			Meteor.users.remove({ _id: user._id })
 		})
@@ -322,6 +322,70 @@ Meteor.methods({
 					if (error) reject(error)
 					resolve()
 				})
+			}
+		})
+	},
+	async 'result.set' (
+		categoryId: string, result: { [stationId: string]: number }, jointFirst?: boolean, jointHighlyCommended?: boolean
+	) {
+		return new Promise((resolve, reject) => {
+			const id = Meteor.userId()
+
+			if (!id) return reject()
+
+			// TODO: Add judgedBy if allowing two judges per category to have different orderings.
+			const existing = Results.findOne({
+				categoryId
+			})
+
+			if (existing) {
+				Results.update({ _id: existing._id }, {
+					categoryId,
+					judgedBy: id,
+					jointFirst,
+					jointHighlyCommended,
+					order: result
+				}, { }, (err: string) => {
+					if (err) reject()
+					resolve()
+				})
+			} else {
+				Results.insert({
+					categoryId,
+					judgedBy: id,
+					jointFirst,
+					jointHighlyCommended,
+					order: result
+				}, (err: string) => {
+					if (err) reject()
+					resolve()
+				})
+			}
+		})
+	},
+	async 'setJudgeToCategory' (judgeId: string, categoryId: string): Promise<any> {
+		check(judgeId, String)
+		check(categoryId, String)
+
+		return new Promise((resolve, reject) => {
+			const toCat = JudgeToCategory.findOne({ judgeId })
+
+			if (toCat) {
+				JudgeToCategory.update(
+					{ _id: toCat._id }, { categoryId, judgeId }, { },
+					(err: string) => {
+						if (err) reject(err)
+						resolve()
+					}
+				)
+			} else {
+				JudgeToCategory.insert(
+					{ categoryId, judgeId },
+					(err: string) => {
+						if (err) reject(err)
+						resolve()
+					}
+				)
 			}
 		})
 	}

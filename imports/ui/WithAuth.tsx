@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import React, { ReactFragment } from 'react'
 import { NaSTAUser } from '../api/accounts'
 import { Roles } from '../api/helpers/enums'
-import { SignIn } from './SignIn'
+import { SignIn } from './auth/SignIn'
 
 export function WithAuth (element: ReactFragment, acceptedRoles?: Roles[]) {
 	const id = Meteor.userId()

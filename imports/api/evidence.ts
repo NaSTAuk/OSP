@@ -36,19 +36,19 @@ export interface EvidenceCall extends EvidenceBase {
 
 export type Evidence = EvidenceVideo | EvidencePDF | EvidenceText | EvidenceCall
 
-export const Evidence = new Mongo.Collection<Evidence>(Collections.EVIDENCE)
+export const EvidenceCollection = new Mongo.Collection<Evidence>(Collections.EVIDENCE)
 
 if (Meteor.isServer) {
 	Meteor.publish(Collections.EVIDENCE, () => {
 		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE])) {
-			return Evidence.find({ })
+			return EvidenceCollection.find({ })
 		}
 	})
 }
 
 export async function InsertEvidence (evidence: Evidence): Promise<string> {
 	return new Promise((resolve, reject) => {
-		Evidence.insert(evidence, (error: any, id: string) => {
+		EvidenceCollection.insert(evidence, (error: any, id: string) => {
 			if (error) reject(error)
 			// TODO: Multiple entries
 			// TODO: Entry IDs are null

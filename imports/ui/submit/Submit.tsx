@@ -1,4 +1,4 @@
-import { Button } from 'antd'
+import { Button, Form, Icon, Modal, Tooltip } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component, FormEvent } from 'react'
@@ -9,8 +9,8 @@ import { MINUTE } from '../../api/helpers/constants'
 import { Collections, SupportingEvidenceType } from '../../api/helpers/enums'
 import { Station, Stations } from '../../api/stations'
 import { SupportingEvidence } from '../../api/supporting-evidence'
+import { TextInput } from '../elements/TextInput'
 import { Upload } from '../elements/Upload'
-import { TextInput } from '../TextInput'
 import '/imports/ui/css/Submit.css'
 
 interface Props extends RouteComponentProps {
@@ -28,7 +28,8 @@ interface State {
 	init: boolean
 	error: string
 	category?: Category
-	valid: boolean
+	valid: boolean,
+	showRulesModal: boolean
 }
 
 /** Creates a menu of awards open for submission */
@@ -67,7 +68,8 @@ class Submit extends Component<Props, State> {
 			values: { },
 			init: true,
 			error: '',
-			valid: false
+			valid: false,
+			showRulesModal: false
 		}
 
 		this.setFormFieldValid = this.setFormFieldValid.bind(this)
@@ -93,12 +95,36 @@ class Submit extends Component<Props, State> {
 					Back To List
 				</Button>
 				<h1>{ category.name }</h1>
-				<form encType='multipart/form-data' onSubmit={ this.handleSubmit.bind(this) }>
+				<Form>
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }
-					<input type='submit' value='Submit' disabled={ !this.state.valid }></input> { this.state.error }
-				</form>
+					<Form.Item>
+						Please provide links to all videos used in your entry below
+						<Modal
+							visible={ this.state.showRulesModal }
+							title='Why we require links to video content'
+							onOk={ () => this.handleRulesModalOk() }
+							footer={ [
+								<Button key='ok' type='primary' onClick={ () => this.handleRulesModalOk() }>
+								OK
+								</Button>
+							]}
+						>
+							Why?
+						</Modal>
+						<Icon type='question-circle' theme='twoTone' onClick={ () => this.setState({ showRulesModal: true }) } />
+					</Form.Item>
+					<Button type='primary' disabled={ !this.state.valid } onClick={ (event) => this.handleSubmit(event) }>
+						Submit
+					</Button> { this.state.error }
+				</Form>
 			</div>
 		)
+	}
+
+	private handleRulesModalOk () {
+		this.setState({
+			showRulesModal: false
+		})
 	}
 
 	private handleSubmit (event: FormEvent) {

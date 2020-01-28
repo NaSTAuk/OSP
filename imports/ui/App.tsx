@@ -4,17 +4,18 @@ import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Route, Router, Switch } from 'react-router'
-import { Link } from 'react-router-dom'
 import { Roles } from '../api/helpers/enums'
+import ResetPassword from './auth/ResetPassword'
+import { SignIn } from './auth/SignIn'
 import { GetDefaultRoute } from './DefaultRoute'
-import Judge from './Judge'
-import JudgeCategoriesList from './JudgeCategoriesList'
-import JudgeCategory from './JudgeCategory'
+import Judge from './judge/Judge'
+import JudgeCategoriesList from './judge/JudgeCategoriesList'
+import JudgeCategory from './judge/JudgeEntry'
+import JudgeRankEntries from './judge/JudgeRankEntries'
+import ManageJudges from './manage/Judges'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
-import ResetPassword from './ResetPassword'
-import { SignIn } from './SignIn'
 import Submit from './submit/Submit'
 import SubmitListAwards from './submit/SubmitListAwards'
 import SubmitListCategories from './submit/SubmitListCategories'
@@ -76,9 +77,15 @@ class App extends Component<AppProps> {
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
 								)
 							} />
+							<Route exact path='/judge/rank/:categoryId' render={
+								(props) => WithAuth(
+									<JudgeRankEntries categoryId={ props.match.params.categoryId } { ...props } />,
+									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
+								)
+							} />
 							<Route exact path='/judge/:categoryId' render={
 								(props) => WithAuth(
-									<Judge { ...props } />,
+									<Judge categoryId={ props.match.params.categoryId } { ...props } />,
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
 								)
 							} />
@@ -108,6 +115,12 @@ class App extends Component<AppProps> {
 							<Route exact path='/manage/stations' render={
 								() => WithAuth(
 									<ManageStations />,
+									[Roles.ADMIN]
+								)
+							} />
+							<Route exact path='/manage/judges' render={
+								(props) => WithAuth(
+									<ManageJudges { ...props } />,
 									[Roles.ADMIN]
 								)
 							} />

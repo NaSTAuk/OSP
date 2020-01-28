@@ -3,11 +3,11 @@ import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Redirect, RouteComponentProps, withRouter } from 'react-router'
-import { NaSTAUser } from '../api/accounts'
-import { Categories, Category } from '../api/categories'
-import { Collections, Roles } from '../api/helpers/enums'
-import { JudgeToCategory } from '../api/judgeToCategory'
 import { Link } from 'react-router-dom'
+import { NaSTAUser } from '../../api/accounts'
+import { Categories, Category } from '../../api/categories'
+import { Collections, Roles } from '../../api/helpers/enums'
+import { JudgeToCategory } from '../../api/judgeToCategory'
 
 interface Props extends RouteComponentProps {
 	loading?: boolean
@@ -48,7 +48,7 @@ class JudgeCategoriesList extends Component<Props> {
 
 	private renderCategory (category: Category) {
 		return (
-			<List.Item key={ category._id} className='item' onClick={ () => { this.goToCategoryPage(category._id) }} >
+			<List.Item key={ category._id } className='item' onClick={ () => { this.goToCategoryPage(category._id) }} >
 				<b>{ category.name }</b>
 			</List.Item>
 		)

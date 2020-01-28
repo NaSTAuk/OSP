@@ -4,12 +4,14 @@ import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { RouteComponentProps, withRouter } from 'react-router'
-import { Categories, Category } from '../api/categories'
-import { Entries, Entry } from '../api/entries'
-import { Evidence } from '../api/evidence'
-import { Collections, SupportingEvidenceType } from '../api/helpers/enums'
-import { Score, Scores } from '../api/scores'
-import { Station, Stations } from '../api/stations'
+import { Link } from 'react-router-dom'
+import { Categories, Category } from '../../api/categories'
+import { Entries, Entry } from '../../api/entries'
+import { Evidence, EvidenceCollection } from '../../api/evidence'
+import { Collections, SupportingEvidenceType } from '../../api/helpers/enums'
+import { Score, Scores } from '../../api/scores'
+import { Station, Stations } from '../../api/stations'
+import { SupportingEvidenceList } from './SupportingEvidenceList'
 
 interface Props extends RouteComponentProps {
 	loading?: boolean
@@ -56,8 +58,9 @@ class JudgeCategory extends Component<Props, State> {
 		if (this.props.loading) return <div></div>
 		return (
 			<div>
+				<Link to={ `/judge/${this.props.categoryId}` }>Back</Link>
 				<h1>{ this.getTitle() }</h1>
-				{ this.renderSupportingEvidenceList() }
+				{ this.props.evidence ? <SupportingEvidenceList evidence={ this.props.evidence } /> : '' }
 				{ this.renderJudgingForm() }
 			</div>
 		)
@@ -73,52 +76,6 @@ class JudgeCategory extends Component<Props, State> {
 			}` :
 			''
 		}`
-	}
-
-	private renderSupportingEvidenceList () {
-		return (
-			<div key='evidenceContainer'>
-				{
-					this.props.evidence ?
-					this.props.evidence.map((evidence) => {
-						return this.renderSupportingEvidence(evidence)
-					})
-					: undefined
-				}
-			</div>
-		)
-	}
-
-	private renderSupportingEvidence (evidence: Evidence) {
-		switch(evidence.type) {
-			case SupportingEvidenceType.PDF:
-				return (
-					<iframe
-						key={ evidence._id }
-						src={ `${evidence.sharingLink.replace(/\?dl=0$/, '')}?raw=1`}
-						style={ { width: '100%', height: '750px' } }
-					>
-
-					</iframe>
-				)
-			case SupportingEvidenceType.VIDEO:
-				return (
-					<video key={ evidence._id }
-						controls={ true }
-						width='640'
-						height='480'
-						src={ `${evidence.sharingLink.replace(/\?dl=0$/, '')}?raw=1` }
-						style={ { width: '100%' } }
-						autoPlay={ true }
-					></video>
-				)
-			case SupportingEvidenceType.TEXT:
-				return (
-					<div key={ evidence._id }>
-						{ evidence.content }
-					</div>
-				)
-		}
 	}
 
 	private renderJudgingForm () {
@@ -221,7 +178,7 @@ export default withTracker((props: Props) => {
 	const evidence: Evidence[] = []
 
 	entry.evidenceIds.forEach((evidenceId) => {
-		const evd = Evidence.findOne({ _id: evidenceId })
+		const evd = EvidenceCollection.findOne({ _id: evidenceId })
 
 		if (evd) evidence.push(evd)
 	})

@@ -1,4 +1,5 @@
-import { Button, Dropdown, Form, Icon, Menu } from 'antd'
+import { Button, Dropdown, Form, Icon, Input, Menu, message, Popconfirm } from 'antd'
+import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
 import React, { Component } from 'react'
 import { NaSTAUser } from '/imports/api/accounts'
@@ -10,6 +11,7 @@ interface Props {
 
 interface State {
 	selectedRole: Roles
+	newPassword: string
 }
 
 export class UserTableExpander extends Component<Props, State> {
@@ -18,7 +20,8 @@ export class UserTableExpander extends Component<Props, State> {
 		super(props)
 
 		this.state = {
-			selectedRole: Roles.ADMIN
+			selectedRole: Roles.ADMIN,
+			newPassword: ''
 		}
 	}
 
@@ -44,12 +47,23 @@ export class UserTableExpander extends Component<Props, State> {
 			<div>
 				{
 					this.props.user.roles.map((role) => {
+						const removeRole = () => {
+							this.removeRoleFromUser(role)
+							message.success('Role removed')
+						}
 						return (
 							<div key={ role}>
 								{ role }
 								{
-									role !== Roles.ADMIN ?
-									<Button type='danger' onClick={ () => this.removeRoleFromUser(role) }>Remove</Button> :
+									role !== Roles.ADMIN || !(this.props.user.emails || []).some((email) => email.address === 'tech@nasta.tv') ?
+									<Popconfirm
+										title='Are you sure you want to remove this role?'
+										onConfirm={ () => removeRole() }
+										okText='Yes'
+										cancelText='No'
+									>
+										<Button type='danger'>Remove</Button>
+									</Popconfirm> :
 									undefined
 								}
 							</div>
@@ -68,6 +82,17 @@ export class UserTableExpander extends Component<Props, State> {
 						</Button>
 					</Form.Item>
 				</Form>
+				<Form layout='inline'>
+					<Form.Item>
+						<Input
+							placeholder='New Password'
+							value={ this.state.newPassword} onChange={ (event) => this.onNewPasswordChange(event) }
+						/>
+					</Form.Item>
+					<Form.Item>
+						<Button onClick={ () => this.changeUserPassword() }>Change Password</Button>
+					</Form.Item>
+				</Form>
 			</div>
 		)
 	}
@@ -84,5 +109,19 @@ export class UserTableExpander extends Component<Props, State> {
 
 	private addSelectedRoleToUser () {
 		Meteor.call('role.add', this.state.selectedRole, this.props.user._id)
+	}
+
+	private changeUserPassword () {
+		Meteor.call('accounts.setPassword', this.props.user._id, this.state.newPassword)
+		this.setState({
+			newPassword: ''
+		})
+		message.success('Password changed')
+	}
+
+	private onNewPasswordChange (event: React.ChangeEvent<HTMLInputElement>) {
+		this.setState({
+			newPassword: event.target.value
+		})
 	}
 }
