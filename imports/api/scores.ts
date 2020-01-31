@@ -8,8 +8,6 @@ export interface Score {
 	stationId: string
 	categoryId: string
 	judgedBy: string
-	/** Range: 0 - 20 */
-	score: number
 	comments: string
 	date: number
 }

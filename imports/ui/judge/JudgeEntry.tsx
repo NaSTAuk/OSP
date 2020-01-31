@@ -1,4 +1,4 @@
-import { Button, Form, InputNumber } from 'antd'
+import { Button, Form } from 'antd'
 import TextArea from 'antd/lib/input/TextArea'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import { Categories, Category } from '../../api/categories'
 import { Entries, Entry } from '../../api/entries'
 import { Evidence, EvidenceCollection } from '../../api/evidence'
-import { Collections, SupportingEvidenceType } from '../../api/helpers/enums'
+import { Collections } from '../../api/helpers/enums'
 import { Score, Scores } from '../../api/scores'
 import { Station, Stations } from '../../api/stations'
 import { SupportingEvidenceList } from './SupportingEvidenceList'
@@ -26,8 +26,7 @@ interface Props extends RouteComponentProps {
 
 interface State {
 	init: boolean,
-	comments: string,
-	score: number
+	comments: string
 }
 
 class JudgeCategory extends Component<Props, State> {
@@ -37,7 +36,6 @@ class JudgeCategory extends Component<Props, State> {
 			return {
 				...prevState,
 				comments: nextProps.previousScore ? nextProps.previousScore.comments : '',
-				score: nextProps.previousScore ? nextProps.previousScore.score : 20,
 				init: false
 			}
 		}
@@ -49,8 +47,7 @@ class JudgeCategory extends Component<Props, State> {
 
 		this.state = {
 			init: true,
-			comments: '',
-			score: 20
+			comments: ''
 		}
 	}
 
@@ -82,16 +79,6 @@ class JudgeCategory extends Component<Props, State> {
 		return (
 			<div key='judgingForm' style={ { paddingBottom: '300px' }}>
 				<Form>
-					<Form.Item>
-						<h3>Score</h3>
-						<InputNumber
-							min={ 1 }
-							max={ 20 }
-							value={ this.state.score }
-							onChange={ (value) => this.scoreChange(value)}
-						>
-						</InputNumber>
-					</Form.Item>
 					<Form.Item>
 						<h3>Comments</h3>
 						Min 100 characters, current length: { this.state.comments.length }
@@ -132,21 +119,14 @@ class JudgeCategory extends Component<Props, State> {
 		if (this.state.comments.length < 100) return
 
 		const comments = this.state.comments
-		const score = Math.max(0, Math.min(20, this.state.score)) // Clamp between 0 and 20
 
 		const id = Meteor.userId()
 
 		if (!id) return
 
-		await Meteor.call('score.add', this.props.stationId, this.props.categoryId, id, comments, score)
+		await Meteor.call('comments.add', this.props.stationId, this.props.categoryId, id, comments)
 
 		this.props.history.push('/judge')
-	}
-
-	private scoreChange (value?: number) {
-		this.setState({
-			score: value || 1
-		})
 	}
 }
 

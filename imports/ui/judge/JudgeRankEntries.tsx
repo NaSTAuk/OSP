@@ -14,13 +14,17 @@ import { Categories } from '/imports/api/categories'
 import { Evidence, EvidenceCollection } from '/imports/api/evidence'
 import { Result, Results } from '/imports/api/results'
 import '/imports/ui/css/Judge.css'
+import { Scores } from '/imports/api/scores'
+
+interface EntryListEvidence {
+	stationId: string
+	stationName: string
+	evidence: Evidence[]
+	comments?: String
+}
 
 interface EntriesList extends ItemInterface {
-	entry: {
-		stationId: string,
-		stationName: string,
-		evidence: Evidence[]
-	}
+	entry: EntryListEvidence
 }
 
 interface Props extends RouteComponentProps {
@@ -28,12 +32,14 @@ interface Props extends RouteComponentProps {
 	loading?: boolean
 	entries?: Entry[]
 	stations?: Station[]
+	/** Name of the category being judged */
 	categoryName?: string
+	/** Previous result/ranking */
 	previousResult?: Result
 }
 
 interface State {
-	entries: EntriesList[]
+	entriesList: EntriesList[]
 	init: boolean
 	activeEntry?: EntriesList
 	drawerVisible: boolean
@@ -45,24 +51,31 @@ class JudgeRankEntries extends Component<Props, State> {
 
 	public static getDerivedStateFromProps (nextProps: Props, prevState: State): State {
 		if (prevState.init && !nextProps.loading && nextProps.entries && nextProps.entries.length && nextProps.stations) {
-			const entries = nextProps.entries.map((entry, index) => {
+			const entries: { id: number, entry: EntryListEvidence }[] = nextProps.entries.map((entry, index) => {
 				const station = nextProps.stations ?
 					nextProps.stations.find((stat) => stat._id === entry.stationId) :
 					undefined
 
+				if (!station) return
+
 				const evidence: Evidence[] = entry.evidenceIds.map((id) => {
 					return EvidenceCollection.findOne({ _id: id })
 				}).filter((ev) => ev !== undefined) as Evidence[]
+
+				const judgesComments = Scores.findOne({
+					stationId: station._id, categoryId: entry.categoryId, judgedBy: Meteor.userId() || ''
+				}, { sort: { date: -1 } })
 
 				return {
 					id: index,
 					entry: {
 						stationId: entry.stationId,
 						stationName: station ? station.name : '',
-						evidence
+						evidence,
+						comments: judgesComments ? judgesComments.comments : undefined
 					}
 				}
-			})
+			}).filter((entry) => entry !== undefined) as { id: number, entry: EntryListEvidence }[]
 
 			let showEntries: Array<{ id: number, entry: { stationId: string, stationName: string, evidence: Evidence[] } }> = []
 
@@ -88,7 +101,7 @@ class JudgeRankEntries extends Component<Props, State> {
 
 			return {
 				init: false,
-				entries: showEntries,
+				entriesList: showEntries,
 				drawerVisible: false,
 				jointFirstPlace: nextProps.previousResult ? !!nextProps.previousResult.jointFirst : false,
 				jointHighlyCommended: nextProps.previousResult ? !!nextProps.previousResult.jointHighlyCommended : false
@@ -103,7 +116,7 @@ class JudgeRankEntries extends Component<Props, State> {
 
 		this.state = {
 			init: true,
-			entries: [],
+			entriesList: [],
 			drawerVisible: false,
 			jointFirstPlace: false,
 			jointHighlyCommended: false
@@ -146,13 +159,13 @@ class JudgeRankEntries extends Component<Props, State> {
 				</Form>
 				<ReactSortable
 					className='list'
-					list={ this.state.entries}
-					setList={ (newState) => this.setState({ entries: newState})}
+					list={ this.state.entriesList}
+					setList={ (newState) => this.setState({ entriesList: newState})}
 				>
-					{ this.state.entries.map((item, index) => {
+					{ this.state.entriesList.map((item, index) => {
 						return (
 							<div onClick={ () => this.setState({ activeEntry: item, drawerVisible: true })}
-								className={ `item ${index < this.state.entries.length ? 'divider' : 'end' }` }
+								className={ `item ${index < this.state.entriesList.length ? 'divider' : 'end' }` }
 								key={ item.id }
 							>
 								{
@@ -186,8 +199,21 @@ class JudgeRankEntries extends Component<Props, State> {
 	}
 
 	private renderEntryPanel () {
-		if(this.state.activeEntry) return <SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
+		if(this.state.activeEntry) return (
+			<React.Fragment>
+				<h1>Your Comments</h1>
+				<p style={{ whiteSpace: 'pre-wrap' }}>
+					{ this.state.activeEntry.entry.comments }
+				</p>
+				<h1>Entry</h1>
+				<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
+			</React.Fragment>
+		)
 	}
+
+	// TODO: - Upload 10 second clips
+	// TODO: - Super blooper category
+
 
 	private drawerClosed () {
 		this.setState({
@@ -213,7 +239,7 @@ class JudgeRankEntries extends Component<Props, State> {
 			[stationId: string]: number
 		} = { }
 
-		this.state.entries.forEach((entry, index) => {
+		this.state.entriesList.forEach((entry, index) => {
 			if (this.state.jointFirstPlace || this.state.jointHighlyCommended) {
 				if (
 					this.state.jointFirstPlace &&
@@ -255,7 +281,8 @@ export default withTracker((props: Props): Props => {
 		Meteor.subscribe(Collections.STATIONS),
 		Meteor.subscribe(Collections.EVIDENCE),
 		Meteor.subscribe(Collections.CATEGORIES),
-		Meteor.subscribe(Collections.RESULTS)
+		Meteor.subscribe(Collections.RESULTS),
+		Meteor.subscribe(Collections.SCORES)
 	]
 
 	const stations = Stations.find({ }).fetch()

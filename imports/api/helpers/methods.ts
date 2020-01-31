@@ -221,7 +221,8 @@ Meteor.methods({
 				stationId: station._id,
 				categoryId,
 				date: Date.now(),
-				evidenceIds: evidence
+				evidenceIds: evidence,
+				videoLinks: values.LINKS
 			}, (error: string) => {
 				if (error) return new Meteor.Error(error)
 				return Promise.resolve()
@@ -294,7 +295,12 @@ Meteor.methods({
 			Meteor.users.remove({ _id: user._id })
 		})
 	},
-	async 'score.add' (stationId: string, categoryId: string, judgedBy: string, comments: string, score: number) {
+	async 'comments.add' (stationId: string, categoryId: string, judgedBy: string, comments: string) {
+		check (stationId, String)
+		check(categoryId, String)
+		check(judgedBy, String)
+		check(comments, String)
+
 		return new Promise((resolve, reject) => {
 			const existing = Scores.findOne({ stationId, categoryId, judgedBy })
 
@@ -304,7 +310,6 @@ Meteor.methods({
 					categoryId,
 					judgedBy,
 					comments,
-					score,
 					date: Date.now()
 				}, { }, (error: string) => {
 					if (error) reject(error)
@@ -316,7 +321,6 @@ Meteor.methods({
 					categoryId,
 					judgedBy,
 					comments,
-					score,
 					date: Date.now()
 				}, (error: string) => {
 					if (error) reject(error)

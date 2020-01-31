@@ -16,13 +16,13 @@ export interface Station {
 export const Stations = new Mongo.Collection<Station>(Collections.STATIONS)
 
 if (Meteor.isServer) {
-	Meteor.publish(Collections.STATIONS, function stationsPublictaion () {
+	Meteor.publish(Collections.STATIONS, () => {
 		const id = Meteor.userId()
 		if (id) {
 			const user = GetUserFromId()
 			if (user) {
 				if (UserHasRole([Roles.ADMIN, Roles.HOST])) {
-					return Stations.find()
+					return Stations.find({ })
 				} else if (UserHasRole([Roles.JUDGE])) {
 					return Stations.find({ name: { $ne: 'NaSTA' } })
 				} else {

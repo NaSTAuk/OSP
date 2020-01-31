@@ -1,4 +1,5 @@
-import { Button, Form, Icon, Modal, Tooltip } from 'antd'
+import { Button, Form, Icon, Modal } from 'antd'
+import TextArea from 'antd/lib/input/TextArea'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component, FormEvent } from 'react'
@@ -11,6 +12,7 @@ import { Station, Stations } from '../../api/stations'
 import { SupportingEvidence } from '../../api/supporting-evidence'
 import { TextInput } from '../elements/TextInput'
 import { Upload } from '../elements/Upload'
+import { Award, Awards } from '/imports/api/awards'
 import '/imports/ui/css/Submit.css'
 
 interface Props extends RouteComponentProps {
@@ -20,6 +22,7 @@ interface Props extends RouteComponentProps {
 	userStation?: Station
 	categories?: Category[]
 	entries?: Entry[]
+	award?: Award
 }
 
 interface State {
@@ -28,8 +31,9 @@ interface State {
 	init: boolean
 	error: string
 	category?: Category
-	valid: boolean,
+	valid: boolean
 	showRulesModal: boolean
+	evidenceLinks: string
 }
 
 /** Creates a menu of awards open for submission */
@@ -69,7 +73,8 @@ class Submit extends Component<Props, State> {
 			init: true,
 			error: '',
 			valid: false,
-			showRulesModal: false
+			showRulesModal: false,
+			evidenceLinks: ''
 		}
 
 		this.setFormFieldValid = this.setFormFieldValid.bind(this)
@@ -90,35 +95,74 @@ class Submit extends Component<Props, State> {
 			return (<div>Unknown category. <Link to='/submit' >Back to safety</Link></div>)
 		}
 		return (
-			<div>
+			<div className='mainContent'>
 				<Button type='link' onClick={ () => this.props.history.push(`/submit/${this.props.awardId}`) }>
 					Back To List
 				</Button>
 				<h1>{ category.name }</h1>
+				<p>
+					{ category.description }
+				</p>
 				<Form>
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }
-					<Form.Item>
-						Please provide links to all videos used in your entry below
-						<Modal
-							visible={ this.state.showRulesModal }
-							title='Why we require links to video content'
-							onOk={ () => this.handleRulesModalOk() }
-							footer={ [
-								<Button key='ok' type='primary' onClick={ () => this.handleRulesModalOk() }>
-								OK
-								</Button>
-							]}
-						>
-							Why?
-						</Modal>
-						<Icon type='question-circle' theme='twoTone' onClick={ () => this.setState({ showRulesModal: true }) } />
-					</Form.Item>
-					<Button type='primary' disabled={ !this.state.valid } onClick={ (event) => this.handleSubmit(event) }>
+					{
+						category.supportingEvidence.some((evidence) => evidence.type === SupportingEvidenceType.VIDEO) &&
+						this.props.award && this.props.award.name === 'NaSTA Awards' ?
+						<Form.Item>
+							Please provide links to all videos used in your entry below
+							<Modal
+								key='rulesModal'
+								visible={ this.state.showRulesModal }
+								title='Why we require links to video content'
+								onOk={ () => this.handleRulesModalOk() }
+								footer={ [
+									<Button key='ok' type='primary' onClick={ () => this.handleRulesModalOk() }>
+									OK
+									</Button>
+								]}
+							>
+								<p>
+									We want to make sure that NaSTA is fair for everyone, as such we require that
+									all content entered be published within the last year.
+									There is, however, an allowance for 10% of content to be archive material.
+								</p>
+							</Modal>
+							<Icon
+								key='rulesIcon'
+								type='question-circle'
+								theme='twoTone'
+								onClick={ () => this.setState({ showRulesModal: true }) }
+								style={ { marginLeft: '1%' } }
+							/>
+							<TextArea
+								key='linksTextarea'
+								value={ this.state.evidenceLinks }
+								rows={ 10 }
+								placeholder='Video links'
+								onChange={ (event) => this.evidenceLinksChange(event)}
+							/>
+						</Form.Item> :
+						undefined
+					}
+					<Button
+						key='submitButton'
+						type='primary'
+						disabled={ !this.state.valid }
+						onClick={ (event) => this.handleSubmit(event) }
+					>
 						Submit
 					</Button> { this.state.error }
 				</Form>
 			</div>
 		)
+	}
+
+	private evidenceLinksChange (event: React.ChangeEvent<HTMLTextAreaElement>) {
+		event.preventDefault()
+
+		this.setState({
+			evidenceLinks: event.target.value
+		}, () => this.formIsValid())
 	}
 
 	private handleRulesModalOk () {
@@ -143,7 +187,7 @@ class Submit extends Component<Props, State> {
 	}
 
 	private async callSubmit (): Promise<boolean> {
-		const values = this.state.values
+		const values = { ...this.state.values, LINKS: this.state.evidenceLinks }
 		return new Promise((resolve, reject) => {
 			Meteor.call(
 				'submission.submit',
@@ -166,6 +210,12 @@ class Submit extends Component<Props, State> {
 			}
 		}
 
+		if (this.props.award && this.props.award.name === 'NaSTA Awards') {
+			if (this.state.evidenceLinks.length < 10) {
+				valid = false
+			}
+		}
+
 		this.setState({
 			valid
 		})
@@ -174,17 +224,13 @@ class Submit extends Component<Props, State> {
 	private setFormFieldValid (uuid: any) {
 		this.setState({
 			supportingEvidenceRefs: { ...this.state.supportingEvidenceRefs, ...{ [uuid]: true }}
-		})
-
-		this.formIsValid()
+		}, () => this.formIsValid())
 	}
 
 	private setFormFieldInvalid (uuid: any) {
 		this.setState({
 			supportingEvidenceRefs: { ...this.state.supportingEvidenceRefs, ...{ [uuid]: false }}
-		})
-
-		this.formIsValid()
+		}, () => this.formIsValid())
 	}
 
 	private fileUploaded (uuid: any, fileId: string) {
@@ -202,12 +248,15 @@ class Submit extends Component<Props, State> {
 		switch (evidence.type) {
 			case SupportingEvidenceType.VIDEO:
 				return (
-					<div>
+					<div key={ evidence._id }>
 						<h3>
 							Video{ evidence.minLength || evidence.maxLength ? ' |' : undefined }
 							{ evidence.minLength ? ` Min length: ${this.millisToMinutes(evidence.minLength)} minutes` : undefined }
 							{ evidence.maxLength ? ` Max length: ${this.millisToMinutes(evidence.maxLength)} minutes` : undefined }
 						</h3>
+						<p>
+							{ evidence.description }
+						</p>
 						<Upload
 							onUpload={ this.setFormFieldValid }
 							uuid={ evidence._id }
@@ -215,27 +264,37 @@ class Submit extends Component<Props, State> {
 							onChange={ this.setFormFieldValue }
 							categoryName={ this.state.category ? this.state.category.name : '' }
 							stationName={ this.props.userStation ? this.props.userStation.name : '' }
+							key={ evidence._id }
 						/>
 					</div>
 				)
 			case SupportingEvidenceType.TEXT:
 				return (
-					<TextInput
-						maxWords={ evidence.maxLength }
-						uuid={ evidence._id }
-						onValid={ this.setFormFieldValid }
-						onInvalid={ this.setFormFieldInvalid }
-						onChange={ this.setFormFieldValue }
-					/>
+					<React.Fragment>
+						<TextInput
+							maxWords={ evidence.maxLength }
+							uuid={ evidence._id }
+							onValid={ this.setFormFieldValid }
+							onInvalid={ this.setFormFieldInvalid }
+							onChange={ this.setFormFieldValue }
+							key={ evidence._id }
+						/>
+						<p>
+							{ evidence.description }
+						</p>
+					</React.Fragment>
 				)
 			case SupportingEvidenceType.PDF:
 				return (
-					<div>
+					<div key={ evidence._id }>
 						<h3>
 							PDF{ evidence.minLength || evidence.maxLength ? ' |' : undefined }
 							{ evidence.minLength ? ` Min length: ${evidence.minLength}` : undefined }
 							{ evidence.maxLength ? ` Max length: ${evidence.maxLength}` : undefined }
 						</h3>
+						<p>
+							{ evidence.description }
+						</p>
 						<Upload
 							onUpload={ this.setFormFieldValid }
 							uuid={ evidence._id }
@@ -243,13 +302,15 @@ class Submit extends Component<Props, State> {
 							onChange={ this.setFormFieldValue }
 							categoryName={ this.state.category ? this.state.category.name : '' }
 							stationName={ this.props.userStation ? this.props.userStation.name : '' }
+							key={ evidence._id }
 						/>
 					</div>
 				)
 			case SupportingEvidenceType.CALL:
 				return (
-					<div className='videoCall'>
+					<div className='videoCall' key={ evidence._id }>
 						A video call will be required as evidence for this entry. This will be arranged after submissions close.
+						{ evidence.description }
 					</div>
 				)
 		}
@@ -264,6 +325,8 @@ export default withTracker((props: Props): Props => {
 	const handles = [
 		Meteor.subscribe(Collections.CATEGORIES),
 		Meteor.subscribe(Collections.ENTRIES),
+		Meteor.subscribe(Collections.AWARDS),
+		Meteor.subscribe(Collections.STATIONS),
 		Meteor.subscribe('users')
 	]
 
@@ -274,6 +337,7 @@ export default withTracker((props: Props): Props => {
 		loading,
 		categories: Categories.find().fetch(),
 		entries: Entries.find().fetch(),
-		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0]
+		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0],
+		award: Awards.findOne({ _id: props.awardId })
 	}
 })(withRouter(Submit) as any)

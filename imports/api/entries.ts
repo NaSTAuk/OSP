@@ -9,6 +9,7 @@ export interface Entry {
 	categoryId: string
 	date: number
 	evidenceIds: string[]
+	videoLinks?: string
 }
 
 export const Entries = new Mongo.Collection<Entry>(Collections.ENTRIES)
