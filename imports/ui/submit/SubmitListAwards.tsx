@@ -1,9 +1,11 @@
+import { List } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
 import { Award, Awards } from '../../api/awards'
 import { Collections } from '../../api/helpers/enums'
+import '/imports/ui/css/Submit.css'
 
 interface Props extends RouteComponentProps {
 	loading: boolean
@@ -14,24 +16,30 @@ class SubmitListAwards extends Component<Props> {
 	public render () {
 		if (this.props.loading) return <div></div>
 		return (
-			<div>
+			<div className='submit'>
 				<Link to='/'>Back</Link>
 				<h1>Awards Open For Entry</h1>
-				<ul>
-					{ this.renderAwards() }
-				</ul>
+				<List
+					itemLayout='horizontal'
+					dataSource={ this.props.awards.filter((award) => award.active) }
+					renderItem={ (award) => this.renderAward(award)}
+					className='list'
+				>
+
+				</List>
 			</div>
 		)
 	}
 
-	private renderAwards () {
-		return this.props.awards.filter((award) => award.active).map((award) => {
-			return (
-				<li key={ award._id }>
-					<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${award._id}` }>{ award.name }</Link>
-				</li>
-			)
-		})
+	private renderAward (award: Award) {
+		return (
+			<List.Item
+				key={ award._id} className='item'
+				onClick={ () => this.props.history.push(`/submit/${award._id}`)}
+			>
+				<b>{ award.name }</b>
+			</List.Item>
+		)
 	}
 }
 

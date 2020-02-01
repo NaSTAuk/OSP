@@ -1,4 +1,4 @@
-import { Button, Col, Row } from 'antd'
+import { Button, List, Tag } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
@@ -66,7 +66,7 @@ class SubmitListCategories extends Component<Props, State> {
 	public render () {
 		if (this.props.loading || this.state.init) return <div></div>
 		return (
-			<div>
+			<div className='submit'>
 				<Button type='link' onClick={ () => this.props.history.push(`/submit`) }>
 					Back To Awards
 				</Button>
@@ -83,24 +83,35 @@ class SubmitListCategories extends Component<Props, State> {
 			return (<div>Unknown award. <Link to='/submit' >Back to safety</Link></div>)
 		}
 
-		return award.categories.map((categoryId) => {
-			const category = this.props.categories ? this.props.categories.find((c) => c._id === categoryId) : undefined
+		return (
+			<List
+				itemLayout='horizontal'
+				dataSource={ this.props.categories }
+				renderItem={ (category) => this.renderCategory(award, category)}
+				className='list'
+			>
 
-			if (category) {
-				return (
-					<Row gutter={ [32, 4]} style={ { borderBottom: '1px solid black', width: '100%' }}>
-						<Col span={ 10 }>
-							<Link to={ (location) => `${location.pathname.replace(/\/$/,'')}/${category._id}` }>{ category.name }</Link>
-						</Col>
-						<Col span={ 14 }>
-							{
-								category._id ? this.state.awardsEntered.includes(category._id) ? 'Entered' : 'Not Entered' : 'nyet'
-							}
-						</Col>
-					</Row>
-				)
-			}
-		})
+			</List>
+		)
+	}
+
+	private renderCategory (award: Award, category: Category) {
+		return (
+			<List.Item
+				key={ category._id} className='item interactive'
+				onClick={ () => this.props.history.push(`/submit/${award._id}/${category._id}`)}
+			>
+				<div style={ { width: '100%', minWidth: '100%' } }>
+					<b>{ category.name }</b>
+					<span style={ { float: 'right' } }>
+						{
+							category._id ? this.state.awardsEntered.includes(category._id) ?
+							<Tag color='green'>Entered</Tag> : <Tag color='red'>Not Entered</Tag> : <Tag>Unknown</Tag>
+						}
+					</span>
+				</div>
+			</List.Item>
+		)
 	}
 }
 

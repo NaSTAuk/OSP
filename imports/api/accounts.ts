@@ -123,11 +123,11 @@ export function GetUserFromId (): NaSTAUser | undefined {
 export function UserHasRole (roles: Roles[]) {
 	const user = GetUserFromId()
 	if (user) {
-		return !!roles.map((role) => {
+		return roles.some((role) => {
 			if (user.roles.includes(role)) {
 				return true
 			}
-		}).length
+		})
 	}
 }
 
