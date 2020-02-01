@@ -13,8 +13,8 @@ import { SupportingEvidenceList } from './SupportingEvidenceList'
 import { Categories } from '/imports/api/categories'
 import { Evidence, EvidenceCollection } from '/imports/api/evidence'
 import { Result, Results } from '/imports/api/results'
-import '/imports/ui/css/Judge.css'
 import { Scores } from '/imports/api/scores'
+import '/imports/ui/css/Judge.css'
 
 interface EntryListEvidence {
 	stationId: string
@@ -51,7 +51,7 @@ class JudgeRankEntries extends Component<Props, State> {
 
 	public static getDerivedStateFromProps (nextProps: Props, prevState: State): State {
 		if (prevState.init && !nextProps.loading && nextProps.entries && nextProps.entries.length && nextProps.stations) {
-			const entries: { id: number, entry: EntryListEvidence }[] = nextProps.entries.map((entry, index) => {
+			const entries: Array<{ id: number, entry: EntryListEvidence }> = nextProps.entries.map((entry, index) => {
 				const station = nextProps.stations ?
 					nextProps.stations.find((stat) => stat._id === entry.stationId) :
 					undefined
@@ -75,7 +75,7 @@ class JudgeRankEntries extends Component<Props, State> {
 						comments: judgesComments ? judgesComments.comments : undefined
 					}
 				}
-			}).filter((entry) => entry !== undefined) as { id: number, entry: EntryListEvidence }[]
+			}).filter((entry) => entry !== undefined) as Array<{ id: number, entry: EntryListEvidence }>
 
 			let showEntries: Array<{ id: number, entry: { stationId: string, stationName: string, evidence: Evidence[] } }> = []
 
@@ -199,21 +199,19 @@ class JudgeRankEntries extends Component<Props, State> {
 	}
 
 	private renderEntryPanel () {
-		if(this.state.activeEntry) return (
-			<React.Fragment>
-				<h1>Your Comments</h1>
-				<p style={{ whiteSpace: 'pre-wrap' }}>
-					{ this.state.activeEntry.entry.comments }
-				</p>
-				<h1>Entry</h1>
-				<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
-			</React.Fragment>
-		)
+		if(this.state.activeEntry) {
+			return (
+				<React.Fragment>
+					<h1>Your Comments</h1>
+					<p style={ { whiteSpace: 'pre-wrap' }}>
+						{ this.state.activeEntry.entry.comments }
+					</p>
+					<h1>Entry</h1>
+					<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
+				</React.Fragment>
+			)
+		}
 	}
-
-	// TODO: - Upload 10 second clips
-	// TODO: - Super blooper category
-
 
 	private drawerClosed () {
 		this.setState({

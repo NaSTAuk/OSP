@@ -122,6 +122,7 @@ Meteor.methods({
 		})
 	},
 	async 'submission.submit' (values: { [key: string]: string }, categoryId: string): Promise<any> {
+		console.log(JSON.stringify(values))
 		check(categoryId, String)
 
 		if (Meteor.userId()) {
@@ -174,6 +175,7 @@ Meteor.methods({
 					if (support.type === SupportingEvidenceType.VIDEO || support.type === SupportingEvidenceType.PDF) {
 
 						let sharingLink = ''
+						let shortClipSharingLink = ''
 
 						try {
 							sharingLink = await GetSharingLink(values[support._id])
@@ -193,6 +195,26 @@ Meteor.methods({
 							}
 						}
 
+						if (values[`${support._id}10Sec`]) {
+							try {
+								shortClipSharingLink = await GetSharingLink(values[`${support._id}10Sec`])
+							} catch (error) {
+								if (error.error.error['.tag'] === 'shared_link_already_exists') {
+									const prev = EvidenceCollection.findOne({
+										stationId: station._id,
+										awardId: categoryId,
+										supportingEvidenceId: support._id
+									}) as EvidenceVideo
+
+									if (prev && prev.shortClipSharingLink.length) {
+										shortClipSharingLink = prev.shortClipSharingLink
+									} else {
+										throw new Error('Something went wrong, please try again')
+									}
+								}
+							}
+						}
+
 						id = await InsertEvidence({
 							type: support.type,
 							content: values[support._id],
@@ -200,7 +222,8 @@ Meteor.methods({
 							supportingEvidenceId: support._id,
 							awardId: categoryId,
 							stationId: station._id,
-							sharingLink
+							sharingLink,
+							shortClipSharingLink
 						})
 					} else {
 						id = await InsertEvidence({

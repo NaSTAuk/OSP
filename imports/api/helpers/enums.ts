@@ -12,7 +12,8 @@ export const enum Collections {
 	EVIDENCE = 'evidence',
 	JudgeToCategory = 'judgeToCategory',
 	SCORES = 'scores',
-	RESULTS = 'results'
+	RESULTS = 'results',
+	SYSTEM = 'system'
 }
 
 export const enum Roles {
@@ -65,9 +66,10 @@ export const enum DEFAULT_CATEGORY_NAMES {
 	NaSTA_AWARDS_TITLE_SEQUENCE = 'Title Sequence',
 	NaSTA_AWARDS_COMEDY = 'Comedy',
 	NaSTA_AWARDS_DRAMA = 'Drama',
-	DOCUMENTARY_AND_FACTUAL = 'Documentary & Factual',
+	NASTA_AWARDS_DOCUMENTARY_AND_FACTUAL = 'Documentary & Factual',
 	NaSTA_AWARDS_SPORT = 'Sport',
 	NaSTA_AWARDS_POST_PRODUCTION_AWARD = 'Post Production Award',
+	NaSTA_AWARDS_SUPER_BLOOPER = 'Super Blooper',
 	PCAs_OPEN = 'Open',
 	PCAs_LIVE_BROADCAST = 'Live Broadcast',
 	PCAs_CONTENT_INNOVATION = 'Content Innovation',

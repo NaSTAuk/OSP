@@ -19,6 +19,7 @@ export interface EvidenceBase {
 export interface EvidenceVideo extends EvidenceBase {
 	type: SupportingEvidenceType.VIDEO
 	sharingLink: string
+	shortClipSharingLink: string
 }
 
 export interface EvidencePDF extends EvidenceBase {

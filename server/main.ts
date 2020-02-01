@@ -11,9 +11,11 @@ import { JudgeToCategory } from '../imports/api/judgeToCategory'
 import '../imports/api/results'
 import '../imports/api/scores'
 import '../imports/api/stations'
+import '../imports/api/system'
+import { System } from '../imports/api/system'
 import { Awards, DEFAULT_AWARDS, DEFAULT_CATEGORIES_FOR_AWARDS } from '/imports/api/awards'
 import { Categories, Category, DEFAULT_CATEGORIES } from '/imports/api/categories'
-import { DEFAULT_CATEGORY_NAMES, Roles } from '/imports/api/helpers/enums'
+import { DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, Roles } from '/imports/api/helpers/enums'
 import { DEFAULT_STATIONS, Stations } from '/imports/api/stations'
 
 function insertCategory (category: Category) {
@@ -99,5 +101,29 @@ Meteor.startup(() => {
 	// Clear auth tokens after deploying new version
 	if (Meteor.isProduction) {
 		Meteor.users.update({ }, { $set: { 'services.resume.loginTokens': [] } }, { multi: true })
+	}
+
+	if (System.find().fetch().length === 0) {
+		System.insert({
+			version: 'v1.0'
+		})
+
+		const blooperCategory = Categories.findOne({ name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER })
+
+		if (!blooperCategory) {
+			const toInsert = DEFAULT_CATEGORIES.find(
+				(category) => category.name === DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER
+			)
+
+			if (toInsert) {
+				const id = Categories.insert(toInsert)
+
+				const nasta = Awards.findOne({ name: DEFAULT_AWARDS_NAMES.NASTA })
+
+				if (nasta) {
+					Awards.update({ _id: nasta._id }, { $push: { categories: id } })
+				}
+			}
+		}
 	}
 })

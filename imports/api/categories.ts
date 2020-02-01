@@ -260,7 +260,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		forAwards: DEFAULT_AWARDS_NAMES.NASTA
 	},
 	{
-		name: DEFAULT_CATEGORY_NAMES.DOCUMENTARY_AND_FACTUAL,
+		name: DEFAULT_CATEGORY_NAMES.NASTA_AWARDS_DOCUMENTARY_AND_FACTUAL,
 		supportingEvidence: [
 			{
 				_id: Random.id(),
@@ -293,6 +293,18 @@ export const DEFAULT_CATEGORIES: Category[] = [
 			}
 		],
 		description: 'A single programme (or a shortened edit from an episode or series) showreel demonstrating excellent post production and editing skills.',
+		forAwards: DEFAULT_AWARDS_NAMES.NASTA
+	},
+	{
+		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER,
+		supportingEvidence: [
+			{
+				_id: Random.id(),
+				type: SupportingEvidenceType.VIDEO,
+				maxLength: 10 * MINUTE
+			}
+		],
+		description: 'Just for fun, upload a montage of your bloopers from this year!',
 		forAwards: DEFAULT_AWARDS_NAMES.NASTA
 	},
 	{

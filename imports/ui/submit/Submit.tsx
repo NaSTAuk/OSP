@@ -7,7 +7,7 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
 import { Categories, Category } from '../../api/categories'
 import { Entries, Entry } from '../../api/entries'
 import { MINUTE } from '../../api/helpers/constants'
-import { Collections, SupportingEvidenceType } from '../../api/helpers/enums'
+import { Collections, DEFAULT_CATEGORY_NAMES, SupportingEvidenceType } from '../../api/helpers/enums'
 import { Station, Stations } from '../../api/stations'
 import { SupportingEvidence } from '../../api/supporting-evidence'
 import { TextInput } from '../elements/TextInput'
@@ -50,6 +50,10 @@ class Submit extends Component<Props, State> {
 
 				cat.supportingEvidence.filter((ev) => ev.type !== SupportingEvidenceType.CALL).forEach((evidence) => {
 					refs[evidence._id] = false
+
+					if (evidence.type === SupportingEvidenceType.VIDEO) {
+						refs[`${evidence._id}10Sec`] = false
+					}
 				})
 
 				return {
@@ -107,7 +111,7 @@ class Submit extends Component<Props, State> {
 					{ category.supportingEvidence.map((evidence) => this.renderSupportingEvidence(evidence) ) }
 					{
 						category.supportingEvidence.some((evidence) => evidence.type === SupportingEvidenceType.VIDEO) &&
-						this.props.award && this.props.award.name === 'NaSTA Awards' ?
+						this.props.award && this.props.award.name === 'NaSTA Awards' && !this.isSuperBlooper() ?
 						<Form.Item>
 							Please provide links to all videos used in your entry below
 							<Modal
@@ -244,6 +248,14 @@ class Submit extends Component<Props, State> {
 		})
 	}
 
+	private isSuperBlooper (): boolean {
+		const category = Categories.findOne({ _id: this.props.categoryId })
+
+		if (!category) return false
+
+		return category.name === DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER
+	}
+
 	private renderSupportingEvidence (evidence: SupportingEvidence) {
 		switch (evidence.type) {
 			case SupportingEvidenceType.VIDEO:
@@ -265,6 +277,16 @@ class Submit extends Component<Props, State> {
 							categoryName={ this.state.category ? this.state.category.name : '' }
 							stationName={ this.props.userStation ? this.props.userStation.name : '' }
 							key={ evidence._id }
+						/>
+						<h3>10 Second Clip of Entry</h3>
+						<Upload
+							onUpload={ this.setFormFieldValid }
+							uuid={ `${evidence._id}10Sec` }
+							format='video/mp4'
+							onChange={ this.setFormFieldValue }
+							categoryName={ this.state.category ? `${this.state.category.name}10Sec` : '10Sec' }
+							stationName={ this.props.userStation ? this.props.userStation.name : '' }
+							key={ `${evidence._id}10Sec` }
 						/>
 					</div>
 				)
