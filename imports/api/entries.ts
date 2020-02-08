@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { NaSTAUser, UserHasRole } from './accounts'
-import { Collections, Roles } from './helpers/enums'
+import { Collections, Roles, VerificationStatus } from './helpers/enums'
 
 export interface Entry {
 	_id?: string
@@ -9,7 +9,8 @@ export interface Entry {
 	categoryId: string
 	date: number
 	evidenceIds: string[]
-	videoLinks?: string
+	videoLinks?: string,
+	verified: VerificationStatus
 }
 
 export const Entries = new Mongo.Collection<Entry>(Collections.ENTRIES)

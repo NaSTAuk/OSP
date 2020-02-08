@@ -4,7 +4,7 @@ import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { ItemInterface, ReactSortable } from 'react-sortablejs'
 import { Entries, Entry } from '/imports/api/entries'
-import { Collections } from '/imports/api/helpers/enums'
+import { Collections, VerificationStatus } from '/imports/api/helpers/enums'
 import { Station, Stations } from '/imports/api/stations'
 
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
@@ -12,20 +12,10 @@ import { RouteComponentProps, withRouter } from 'react-router'
 import { SupportingEvidenceList } from './SupportingEvidenceList'
 import { Categories } from '/imports/api/categories'
 import { Evidence, EvidenceCollection } from '/imports/api/evidence'
+import { EntriesList, EntryListEvidence } from '/imports/api/helpers/interfaces'
 import { Result, Results } from '/imports/api/results'
 import { Scores } from '/imports/api/scores'
 import '/imports/ui/css/Judge.css'
-
-interface EntryListEvidence {
-	stationId: string
-	stationName: string
-	evidence: Evidence[]
-	comments?: String
-}
-
-interface EntriesList extends ItemInterface {
-	entry: EntryListEvidence
-}
 
 interface Props extends RouteComponentProps {
 	categoryId: string
@@ -72,12 +62,15 @@ class JudgeRankEntries extends Component<Props, State> {
 						stationId: entry.stationId,
 						stationName: station ? station.name : '',
 						evidence,
-						comments: judgesComments ? judgesComments.comments : undefined
+						comments: judgesComments ? judgesComments.comments : undefined,
+						entry
 					}
 				}
 			}).filter((entry) => entry !== undefined) as Array<{ id: number, entry: EntryListEvidence }>
 
-			let showEntries: Array<{ id: number, entry: { stationId: string, stationName: string, evidence: Evidence[] } }> = []
+			let showEntries: Array<{
+				id: number, entry: { stationId: string, stationName: string, evidence: Evidence[], entry: Entry }
+			}> = []
 
 			if (nextProps.previousResult) {
 				Object.entries(nextProps.previousResult.order).sort((a, b) => {
@@ -164,7 +157,7 @@ class JudgeRankEntries extends Component<Props, State> {
 				>
 					{ this.state.entriesList.map((item, index) => {
 						return (
-							<div onClick={ () => this.setState({ activeEntry: item, drawerVisible: true })}
+							<div onClick={ () => this.setState({ activeEntry: item, drawerVisible: true }) }
 								className={ `item ${index < this.state.entriesList.length ? 'divider' : 'end' }` }
 								key={ item.id }
 							>
@@ -294,7 +287,11 @@ export default withTracker((props: Props): Props => {
 	const entries: Entry[] = []
 
 	stations.forEach((station) => {
-		const entry = Entries.findOne({ stationId: station._id, categoryId: props.categoryId }, { sort: { date: -1 } })
+		const entry = Entries.findOne({
+			stationId: station._id,
+			categoryId: props.categoryId,
+			verified: VerificationStatus.VERIFIED
+		}, { sort: { date: -1 } })
 
 		if (entry) entries.push(entry)
 	})

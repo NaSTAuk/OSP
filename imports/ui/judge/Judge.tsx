@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import { NaSTAUser } from '../../api/accounts'
 import { Categories, Category } from '../../api/categories'
 import { Entries, Entry } from '../../api/entries'
-import { Collections, Roles } from '../../api/helpers/enums'
+import { Collections, Roles, VerificationStatus } from '../../api/helpers/enums'
 import { JudgeToCategory } from '../../api/judgeToCategory'
 import { Scores } from '../../api/scores'
 import { Stations } from '../../api/stations'
@@ -44,7 +44,7 @@ class Judge extends Component<Props> {
 				</h1>
 				<h2>Provide Final Ranking</h2>
 				<p>
-					After providing scores for all entries, follow&nbsp;
+					After providing comments for all entries, follow&nbsp;
 					{ this.props.category ? <Link to={ `/judge/rank/${this.props.category._id}`}>this link</Link> : undefined }&nbsp;
 					to provide your final ranking of entrants, which will be used as the overall results.
 				</p>
@@ -117,7 +117,8 @@ export default withTracker((props: Props) => {
 	Stations.find({ }).fetch().forEach((station) => {
 		const latest = Entries.findOne({
 			categoryId: category._id,
-			stationId: station._id
+			stationId: station._id,
+			verified: VerificationStatus.VERIFIED
 		}, {
 			sort: { date: -1 }
 		})

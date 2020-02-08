@@ -3,6 +3,7 @@ import { Redirect } from 'react-router'
 import { UserHasRole } from '../api/accounts'
 import { Roles } from '../api/helpers/enums'
 import { Admin } from './Admin'
+import Hosts from './hosts/Hosts'
 
 export function GetDefaultRoute () {
 	if (UserHasRole([Roles.ADMIN])) {
@@ -11,7 +12,7 @@ export function GetDefaultRoute () {
 		)
 	} else if (UserHasRole([Roles.HOST])) {
 		return (
-			<div>Coming soon!</div>
+			<Hosts />
 		)
 	} else if (UserHasRole([Roles.JUDGE])) {
 		return <Redirect to='/judge' />

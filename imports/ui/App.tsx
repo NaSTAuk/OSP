@@ -8,6 +8,7 @@ import { Roles } from '../api/helpers/enums'
 import ResetPassword from './auth/ResetPassword'
 import { SignIn } from './auth/SignIn'
 import { GetDefaultRoute } from './DefaultRoute'
+import Hosts from './hosts/Hosts'
 import Judge from './judge/Judge'
 import JudgeCategoriesList from './judge/JudgeCategoriesList'
 import JudgeCategory from './judge/JudgeEntry'
@@ -98,6 +99,12 @@ class App extends Component<AppProps> {
 										{ ...props }
 									/>,
 									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
+								)
+							} />
+							<Route exact path='/hosts' render={
+								() => WithAuth(
+									<Hosts />,
+									[Roles.ADMIN, Roles.HOST]
 								)
 							} />
 							<Route exact path='/manage' render={

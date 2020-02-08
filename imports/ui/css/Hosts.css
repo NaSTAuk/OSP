@@ -1,0 +1,40 @@
+.hosts {
+    margin: 1%;
+    overflow: auto;
+}
+
+.hosts .list {
+    margin-bottom: 1%;
+}
+
+.hosts .list .item {
+    background-color: rgb(251, 251, 251);
+    padding: 1%;
+    cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select:none;
+    user-select:none;
+    -o-user-select:none;
+}
+
+.hosts .list .item .content {
+    width: 100%;
+}
+
+.hosts .list .item.divider {
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.hosts .category {
+    margin-bottom: 1%;
+}
+
+.hosts .category .sort-by {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.badges {
+    float: right;
+}

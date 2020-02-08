@@ -11,7 +11,7 @@ import { Result, Results } from '../results'
 import { Scores } from '../scores'
 import { GetStationForUser, Stations } from '../stations'
 import { SupportingEvidencePDF, SupportingEvidenceVideo } from '../supporting-evidence'
-import { Roles, SupportingEvidenceType } from './enums'
+import { Roles, SupportingEvidenceType, VerificationStatus } from './enums'
 
 export const DROPBOX_TOKEN = Meteor.settings.dropbox.accessToken
 
@@ -245,7 +245,8 @@ Meteor.methods({
 				categoryId,
 				date: Date.now(),
 				evidenceIds: evidence,
-				videoLinks: values.LINKS
+				videoLinks: values.LINKS,
+				verified: VerificationStatus.WAITING
 			}, (error: string) => {
 				if (error) return new Meteor.Error(error)
 				return Promise.resolve()
@@ -414,6 +415,21 @@ Meteor.methods({
 					}
 				)
 			}
+		})
+	},
+	'entry:setVerification' (entryId: string, status: VerificationStatus) {
+		check(entryId, String)
+
+		Entries.update({ _id: entryId }, { $set: { verified: status } })
+	},
+	async 'evidence:setVerified' (evidenceId: string, checked: boolean) {
+		check (evidenceId, String)
+		check (checked, Boolean)
+
+		return new Promise ((resolve, _reject) => {
+			EvidenceCollection.update({ _id: evidenceId }, { $set: { verified: checked } }, { }, () => {
+				resolve()
+			})
 		})
 	}
 })
