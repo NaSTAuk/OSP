@@ -3,21 +3,8 @@
     overflow: auto;
 }
 
-.judge .list {
-    min-height: 350px
-}
-
-.judge .list .item {
-    background-color: rgb(251, 251, 251);
-    padding: 1%;
-    cursor: pointer;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select:none;
-    user-select:none;
-    -o-user-select:none;
-}
-
-.judge .list .item.divider {
-    border-bottom: 1px solid #e8e8e8;
+.judge .list-link {
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    text-decoration: underline;
 }

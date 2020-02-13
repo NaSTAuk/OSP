@@ -133,14 +133,14 @@ class JudgeRankEntries extends Component<Props, State> {
 				</p>
 				<Form layout='inline'>
 					<Form.Item>
-						Joint First Place
+						<span style={ { marginRight: '5px', color: 'rgb(253, 253, 253)' } }>Joint First Place</span>
 						<Checkbox
 							checked={ this.state.jointFirstPlace }
 							onChange={ (event) => this.firstPlaceChanged(event) }
 						/>
 					</Form.Item>
 					<Form.Item>
-						Joint Highly Commended
+						<span style={ { marginRight: '5px', color: 'rgb(253, 253, 253)' } }>Joint Highly Commended</span>
 						<Checkbox
 							checked={ this.state.jointHighlyCommended }
 							onChange={ (event) => this.highlyCommendedChanged(event) }

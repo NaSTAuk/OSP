@@ -19,14 +19,18 @@ class SubmitListAwards extends Component<Props> {
 			<div className='submit'>
 				<Link to='/'>Back</Link>
 				<h1>Awards Open For Entry</h1>
-				<List
-					itemLayout='horizontal'
-					dataSource={ this.props.awards.filter((award) => award.active) }
-					renderItem={ (award) => this.renderAward(award)}
-					className='list'
-				>
+				{
+					this.props.awards.filter((award) => award.active).length > 0 ?
+					<List
+						itemLayout='horizontal'
+						dataSource={ this.props.awards.filter((award) => award.active) }
+						renderItem={ (award) => this.renderAward(award)}
+						className='list'
+					>
 
-				</List>
+					</List> :
+					<h1>There are currently no awards open, check back soon!</h1>
+				}
 			</div>
 		)
 	}

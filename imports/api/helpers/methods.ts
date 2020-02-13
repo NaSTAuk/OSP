@@ -3,6 +3,7 @@ import { check } from 'meteor/check'
 import { Meteor } from 'meteor/meteor'
 import fetch from 'node-fetch'
 import { NaSTAUser, UserHasRole } from '../accounts'
+import { Awards } from '../awards'
 import { Categories } from '../categories'
 import { Entries } from '../entries'
 import { EvidenceCollection, EvidencePDF, EvidenceVideo, InsertEvidence } from '../evidence'
@@ -430,6 +431,19 @@ Meteor.methods({
 			EvidenceCollection.update({ _id: evidenceId }, { $set: { verified: checked } }, { }, () => {
 				resolve()
 			})
+		})
+	},
+	'awards:toggleActive' (awardId: string) {
+		check (awardId, String)
+
+		const award = Awards.findOne({ _id: awardId })
+
+		if (!award) throw new Meteor.Error(`Award ${awardId} does not exist`)
+
+		Awards.update({ _id: awardId }, {
+			$set: {
+				active: !award.active
+			}
 		})
 	}
 })

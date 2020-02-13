@@ -50,9 +50,12 @@ export class SupportingEvidenceList extends Component<Props> {
 				)
 			case SupportingEvidenceType.TEXT:
 				return (
-					<div key={ evidence._id }>
-						{ evidence.content }
-					</div>
+					<React.Fragment>
+						<h2>Supporting Text</h2>
+						<p key={ evidence._id } style={ { wordWrap: 'break-word' } }>
+							{ evidence.content }
+						</p>
+					</React.Fragment>
 				)
 		}
 	}

@@ -36,7 +36,7 @@ export class TextInput extends Component<Props, State> {
 			<div>
 				<textarea ref={ this.textAreaRef } placeholder='Your entry here' onChange={ this.onType }></textarea>
 				<span className={ classnames('wordCount', this.state.wordCountClass) }>
-					{ this.state.wordCount }/{ this.props.maxWords || 0 }
+					<p>{ this.state.wordCount }/{ this.props.maxWords || 0 }</p>
 				</span>
 			</div>
 		)

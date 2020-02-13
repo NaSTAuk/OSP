@@ -178,7 +178,7 @@ class Hosts extends Component<Props, State> {
 			<React.Fragment>
 				<h1>Quick actions</h1>
 				<Form>
-					<h3>Set Entry Status</h3>
+					<h4>Set Entry Status</h4>
 					<Dropdown.Button overlay={ verifiedDropdown} icon={ <Icon key='down' type='down' /> }>
 						{
 							translateStatus(
@@ -261,9 +261,11 @@ class Hosts extends Component<Props, State> {
 			return (
 				<div key={ category._id} className='category'>
 					<h2>{ category.name }</h2>
-					| Sort By&nbsp;
-					<b className='sort-by' onClick={ () => this.sortCategory(category._id!, 'name') }>Name</b>&nbsp;
-					<b className='sort-by' onClick={ () => this.sortCategory(category._id!, 'result') }>Result</b>
+					<p>
+						Sort By&nbsp;
+						<b className='sort-by' onClick={ () => this.sortCategory(category._id!, 'name') }>Name</b>&nbsp;
+						<b className='sort-by' onClick={ () => this.sortCategory(category._id!, 'result') }>Result</b>
+					</p>
 					{ this.renderEntriesInCategory(category) }
 				</div>
 			)
@@ -381,7 +383,7 @@ class Hosts extends Component<Props, State> {
 		const position = place[1]
 
 		return (
-			<Tag color={ position === 1 ? 'gold' : position === 2 ? 'silver' : position > 5 ? 'green' : 'lime' }>
+			<Tag color={ position === 1 ? 'gold' : position === 2 ? 'silver' : position < 5 ? 'green' : 'lime' }>
 				{
 					position < 3 ?
 					<Icon type='trophy'  /> :

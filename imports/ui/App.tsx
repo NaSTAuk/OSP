@@ -14,6 +14,7 @@ import JudgeCategoriesList from './judge/JudgeCategoriesList'
 import JudgeCategory from './judge/JudgeEntry'
 import JudgeRankEntries from './judge/JudgeRankEntries'
 import ManageJudges from './manage/Judges'
+import ManageAwards from './manage/Awards'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
@@ -43,7 +44,7 @@ class App extends Component<AppProps> {
 	public render () {
 		if (Meteor.userId() && this.props.loading) return <div></div>
 		return (
-			<div>
+			<div className={ Meteor.userId() ? 'container' : '' }>
 				{
 					Meteor.userId() ?
 					<Button type='link' onClick={ () => this.logoutUser() } style={ { float: 'right'} }>Logout</Button> :
@@ -108,14 +109,14 @@ class App extends Component<AppProps> {
 								)
 							} />
 							<Route exact path='/manage' render={
-								() => WithAuth(
-									<Manage />,
+								(props) => WithAuth(
+									<Manage { ...props } />,
 									[Roles.ADMIN]
 								)
 							} />
 							<Route exact path='/manage/users' render={
-								() => WithAuth(
-									<ManageUsers />,
+								(props) => WithAuth(
+									<ManageUsers { ...props } />,
 									[Roles.ADMIN]
 								)
 							} />
@@ -128,6 +129,12 @@ class App extends Component<AppProps> {
 							<Route exact path='/manage/judges' render={
 								(props) => WithAuth(
 									<ManageJudges { ...props } />,
+									[Roles.ADMIN]
+								)
+							} />
+							<Route exact path='/manage/awards' render={
+								(props) => WithAuth(
+									<ManageAwards { ...props } />,
 									[Roles.ADMIN]
 								)
 							} />

@@ -45,7 +45,15 @@ class Judge extends Component<Props> {
 				<h2>Provide Final Ranking</h2>
 				<p>
 					After providing comments for all entries, follow&nbsp;
-					{ this.props.category ? <Link to={ `/judge/rank/${this.props.category._id}`}>this link</Link> : undefined }&nbsp;
+					{
+						this.props.category ?
+						<Link
+							className='list-link'
+							to={ `/judge/rank/${this.props.category._id}`}
+						>
+							this link
+						</Link> : undefined
+					}&nbsp;
 					to provide your final ranking of entrants, which will be used as the overall results.
 				</p>
 				<h2>Entries to judge</h2>

@@ -10,27 +10,3 @@
     margin: 1%;
     overflow: auto;
 }
-
-.submit .list {
-    min-height: 350px
-}
-
-.submit .list .item {
-    background-color: rgb(251, 251, 251);
-    padding: 1%;
-    cursor: pointer;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select:none;
-    user-select:none;
-    -o-user-select:none;
-}
-
-.submit .list .item.interactive {
-    cursor: pointer;
-}
-
-.submit .list .item.divider {
-    border-bottom: 1px solid #e8e8e8;
-}
-

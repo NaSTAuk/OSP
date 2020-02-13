@@ -12,7 +12,7 @@ import { Station, Stations } from '../../api/stations'
 interface Props extends RouteComponentProps {
 	loading?: boolean,
 	awardId: string,
-	awards?: Award[]
+	award?: Award
 	categories?: Category[]
 	entries?: Entry[]
 	userStation?: Station
@@ -71,23 +71,21 @@ class SubmitListCategories extends Component<Props, State> {
 					Back To Awards
 				</Button>
 				<h1>Categories open for entry</h1>
-				{ this.renderCategories(this.props.awardId) }
+				{ this.renderCategories() }
 			</div>
 		)
 	}
 
-	private renderCategories (awardId: string) {
-		const award = this.props.awards ? this.props.awards.find((a) => a._id === awardId) : undefined
-
-		if (!award) {
+	private renderCategories () {
+		if (!this.props.award || !this.props.categories) {
 			return (<div>Unknown award. <Link to='/submit' >Back to safety</Link></div>)
 		}
 
 		return (
 			<List
 				itemLayout='horizontal'
-				dataSource={ this.props.categories }
-				renderItem={ (category) => this.renderCategory(award, category)}
+				dataSource={ this.props.categories.sort((a, b) => a.name.localeCompare(b.name)) }
+				renderItem={ (category) => this.renderCategory(this.props.award!, category)}
 				className='list'
 			>
 
@@ -124,13 +122,21 @@ export default withTracker((props: Props) => {
 		Meteor.subscribe('users')
 	]
 
+	const award = Awards.findOne({ _id: props.awardId })
+
+	let categories: Category[] = []
+
+	if (award) {
+		categories = Categories.find({ forAwards: award.name }).fetch()
+	}
+
 	const loading = handles.some((handle) => !handle.ready())
 
 	return {
 		loading,
 		awardId: props.awardId,
-		awards: Awards.find().fetch(),
-		categories: Categories.find().fetch(),
+		award,
+		categories,
 		entries: Entries.find().fetch(),
 		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0]
 	}

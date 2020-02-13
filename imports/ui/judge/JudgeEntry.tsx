@@ -80,8 +80,8 @@ class JudgeCategory extends Component<Props, State> {
 			<div key='judgingForm' style={ { paddingBottom: '300px' }}>
 				<Form>
 					<Form.Item>
-						<h3>Comments</h3>
-						Min 100 characters, current length: { this.state.comments.length }
+						<h1>Your Comments</h1>
+						<p>Min 100 characters, current length: { this.state.comments.length }</p>
 						<TextArea
 							value={ this.state.comments }
 							rows={ 20 }

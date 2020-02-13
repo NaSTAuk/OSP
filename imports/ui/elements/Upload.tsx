@@ -90,10 +90,10 @@ export class Upload extends Component<Props, State> {
 					this.state.tries[file.name] > 0 ?
 					this.state.tries[file.name] >= 5 ?
 					<div className='UploadFailed'>
-						Uploading failed.
+						<p>Uploading failed.</p>
 					</div> :
 					<div>
-						Upload failed, retrying. Attempt: { this.state.tries[file.name] + 1 } / 5
+						<p>Upload failed, retrying. Attempt: { this.state.tries[file.name] + 1 } / 5</p>
 					</div> : undefined
 				}
 			</div>

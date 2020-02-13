@@ -113,7 +113,16 @@ class Submit extends Component<Props, State> {
 						category.supportingEvidence.some((evidence) => evidence.type === SupportingEvidenceType.VIDEO) &&
 						this.props.award && this.props.award.name === 'NaSTA Awards' && !this.isSuperBlooper() ?
 						<Form.Item>
-							Please provide links to all videos used in your entry below
+							<p>
+								Please provide links to all videos used in your entry below.
+								<Icon
+									key='rulesIcon'
+									type='question-circle'
+									theme='twoTone'
+									onClick={ () => this.setState({ showRulesModal: true }) }
+									style={ { marginLeft: '1%' } }
+								/>
+							</p>
 							<Modal
 								key='rulesModal'
 								visible={ this.state.showRulesModal }
@@ -131,13 +140,6 @@ class Submit extends Component<Props, State> {
 									There is, however, an allowance for 10% of content to be archive material.
 								</p>
 							</Modal>
-							<Icon
-								key='rulesIcon'
-								type='question-circle'
-								theme='twoTone'
-								onClick={ () => this.setState({ showRulesModal: true }) }
-								style={ { marginLeft: '1%' } }
-							/>
 							<TextArea
 								key='linksTextarea'
 								value={ this.state.evidenceLinks }

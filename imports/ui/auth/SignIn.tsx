@@ -1,29 +1,77 @@
+import { Button, Form, Input } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import React, { Component, FormEvent } from 'react'
-import ReactDOM from 'react-dom'
+
+interface State {
+	email: string
+	password: string
+}
 
 /** Login UI */
-export class SignIn extends Component {
+export class SignIn extends Component<{ }, State> {
+
+	constructor (props: { }) {
+		super(props)
+
+		this.state = {
+			email: '',
+			password: ''
+		}
+	}
+
 	public render () {
 		return (
-			<div>
+			<div className='signin container compact'>
 				<h1>Sign in</h1>
-				<form onSubmit={ this.handleSubmit.bind(this) }>
-					<input type='email' ref='emailInput' placeholder='Email' />
-					<input type='password' ref='passwordInput' placeholder='Password' />
-					<input type='submit' value='Login'></input>
-				</form>
+				<Form>
+					<Form.Item>
+						<Input
+							type='email'
+							placeholder='Email'
+							value={ this.state.email }
+							onChange={ (event) => this.emailChanged(event) }
+							onKeyUp={ (event) => this.keyUp(event) }
+						/>
+					</Form.Item>
+					<Form.Item>
+						<Input
+							type='password'
+							placeholder='Password'
+							value={ this.state.password }
+							onChange={ (event) => this.passwordChanged(event) }
+							onKeyUp={ (event) => this.keyUp(event) }
+						/>
+					</Form.Item>
+					<Form.Item>
+						<Button type='primary' onClick={ (event) => this.handleSubmit(event) }>Login</Button>
+					</Form.Item>
+				</Form>
 			</div>
 		)
 	}
 
+	private emailChanged (event: React.ChangeEvent<HTMLInputElement>) {
+		this.setState({
+			email: event.target.value
+		})
+	}
+
+	private passwordChanged (event: React.ChangeEvent<HTMLInputElement>) {
+		this.setState({
+			password: event.target.value
+		})
+	}
+
+	private keyUp (event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.keyCode === 13) {
+			this.handleSubmit(event)
+		}
+	}
+
 	private handleSubmit (event: FormEvent) {
 		event.preventDefault()
-		const email = (ReactDOM.findDOMNode(this.refs.emailInput) as HTMLInputElement).value.trim()
-		const password = (ReactDOM.findDOMNode(this.refs.passwordInput) as HTMLInputElement).value.trim()
-		Meteor.loginWithPassword(email, password);
-		(ReactDOM.findDOMNode(this.refs.emailInput) as HTMLInputElement).value = '';
-		(ReactDOM.findDOMNode(this.refs.passwordInput) as HTMLInputElement).value = ''
+		Meteor.loginWithPassword(this.state.email, this.state.password)
+
 		setTimeout(() => document.location.reload(true), 1000)
 	}
 }
