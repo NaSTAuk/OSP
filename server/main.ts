@@ -1,5 +1,6 @@
 import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
+import uuid from 'uuid'
 import '../imports/api/accounts'
 import '../imports/api/accounts'
 import { NaSTAUser } from '../imports/api/accounts'
@@ -15,7 +16,7 @@ import '../imports/api/system'
 import { System } from '../imports/api/system'
 import { Awards, DEFAULT_AWARDS, DEFAULT_CATEGORIES_FOR_AWARDS } from '/imports/api/awards'
 import { Categories, Category, DEFAULT_CATEGORIES } from '/imports/api/categories'
-import { DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES, Roles } from '/imports/api/helpers/enums'
+import { DEFAULT_CATEGORY_NAMES, Roles } from '/imports/api/helpers/enums'
 import { DEFAULT_STATIONS, Stations } from '/imports/api/stations'
 
 function insertCategory (category: Category) {
@@ -45,7 +46,9 @@ Meteor.startup(() => {
 	}
 
 	if (Meteor.users.find({ }).fetch().length === 0) {
-		Accounts.createUser({ email: 'tech@nasta.tv', password: 'password' })
+		const password = uuid()
+		console.log(`Creating user "tech@nasta.tv" with password ${password}`)
+		Accounts.createUser({ email: 'tech@nasta.tv', password })
 	}
 
 	if (Stations.find().count() === 0) {
@@ -80,50 +83,14 @@ Meteor.startup(() => {
 		}
 	}
 
-	if (JudgeToCategory.find().count() === 1) {
-		// TODO: Remove, temporary during testing
-
-		const user = Meteor.users.findOne({ emails: { address: 'tech@nasta.tv', verified: false } })
-
-		if (user) {
-			const categories = Categories.find({ }).fetch()
-
-			categories.forEach((category) => {
-				if (category.name === DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_BROADCASTER) return
-				JudgeToCategory.insert({
-					judgeId: user._id,
-					categoryId: category._id || ''
-				})
-			})
-		}
+	if (System.find().fetch().length === 0) {
+		System.insert({
+			version: 'v1.0'
+		})
 	}
 
 	// Clear auth tokens after deploying new version
 	if (Meteor.isProduction) {
 		Meteor.users.update({ }, { $set: { 'services.resume.loginTokens': [] } }, { multi: true })
-	}
-
-	if (System.find().fetch().length === 0) {
-		System.insert({
-			version: 'v1.0'
-		})
-
-		const blooperCategory = Categories.findOne({ name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER })
-
-		if (!blooperCategory) {
-			const toInsert = DEFAULT_CATEGORIES.find(
-				(category) => category.name === DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER
-			)
-
-			if (toInsert) {
-				const id = Categories.insert(toInsert)
-
-				const nasta = Awards.findOne({ name: DEFAULT_AWARDS_NAMES.NASTA })
-
-				if (nasta) {
-					Awards.update({ _id: nasta._id }, { $push: { categories: id } })
-				}
-			}
-		}
 	}
 })

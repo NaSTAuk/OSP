@@ -295,6 +295,8 @@ export const DEFAULT_CATEGORIES: Category[] = [
 		description: 'A single programme (or a shortened edit from an episode or series) showreel demonstrating excellent post production and editing skills.',
 		forAwards: DEFAULT_AWARDS_NAMES.NASTA
 	},
+	// Super Blooper was added for QuaysTV, hosts of NaSTA 2020. It may not be required for future years.
+	// But hey, it's a lot of fun!
 	{
 		name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER,
 		supportingEvidence: [
