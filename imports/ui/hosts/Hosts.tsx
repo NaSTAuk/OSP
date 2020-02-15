@@ -198,6 +198,12 @@ class Hosts extends Component<Props, State> {
 				</Form>
 				<h1>Entry</h1>
 				<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
+				<h1>Video Links</h1>
+				<p style={ { wordWrap: 'break-word', whiteSpace: 'pre-wrap' } }>
+					{
+						this.state.activeEntry.entry.entry.videoLinks
+					}
+				</p>
 			</React.Fragment>
 		)
 	}
@@ -241,14 +247,12 @@ class Hosts extends Component<Props, State> {
 		if (!this.props.awards || !this.props.awards.length) return <div>No awards in system</div>
 
 		return this.props.awards.map((award) => {
-			if (award.active) {
-				return (
-					<div key={ award._id }>
-						<h1>{ award.name }</h1>
-						{ this.renderCategoriesInAward(award) }
-					</div>
-				)
-			}
+			return (
+				<div key={ award._id }>
+					<h1>{ award.name }</h1>
+					{ this.renderCategoriesInAward(award) }
+				</div>
+			)
 		})
 	}
 

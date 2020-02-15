@@ -2,6 +2,7 @@ import { Button, Form, Input } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import React, { Component, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import '/imports/ui/css/SignIn.css'
 
 interface State {
 	email: string
@@ -18,6 +19,14 @@ export class SignIn extends Component<{ }, State> {
 			email: '',
 			password: ''
 		}
+	}
+
+	public componentWillMount () {
+		document.body.style.backgroundImage = `url('/background_login.jpg')`
+	}
+
+	public componentWillUnmount () {
+		document.body.style.backgroundImage = `url('/background.jpg');`
 	}
 
 	public render () {

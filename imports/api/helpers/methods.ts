@@ -123,7 +123,6 @@ Meteor.methods({
 		})
 	},
 	async 'submission.submit' (values: { [key: string]: string }, categoryId: string): Promise<any> {
-		console.log(JSON.stringify(values))
 		check(categoryId, String)
 
 		if (Meteor.userId()) {

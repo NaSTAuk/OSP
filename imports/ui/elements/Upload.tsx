@@ -58,7 +58,7 @@ export class Upload extends Component<Props, State> {
 					this.state.files.map((file) => {
 						return (
 							<div key={ file.name} className='Row'>
-								<span className='Filename'>{ file.name }</span>
+								<span className='Filename'><p>{ file.name }</p></span>
 								{ this.renderProgress(file) }
 							</div>
 						)
@@ -84,7 +84,7 @@ export class Upload extends Component<Props, State> {
 			<div className='ProgressWrapper'>
 				<Progress progress={ uploadProgress ? uploadProgress.percentage : 0 } />
 				{
-					uploadProgress ? <div className='UploadPercent'>{ Math.floor(uploadProgress.percentage) }%</div> : undefined
+					uploadProgress ? <div className='UploadPercent'><p>{ Math.floor(uploadProgress.percentage) }%</p></div> : undefined
 				}
 				{
 					this.state.tries[file.name] > 0 ?
