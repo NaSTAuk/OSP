@@ -5,6 +5,7 @@ import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Redirect, Route, Router, Switch } from 'react-router'
 import { Roles } from '../api/helpers/enums'
+import RequestPasswordReset from './auth/RequestPasswordReset'
 import ResetPassword from './auth/ResetPassword'
 import { SignIn } from './auth/SignIn'
 import { GetDefaultRoute } from './DefaultRoute'
@@ -57,12 +58,19 @@ class App extends Component<AppProps> {
 							<Route exact path='/resetredirect'>
 								<Redirect to='/' />
 							</Route>
+							<Route exact path='/forgotpassword' render={ (props) => <RequestPasswordReset { ...props } /> } />
 							<Route exact path='/' render={
 								() => WithAuth(
 									GetDefaultRoute()
 								)
 							} />
 							<Route exact path='/enroll-account/:token' render={
+								(props) => <ResetPassword token={ props.match.params.token } />
+							}/>
+							<Route exact path='/reset-password/:token' render={
+								(props) => <ResetPassword token={ props.match.params.token } />
+							}/>
+							<Route exact path='/reset-password/:token' render={
 								(props) => <ResetPassword token={ props.match.params.token } />
 							}/>
 							<Route exact path='/submit' render={

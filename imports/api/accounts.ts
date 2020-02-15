@@ -38,6 +38,9 @@ if (Meteor.isServer) {
 	Accounts.urls.enrollAccount = (token) => {
 		return Meteor.absoluteUrl(`enroll-account/${token}`)
 	}
+	Accounts.urls.resetPassword = (token) => {
+		return Meteor.absoluteUrl(`reset-password/${token}`)
+	}
 
 	Meteor.publish('users', () => {
 		return Meteor.users.find({ }, { fields: { stationId: 1, emails: 1, roles: 1 } })

@@ -1,4 +1,4 @@
-import { Button, Form, Input } from 'antd'
+import { Button, Form, Input, message } from 'antd'
 import { Accounts } from 'meteor/accounts-base'
 import React, { Component } from 'react'
 import { RouteComponentProps, withRouter } from 'react-router'
@@ -53,7 +53,8 @@ class ResetPassword extends Component<Props, State> {
 					error: 'Sorry we could not reset your password. Please try again.'
 				})
 			} else {
-				this.props.history.replace('/resetredirect')
+				message.success('Password reset')
+				setTimeout(() => this.props.history.replace('/resetredirect'), 2000)
 			}
 		})
 	}

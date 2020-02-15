@@ -1,6 +1,7 @@
 import { Button, Form, Input } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import React, { Component, FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 
 interface State {
 	email: string
@@ -45,6 +46,7 @@ export class SignIn extends Component<{ }, State> {
 					<Form.Item>
 						<Button type='primary' onClick={ (event) => this.handleSubmit(event) }>Login</Button>
 					</Form.Item>
+					<Link to='/forgotpassword'>Forgot password?</Link>
 				</Form>
 			</div>
 		)
