@@ -25,16 +25,18 @@ class ResetPassword extends Component<Props, State> {
 
 	public render () {
 		return (
-			<Form>
-				<Form.Item>
-					New Password (min 12 characters)
-					<Input onChange={ (event) => this.passwordChange(event)}></Input>
-				</Form.Item>
-				<Button type='primary' onClick={ () => this.handleSubmit() } disabled={ this.state.password.length < 12}>
-					Submit
-				</Button>
-				{ this.state.error }
-			</Form>
+			<div className='signin container compact'>
+				<Form>
+					<Form.Item>
+						<h3>New Password (min 12 characters)</h3>
+						<Input onChange={ (event) => this.passwordChange(event)}></Input>
+					</Form.Item>
+					<Button type='primary' onClick={ () => this.handleSubmit() } disabled={ this.state.password.length < 12}>
+						Submit
+					</Button>
+					{ this.state.error }
+				</Form>
+			</div>
 		)
 	}
 
@@ -51,7 +53,7 @@ class ResetPassword extends Component<Props, State> {
 					error: 'Sorry we could not reset your password. Please try again.'
 				})
 			} else {
-				this.props.history.push('/')
+				this.props.history.replace('/resetredirect')
 			}
 		})
 	}

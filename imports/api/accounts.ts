@@ -56,41 +56,73 @@ Meteor.methods({
 		Accounts.createUser({ email, password})
 	},
 	'accounts.delete' (userId: string) {
-		check (userId, String)
+		check(userId, String)
 
 		Meteor.users.remove({ _id: userId })
 	},
 	async 'accounts.new.withStation' (email: string, stationId: string): Promise<any> {
-		const id = await createAccount(email)
+		check(email, String)
+		check(stationId, String)
 
-		const stationdb = Stations.findOne({ _id: stationId })
+		if (Meteor.isServer) {
+			let id = ''
+			try {
+				id = await createAccount(email)
+			} catch (error) {
+				return Promise.reject(error)
+			}
 
-		if (!stationdb || !stationdb._id) {
-			return Promise.reject(`Failed to find station: ${stationId}`)
+			const stationdb = Stations.findOne({ _id: stationId })
+
+			if (!stationdb || !stationdb._id) {
+				return Promise.reject(`Failed to find station: ${stationId}`)
+			}
+
+			try {
+				await addStationIdToUser(id, stationdb._id)
+			} catch (error) {
+				return Promise.reject(error)
+			}
+
+			try {
+				Accounts.sendEnrollmentEmail(id, email)
+			} catch (error) {
+				return Promise.reject(error)
+			}
+
+			return new Promise((resolve, reject) => {
+				Stations.update(
+					{ _id: (stationdb as Station)._id },
+					{ $push: { authorizedUsers: id } },
+					{ },
+					((err: string) => {
+						if (err) reject()
+						resolve()
+					})
+				)
+			})
+		} else {
+			return Promise.resolve()
 		}
-
-		await addStationIdToUser(id, stationdb._id)
-
-		return new Promise((resolve, reject) => {
-			Stations.update(
-				{ _id: (stationdb as Station)._id },
-				{ $push: { authorizedUsers: id } },
-				{ },
-				((err: string) => {
-					if (err) reject()
-					resolve()
-				})
-			)
-		})
 	},
 	async 'accounts.new' (email: string): Promise<any> {
 		check(email, String)
 
-		const id = await createAccount(email)
+		let id = ''
+
+		try {
+			id = await createAccount(email)
+		} catch (error) {
+			return Promise.reject(error)
+		}
 
 		if (!id) return Promise.reject('Failed to create user')
 
-		Accounts.sendEnrollmentEmail(id, email)
+		try {
+			Accounts.sendEnrollmentEmail(id, email)
+		} catch (error) {
+			return Promise.reject(`Error creating account: ${error}`)
+		}
 
 		return Promise.resolve(id)
 	},
@@ -105,7 +137,11 @@ Meteor.methods({
 		check (password, String)
 
 		if (!this.isSimulation) {
-			Accounts.setPassword(userId, password)
+			try {
+				Accounts.setPassword(userId, password)
+			} catch (error) {
+				throw new Meteor.Error(`Could not set password for user ${userId}`)
+			}
 		}
 	}
 })
@@ -136,23 +172,19 @@ function createAccount (email: string): Promise<any> {
 		throw new Meteor.Error('Email already registered')
 	}
 
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		const id = Accounts.createUser({ email, password: Random.hexString(12) })
-		if (id) {
-			resolve(id)
-		} else {
-			reject()
-		}
+
+		resolve(id)
 	})
 }
 
 function addStationIdToUser (userId: string, stationId: string): Promise<any> {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		(Meteor.users as Mongo.Collection<NaSTAUser>).update(
 			{ _id: userId }, { $set: { stationId } },
 			{ },
-			((err: string) => {
-				if (err) reject(err)
+			(() => {
 				resolve()
 			})
 		)

@@ -3,7 +3,7 @@ import history from 'history'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
-import { Route, Router, Switch } from 'react-router'
+import { Redirect, Route, Router, Switch } from 'react-router'
 import { Roles } from '../api/helpers/enums'
 import ResetPassword from './auth/ResetPassword'
 import { SignIn } from './auth/SignIn'
@@ -13,8 +13,8 @@ import Judge from './judge/Judge'
 import JudgeCategoriesList from './judge/JudgeCategoriesList'
 import JudgeCategory from './judge/JudgeEntry'
 import JudgeRankEntries from './judge/JudgeRankEntries'
-import ManageJudges from './manage/Judges'
 import ManageAwards from './manage/Awards'
+import ManageJudges from './manage/Judges'
 import { Manage } from './manage/Manage'
 import ManageStations from './manage/Stations'
 import ManageUsers from './manage/Users'
@@ -54,6 +54,9 @@ class App extends Component<AppProps> {
 					<Router history={ browserHistory }>
 						<Switch>
 							<Route exact path='/signin' component={ SignIn } />
+							<Route exact path='/resetredirect'>
+								<Redirect to='/' />
+							</Route>
 							<Route exact path='/' render={
 								() => WithAuth(
 									GetDefaultRoute()
