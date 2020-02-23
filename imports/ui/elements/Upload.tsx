@@ -57,7 +57,7 @@ export class Upload extends Component<Props, State> {
 				{
 					this.state.files.map((file) => {
 						return (
-							<div key={ file.name} className='Row'>
+							<div key={ file.name.replace(/\s+/g, '_') } className='Row'>
 								<span className='Filename'><p>{ file.name }</p></span>
 								{ this.renderProgress(file) }
 							</div>
@@ -78,7 +78,7 @@ export class Upload extends Component<Props, State> {
 	}
 
 	private renderProgress (file: File) {
-		const uploadProgress = this.state.uploadProgress[file.name]
+		const uploadProgress = this.state.uploadProgress[file.name.replace(/\s+/g, '_')]
 		if (this.state.uploading || this.state.successfullUploaded) {
 			return (
 			<div className='ProgressWrapper'>
@@ -87,13 +87,13 @@ export class Upload extends Component<Props, State> {
 					uploadProgress ? <div className='UploadPercent'><p>{ Math.floor(uploadProgress.percentage) }%</p></div> : undefined
 				}
 				{
-					this.state.tries[file.name] > 0 ?
-					this.state.tries[file.name] >= 5 ?
+					this.state.tries[file.name.replace(/\s+/g, '_')] > 0 ?
+					this.state.tries[file.name.replace(/\s+/g, '_')] >= 5 ?
 					<div className='UploadFailed'>
 						<p>Uploading failed.</p>
 					</div> :
 					<div>
-						<p>Upload failed, retrying. Attempt: { this.state.tries[file.name] + 1 } / 5</p>
+						<p>Upload failed, retrying. Attempt: { this.state.tries[file.name.replace(/\s+/g, '_')] + 1 } / 5</p>
 					</div> : undefined
 				}
 			</div>
@@ -106,8 +106,8 @@ export class Upload extends Component<Props, State> {
 		const promises: Array<Promise<unknown>> = []
 		let valid = true
 		this.state.files.forEach((file) => {
-			// Files are limited to 1GB
-			if (file.type === this.props.format && file.size <= 1000 * 1024 * 1024) {
+			// Files are limited to 5GB
+			if (file.type === this.props.format && file.size <= 5000 * 1024 * 1024) {
 				promises.push(this.sendRequest(file))
 			} else {
 				valid = false
@@ -138,7 +138,10 @@ export class Upload extends Component<Props, State> {
 	private async sendRequest (file: File) {
 		return new Promise(async (resolve, reject) => {
 			if (file.size <= 10 * 1024 * 1024) {
-				this.setState({ uploadProgress: { [file.name]: { percentage: 1, state: 'uploading'} }, uploading: true })
+				this.setState({
+					uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 1, state: 'uploading'} },
+					uploading: true
+				})
 				let uploading = true
 				let tries = 0
 				while (uploading && tries < 5) {
@@ -146,12 +149,15 @@ export class Upload extends Component<Props, State> {
 						return this.uploadSmallFile(file, this.props.stationName, this.props.categoryName).then((id) => {
 							this.props.onChange(this.props.uuid, id.replace(/^id:/, ''))
 							uploading = false
-							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
+							this.setState({
+								uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 100, state: 'done'} },
+								uploading: true
+							})
 							resolve()
 						}).catch((err) => {
 							console.log(err)
 							tries++
-							this.setState({ tries: { [file.name]: tries } })
+							this.setState({ tries: { [file.name.replace(/\s+/g, '_')]: tries } })
 						})
 					} catch (err) {
 						tries++
@@ -168,13 +174,13 @@ export class Upload extends Component<Props, State> {
 						console.log('Uploading')
 
 						this.setState(
-							{ uploadProgress: { [file.name]: { percentage: 1, state: 'pending'} }, uploading: true }
+							{ uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 1, state: 'pending'} }, uploading: true }
 						)
 						const sessionId = await this.startUploadSession(chunks[0])
 						this.setState(
 							{
 								uploadProgress: {
-									[file.name]: {
+									[file.name.replace(/\s+/g, '_')]: {
 										percentage: (1 / chunks.length) * 100,
 										state: 'uploading'
 									}
@@ -199,7 +205,7 @@ export class Upload extends Component<Props, State> {
 								this.setState(
 									{
 										uploadProgress: {
-											[file.name]: {
+											[file.name.replace(/\s+/g, '_')]: {
 												percentage: (i / chunks.length) * 100,
 												state: 'pending'
 											}
@@ -216,11 +222,14 @@ export class Upload extends Component<Props, State> {
 								chunkSize,
 								chunks.length - 1,
 								true,
-								`/${file.name}`,
+								`/${file.name.replace(/\s+/g, '_')}`,
 								this.props.stationName,
 								this.props.categoryName
 							)
-							this.setState({ uploadProgress: { [file.name]: { percentage: 100, state: 'done'} }, uploading: true })
+							this.setState({
+								uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 100, state: 'done'} },
+								uploading: true
+							})
 							uploading = false
 							resolve(id.replace(/^id:/, ''))
 						}
@@ -249,7 +258,7 @@ export class Upload extends Component<Props, State> {
 			Meteor.call(
 				'submission.uploadFile',
 				b64Encoding,
-				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${file.name.replace(/$\//, '')}`,
+				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${file.name.replace(/$\//, '').replace(/\s+/g, '_')}`,
 
 				(error: any, result: any) => {
 					if (error) reject(error)

@@ -61,7 +61,7 @@ export const enum DEFAULT_CATEGORY_NAMES {
 	NaSTA_AWARDS_MARS_ELKINS_EL_BROGY = 'The Mars Elkins El-Brogy Award for Multimedia Content',
 	NaSTA_AWARDS_WRITING = 'Writing',
 	NaSTA_AWARDS_LIVE_BROADCAST = 'Live Broadcast',
-	NaSTA_AWARDS_CINEMATOGRAPHY = 'Cimematography',
+	NaSTA_AWARDS_CINEMATOGRAPHY = 'Cinematography',
 	NaSTA_AWARDS_LIGHT_ENTERTAINMENT = 'Light Entertainment',
 	NaSTA_AWARDS_TITLE_SEQUENCE = 'Title Sequence',
 	NaSTA_AWARDS_COMEDY = 'Comedy',

@@ -1,10 +1,11 @@
-import { Button } from 'antd'
+import { Button, notification } from 'antd'
 import history from 'history'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Redirect, Route, Router, Switch } from 'react-router'
-import { Roles } from '../api/helpers/enums'
+import { Collections, Roles } from '../api/helpers/enums'
+import { System, SystemProps } from '../api/system'
 import RequestPasswordReset from './auth/RequestPasswordReset'
 import ResetPassword from './auth/ResetPassword'
 import { SignIn } from './auth/SignIn'
@@ -27,14 +28,46 @@ import '/imports/ui/css/App.css'
 
 export interface AppProps {
 	loading: boolean
+	system?: SystemProps
+}
+
+export interface State {
+	messageSent: boolean
 }
 
 const browserHistory = history.createBrowserHistory()
 
 /** App */
-class App extends Component<AppProps> {
+class App extends Component<AppProps, State> {
+
+	public static getDerivedStateFromProps (nextProps: AppProps, prevState: State): State {
+
+		if (!Meteor.userId()) {
+			return {
+				...prevState,
+				messageSent: true
+			}
+		}
+
+		if(nextProps.system && nextProps.system.message && Meteor.userId()) {
+			notification.info({
+				message: nextProps.system.message
+			})
+
+			return {
+				...prevState,
+				messageSent: true
+			}
+		}
+
+		return prevState
+	}
 	constructor (props: AppProps) {
 		super (props)
+
+		this.state = {
+			messageSent: false
+		}
 	}
 
 	public shouldComponentUpdate (nextProps: AppProps, _nextState: any) {
@@ -159,19 +192,21 @@ class App extends Component<AppProps> {
 
 	private logoutUser () {
 		Meteor.logout(((error) => {
-			if (!error) setTimeout(() => document.location.reload(true), 1000)
+			if (!error) setTimeout(() => document.location.replace('/'), 1000)
 		}))
 	}
 }
 
 export default withTracker(() => {
 	const handles = [
-		Meteor.subscribe('users')
+		Meteor.subscribe('users'),
+		Meteor.subscribe(Collections.SYSTEM)
 	]
 
 	const loading = handles.some((handle) => !handle.ready())
 
 	return {
-		loading
+		loading,
+		system: System.findOne({ })
 	}
 })(App as any)

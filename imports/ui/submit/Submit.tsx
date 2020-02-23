@@ -34,6 +34,7 @@ interface State {
 	valid: boolean
 	showRulesModal: boolean
 	evidenceLinks: string
+	submitting: boolean
 }
 
 /** Creates a menu of awards open for submission */
@@ -78,13 +79,17 @@ class Submit extends Component<Props, State> {
 			error: '',
 			valid: false,
 			showRulesModal: false,
-			evidenceLinks: ''
+			evidenceLinks: '',
+			submitting: false
 		}
 
 		this.setFormFieldValid = this.setFormFieldValid.bind(this)
 		this.setFormFieldInvalid = this.setFormFieldInvalid.bind(this)
 		this.fileUploaded = this.fileUploaded.bind(this)
 		this.setFormFieldValue = this.setFormFieldValue.bind(this)
+
+		// Check validity every 5 seconds because UIs are hard.
+		setTimeout(() => this.formIsValid(), 5000)
 	}
 
 	public render () {
@@ -155,6 +160,7 @@ class Submit extends Component<Props, State> {
 						type='primary'
 						disabled={ !this.state.valid }
 						onClick={ (event) => this.handleSubmit(event) }
+						loading={ this.state.submitting }
 					>
 						Submit
 					</Button> { this.state.error }
@@ -179,6 +185,10 @@ class Submit extends Component<Props, State> {
 
 	private handleSubmit (event: FormEvent) {
 		event.preventDefault()
+
+		this.setState({
+			submitting: true
+		})
 
 		this.callSubmit().then(() => {
 
@@ -217,7 +227,15 @@ class Submit extends Component<Props, State> {
 		}
 
 		if (this.props.award && this.props.award.name === 'NaSTA Awards') {
-			if (this.state.evidenceLinks.length < 10) {
+			const cat = this.props.categories ?
+				this.props.categories.find((category) => category._id === this.props.categoryId) :
+				undefined
+
+			if (
+				cat &&
+				cat.supportingEvidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) &&
+				this.state.evidenceLinks.length < 10
+			) {
 				valid = false
 			}
 		}
@@ -333,8 +351,9 @@ class Submit extends Component<Props, State> {
 			case SupportingEvidenceType.CALL:
 				return (
 					<div className='videoCall' key={ evidence._id }>
-						A video call will be required as evidence for this entry. This will be arranged after submissions close.
-						{ evidence.description }
+						<p>
+							A video call will be required as evidence for this entry. This will be arranged after submissions close.
+						</p>
 					</div>
 				)
 		}

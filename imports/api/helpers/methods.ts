@@ -24,7 +24,7 @@ function b64ToBuffer (b64Encoding: string): Buffer {
 	return new Buffer(b64Encoding.slice(index + ';base64,'.length), 'base64')
 }
 
-function GetSharingLink (filePathLower: string): Promise<string> {
+function CreateSharingLink (filePathLower: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		dbx.sharingCreateSharedLinkWithSettings({
 			path: filePathLower,
@@ -39,6 +39,24 @@ function GetSharingLink (filePathLower: string): Promise<string> {
 		}).then((result) => {
 			resolve(result.url)
 		}).catch((err) => {
+			console.log(JSON.stringify(err))
+			reject(err)
+		})
+	})
+}
+
+function GetSharingLink (filePathLower: string): Promise<string> {
+	return new Promise((resolve, reject) => {
+		dbx.sharingListSharedLinks({
+			path: filePathLower
+		}).then((result) => {
+			const res = result.links[0] ? result.links[0].url : undefined
+
+			if (!res) reject('Contact tech@nasta.tv')
+
+			resolve(res)
+		}).catch((err) => {
+			console.log(JSON.stringify(err))
 			reject(err)
 		})
 	})
@@ -52,6 +70,7 @@ Meteor.methods({
 			contents: b64ToBuffer(chunk),
 			close: false
 		}).catch((err) => {
+			console.log(JSON.stringify(err))
 			return Promise.reject(err)
 		}).then((result) => {
 			return Promise.resolve(result.session_id)
@@ -67,7 +86,7 @@ Meteor.methods({
 		check(finish, Boolean)
 		check(path, String)
 
-		console.log(`Uploading offset ${chunkNumber*chunkSize}`)
+		console.log(`${new Date().toLocaleString()} Uploading offset ${chunkNumber*chunkSize} to ${sessionId}`)
 
 		if (finish) {
 			return dbx.filesUploadSessionFinish({
@@ -79,12 +98,14 @@ Meteor.methods({
 				commit: {
 					path,
 					mode: {
-						'.tag': 'add'
+						'.tag': 'overwrite'
 					}
 				}
 			} as any).catch((err) => {
+				console.log(JSON.stringify(err))
 				return Promise.reject(err)
 			}).then((result) => {
+				console.log(`${new Date().toLocaleString()} Finished upload of ${sessionId}`)
 				return Promise.resolve(result.path_lower)
 			})
 		} else {
@@ -93,6 +114,7 @@ Meteor.methods({
 				session_id: sessionId,
 				offset: chunkNumber*chunkSize
 			}).catch((err) => {
+				console.log(JSON.stringify(err))
 				return Promise.reject(err)
 			}).then((result) => {
 				return Promise.resolve(result)
@@ -107,14 +129,14 @@ Meteor.methods({
 
 		if (file.length > 100 * 1024 * 1024) {
 			console.log('Too large')
-			return // TODO: Send some error
+			return Promise.reject('File is too large, maximum size is 100MB')
 		}
 
 		return dbx.filesUpload({
 			contents: file,
 			path
 		}).catch((error) => {
-			console.log(error)
+			console.log(JSON.stringify(error))
 		}).then((result) => {
 			if (result) {
 				return Promise.resolve(result.path_lower)
@@ -178,38 +200,46 @@ Meteor.methods({
 						let shortClipSharingLink = ''
 
 						try {
-							sharingLink = await GetSharingLink(values[support._id])
+							sharingLink = await CreateSharingLink(values[support._id])
 						} catch (error) {
 							if (error.error.error['.tag'] === 'shared_link_already_exists') {
-								const prev = EvidenceCollection.findOne({
-									stationId: station._id,
-									awardId: categoryId,
-									supportingEvidenceId: support._id
-								}) as EvidenceVideo | EvidencePDF | undefined
+								try {
+									sharingLink = await GetSharingLink(values[support._id])
+								} catch (error) {
+									const prev = EvidenceCollection.findOne({
+										stationId: station._id,
+										awardId: categoryId,
+										supportingEvidenceId: support._id
+									}) as EvidenceVideo | EvidencePDF | undefined
 
-								if (prev && prev.sharingLink.length) {
-									sharingLink = prev.sharingLink
-								} else {
-									throw new Error('Something went wrong, please try again')
+									if (prev && prev.sharingLink.length) {
+										sharingLink = prev.sharingLink
+									} else {
+										throw new Error('Something went wrong, please try again')
+									}
 								}
 							}
 						}
 
 						if (values[`${support._id}10Sec`]) {
 							try {
-								shortClipSharingLink = await GetSharingLink(values[`${support._id}10Sec`])
+								shortClipSharingLink = await CreateSharingLink(values[`${support._id}10Sec`])
 							} catch (error) {
 								if (error.error.error['.tag'] === 'shared_link_already_exists') {
-									const prev = EvidenceCollection.findOne({
-										stationId: station._id,
-										awardId: categoryId,
-										supportingEvidenceId: support._id
-									}) as EvidenceVideo
+									try {
+										sharingLink = await GetSharingLink(values[support._id])
+									} catch (error) {
+										const prev = EvidenceCollection.findOne({
+											stationId: station._id,
+											awardId: categoryId,
+											supportingEvidenceId: support._id
+										}) as EvidenceVideo
 
-									if (prev && prev.shortClipSharingLink.length) {
-										shortClipSharingLink = prev.shortClipSharingLink
-									} else {
-										throw new Error('Something went wrong, please try again')
+										if (prev && prev.shortClipSharingLink.length) {
+											shortClipSharingLink = prev.shortClipSharingLink
+										} else {
+											throw new Error('Something went wrong, please try again')
+										}
 									}
 								}
 							}

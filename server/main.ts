@@ -85,8 +85,23 @@ Meteor.startup(() => {
 
 	if (System.find().fetch().length === 0) {
 		System.insert({
-			version: 'v1.0'
+			version: 'v1.0',
+			message: ''
 		})
+	}
+
+	const system = System.findOne({ })
+
+	if (system && system.version === 'v1.0') {
+		System.update(
+			{ _id: system._id },
+			{
+				$set: {
+					version: 'v1.0.1',
+					message: 'Remember by-elections are open! Voting info in the Facebook group.'
+				}
+			}
+		)
 	}
 
 	// Clear auth tokens after deploying new version

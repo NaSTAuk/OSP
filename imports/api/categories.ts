@@ -94,8 +94,8 @@ export const DEFAULT_CATEGORIES: Category[] = [
 			},
 			{
 				_id: Random.id(),
-				type: SupportingEvidenceType.TEXT,
-				maxLength: 500,
+				type: SupportingEvidenceType.PDF,
+				maxLength: '500 Words',
 				description: 'The submission must be accompanied by a written document detailing marketing strategies, tools, and techniques used by your station.'
 			}
 		],
@@ -157,6 +157,10 @@ export const DEFAULT_CATEGORIES: Category[] = [
 				_id: Random.id(),
 				type: SupportingEvidenceType.VIDEO,
 				maxLength: 10 * MINUTE
+			},
+			{
+				_id: Random.id(),
+				type: SupportingEvidenceType.PDF
 			}
 		],
 		description: 'A showreel demonstrating effective, innovative and strong use of multimedia content with an accompanying document.',
