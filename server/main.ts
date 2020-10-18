@@ -10,6 +10,7 @@ import '../imports/api/helpers/methods'
 import '../imports/api/judgeToCategory'
 import { JudgeToCategory } from '../imports/api/judgeToCategory'
 import '../imports/api/results'
+import { Results } from '../imports/api/results'
 import '../imports/api/scores'
 import '../imports/api/stations'
 import '../imports/api/system'
@@ -87,34 +88,6 @@ Meteor.startup(() => {
 		System.insert({
 			version: 'v1.0',
 			messages: []
-		})
-	}
-
-	const system = System.findOne({ })
-
-	if (system && system.version === 'v1.0') {
-		System.update(
-			{ _id: system._id },
-			{
-				$set: {
-					version: 'v1.0.1',
-					message: 'Remember by-elections are open! Voting info in the Facebook group.'
-				}
-			}
-		)
-	}
-
-	if (system && system.version === 'v1.0.1') {
-		const categories = Categories.find({ }).fetch()
-
-		categories.forEach((cat) => {
-			if (cat.name !== DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_FRESHERS_COVERAGE) {
-				Categories.update({ id: cat }, {
-					$set: {
-						openForReview: true
-					}
-				})
-			}
 		})
 	}
 
