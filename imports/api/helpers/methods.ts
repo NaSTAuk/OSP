@@ -8,13 +8,12 @@ import { Categories } from '../categories'
 import { Entries } from '../entries'
 import { EvidenceCollection, EvidencePDF, EvidenceVideo, InsertEvidence } from '../evidence'
 import { JudgeToCategory } from '../judgeToCategory'
-import { Result, Results } from '../results'
+import { Results } from '../results'
 import { Scores } from '../scores'
 import { GetStationForUser, Stations } from '../stations'
-import { SupportingEvidencePDF, SupportingEvidenceVideo } from '../supporting-evidence'
 import { Roles, SupportingEvidenceType, VerificationStatus } from './enums'
 
-export const DROPBOX_TOKEN = Meteor.settings.dropbox.accessToken
+export const DROPBOX_TOKEN: string | undefined = Meteor.settings?.dropbox?.accessToken
 
 const dbx = new Dropbox({ accessToken: DROPBOX_TOKEN, fetch })
 
@@ -384,7 +383,7 @@ Meteor.methods({
 		})
 	},
 	async 'result.set' (
-		categoryId: string, result: { [stationId: string]: number }, jointFirst?: boolean, jointHighlyCommended?: boolean
+		categoryId: string, result: Map<string, number>, jointFirst?: boolean, jointHighlyCommended?: boolean
 	) {
 		return new Promise((resolve, reject) => {
 			const id = Meteor.userId()

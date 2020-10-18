@@ -4,7 +4,7 @@ import { GetUserFromId, UserHasRole } from './accounts'
 import { Collections, Roles } from './helpers/enums'
 
 export interface Station {
-	_id?: string
+	_id: string
 	/** Station full name (as written on award). */
 	name: string
 	/** Whether the station is eligible to enter the awards (is affiliated, not disqualified). */
@@ -45,6 +45,7 @@ export function GetStationForUser (): Station | undefined {
 
 export const DEFAULT_STATIONS: Station[] = [
 	{
+		_id: '',
 		name: 'NaSTA',
 		eligibleForEntry: true,
 		authorizedUsers: []

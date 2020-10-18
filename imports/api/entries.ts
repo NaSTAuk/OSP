@@ -18,7 +18,7 @@ export type FAILURE_TYPE =
 	'VIDEO_BITRATE'
 
 export interface Entry {
-	_id?: string
+	_id: string
 	stationId: string
 	categoryId: string
 	date: number

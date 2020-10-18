@@ -12,7 +12,7 @@ import { RouteComponentProps, withRouter } from 'react-router'
 import { SupportingEvidenceList } from './SupportingEvidenceList'
 import { Categories } from '/imports/api/categories'
 import { Evidence, EvidenceCollection } from '/imports/api/evidence'
-import { EntriesList, EntryListEvidence } from '/imports/api/helpers/interfaces'
+import { EntryListEvidence } from '/imports/api/helpers/interfaces'
 import { Result, Results } from '/imports/api/results'
 import { Scores } from '/imports/api/scores'
 import '/imports/ui/css/Judge.css'
@@ -29,9 +29,9 @@ interface Props extends RouteComponentProps {
 }
 
 interface State {
-	entriesList: EntriesList[]
+	entriesList: EntryListEvidence[]
 	init: boolean
-	activeEntry?: EntriesList
+	activeEntry?: EntryListEvidence
 	drawerVisible: boolean
 	jointFirstPlace: boolean
 	jointHighlyCommended: boolean
@@ -41,7 +41,7 @@ class JudgeRankEntries extends Component<Props, State> {
 
 	public static getDerivedStateFromProps (nextProps: Props, prevState: State): State {
 		if (prevState.init && !nextProps.loading && nextProps.entries && nextProps.entries.length && nextProps.stations) {
-			const entries: Array<{ id: number, entry: EntryListEvidence }> = nextProps.entries.map((entry, index) => {
+			const entries: EntryListEvidence[] = nextProps.entries.map((entry) => {
 				const station = nextProps.stations ?
 					nextProps.stations.find((stat) => stat._id === entry.stationId) :
 					undefined
@@ -57,20 +57,16 @@ class JudgeRankEntries extends Component<Props, State> {
 				}, { sort: { date: -1 } })
 
 				return {
-					id: index,
-					entry: {
+					
 						stationId: entry.stationId,
 						stationName: station ? station.name : '',
 						evidence,
 						comments: judgesComments ? judgesComments.comments : undefined,
 						entry
-					}
 				}
-			}).filter((entry) => entry !== undefined) as Array<{ id: number, entry: EntryListEvidence }>
+			}).filter((entry) => entry !== undefined) as EntryListEvidence[]
 
-			let showEntries: Array<{
-				id: number, entry: { stationId: string, stationName: string, evidence: Evidence[], entry: Entry }
-			}> = []
+			let showEntries: EntryListEvidence[] = []
 
 			if (nextProps.previousResult) {
 				Object.entries(nextProps.previousResult.order).sort((a, b) => {
@@ -172,13 +168,13 @@ class JudgeRankEntries extends Component<Props, State> {
 										{ index + 1 }
 									</Tag>
 								}
-								{ item.entry.stationName }
+								{ item.stationName }
 							</div>
 						)
 					})}
 				</ReactSortable>
 				<Drawer
-					title={ this.state.activeEntry ? this.state.activeEntry.entry.stationName : 'Entry Details' }
+					title={ this.state.activeEntry ? this.state.activeEntry.stationName : 'Entry Details' }
 					placement='right'
 					width={ '50%' }
 					closable={ true }
@@ -200,7 +196,7 @@ class JudgeRankEntries extends Component<Props, State> {
 						{ this.state.activeEntry.entry.comments }
 					</p>
 					<h1>Entry</h1>
-					<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
+					<SupportingEvidenceList evidence={ this.state.activeEntry.evidence } />
 				</React.Fragment>
 			)
 		}
@@ -226,9 +222,7 @@ class JudgeRankEntries extends Component<Props, State> {
 	}
 
 	private async saveOrder () {
-		const order: {
-			[stationId: string]: number
-		} = { }
+		const order: Map<string, number> = new Map()
 
 		this.state.entriesList.forEach((entry, index) => {
 			if (this.state.jointFirstPlace || this.state.jointHighlyCommended) {
@@ -238,19 +232,19 @@ class JudgeRankEntries extends Component<Props, State> {
 					index < 4
 				) {
 					if (index === 0 || index === 1) {
-						order[entry.entry.stationId] = 1
+						order.set(entry.stationId, 1)
 					} else if (index === 2 || index === 3) {
-						order[entry.entry.stationId] = 3
+						order.set(entry.stationId, 3)
 					}
 				} else if (this.state.jointFirstPlace && (index === 0 || index === 1)) {
-					order[entry.entry.stationId] = 1
+					order.set(entry.stationId, 1)
 				} else if (this.state.jointHighlyCommended && (index === 1 || index === 2)) {
-					order[entry.entry.stationId] = 2
+					order.set(entry.stationId, 2)
 				} else {
-					order[entry.entry.stationId] = index + 1
+					order.set(entry.stationId, index + 1)
 				}
 			} else {
-				order[entry.entry.stationId] = index + 1
+				order.set(entry.entry.stationId, index + 1)
 			}
 		})
 
