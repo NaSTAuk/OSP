@@ -23,6 +23,7 @@ import ManageUsers from './manage/Users'
 import Submit from './submit/Submit'
 import SubmitListAwards from './submit/SubmitListAwards'
 import SubmitListCategories from './submit/SubmitListCategories'
+import VideosPage from './Videos'
 import { WithAuth } from './WithAuth'
 import '/imports/ui/css/App.css'
 
@@ -49,9 +50,11 @@ class App extends Component<AppProps, State> {
 			}
 		}
 
-		if(nextProps.system && nextProps.system.message && Meteor.userId()) {
-			notification.info({
-				message: nextProps.system.message
+		if(nextProps.system && nextProps.system.messages && Meteor.userId()) {
+			nextProps.system.messages.forEach((message) => {
+				notification.info({
+					message
+				})
 			})
 
 			return {
@@ -110,7 +113,14 @@ class App extends Component<AppProps, State> {
 								() => WithAuth(<SubmitListAwards />)
 							} />
 							<Route exact path='/submit/:awardId' render={
-								(props) => WithAuth(<SubmitListCategories awardId={ props.match.params.awardId } { ...props } />)
+								(props) => WithAuth(
+									<SubmitListCategories review={ false } awardId={ props.match.params.awardId } { ...props } />
+								)
+							} />
+							<Route exact path='/review/:awardId' render={
+								(props) => WithAuth(
+									<SubmitListCategories review={ true } awardId={ props.match.params.awardId } { ...props } />
+								)
 							} />
 							<Route exact path='/submit/:awardId/:categoryId' render={
 								(props) => WithAuth(
@@ -150,6 +160,12 @@ class App extends Component<AppProps, State> {
 								() => WithAuth(
 									<Hosts />,
 									[Roles.ADMIN, Roles.HOST]
+								)
+							} />
+							<Route exact path='/hosts/videos' render={
+								() => WithAuth(
+									<VideosPage />,
+									[ Roles.ADMIN, Roles.HOST, Roles.EDITOR ]
 								)
 							} />
 							<Route exact path='/manage' render={

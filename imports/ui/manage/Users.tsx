@@ -1,4 +1,4 @@
-import { Button, Dropdown, Form, Icon, Input, Menu, message, Popconfirm, Table } from 'antd'
+import { Button, Checkbox, Dropdown, Form, Icon, Input, Menu, message, Popconfirm, Table } from 'antd'
 import { ColumnProps } from 'antd/lib/table'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
@@ -19,6 +19,7 @@ interface State {
 	addUserFormEmail?: string
 	addUserFormError?: string
 	addUserFormPassword?: string
+	sendEmail: boolean
 }
 
 /** User management table */
@@ -27,7 +28,9 @@ class ManageUsers extends Component<Props, State> {
 	constructor (props: Props) {
 		super(props)
 
-		this.state = { }
+		this.state = {
+			sendEmail: true
+		}
 	}
 
 	public render () {
@@ -101,6 +104,14 @@ class ManageUsers extends Component<Props, State> {
 						</Dropdown.Button>
 					</Form.Item>
 					<Form.Item>
+						<Checkbox
+							value={ this.state.sendEmail }
+							onChange={ (event) => this.setState({ sendEmail: event.target.checked }) }
+						>
+							Send enrollment email
+						</Checkbox>
+					</Form.Item>
+					<Form.Item>
 						<Button
 							type='primary'
 							htmlType='submit'
@@ -134,6 +145,7 @@ class ManageUsers extends Component<Props, State> {
 				'accounts.new.withStation',
 				this.state.addUserFormEmail,
 				this.state.addUserFormStationId,
+				this.state.sendEmail,
 				(error: string, result: boolean) => {
 					if (error) reject(error)
 					resolve(result)
@@ -211,6 +223,30 @@ class ManageUsers extends Component<Props, State> {
 							cancelText='No'
 						>
 							<Button type='danger'>Delete</Button>
+						</Popconfirm>
+					)
+				}
+			},
+			{
+				title: '',
+				dataIndex: '',
+				key: 'sendEmail',
+				render: (record: NaSTAUser) => {
+					if (record.emails && record.emails.some((email) => email.address === 'tech@nasta.tv')) return ''
+
+					const sendEnrollment = () => {
+						Meteor.call('accounts.endEnrollment', record._id)
+						message.success('Enrollment Email Sent')
+					}
+
+					return (
+						<Popconfirm
+							title='Are you sure you want to send an enrollment email to this user?'
+							onConfirm={ () => sendEnrollment() }
+							okText='Yes'
+							cancelText='No'
+						>
+							<Button type='primary'>Send Enrollment Email</Button>
 						</Popconfirm>
 					)
 				}

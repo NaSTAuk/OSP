@@ -23,7 +23,7 @@ if (Meteor.isServer) {
 			if (user) {
 				if (UserHasRole([Roles.ADMIN, Roles.HOST])) {
 					return Stations.find({ })
-				} else if (UserHasRole([Roles.JUDGE])) {
+				} else if (UserHasRole([Roles.JUDGE, Roles.EDITOR])) {
 					return Stations.find({ name: { $ne: 'NaSTA' } })
 				} else {
 					return Stations.find({ _id: user.stationId, authorizedUsers: id })

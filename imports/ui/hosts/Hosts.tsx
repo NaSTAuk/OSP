@@ -1,8 +1,11 @@
-import { Checkbox, Drawer, Dropdown, Form, Icon, List, Menu, Tag } from 'antd'
+import { Button, Checkbox, Divider, Drawer, Dropdown, Form, Icon, Input, List, Menu, Tag } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import { TechSpecIssuesList } from '../elements/TechSpecFailures'
+import { TechSpecsBadge } from '../elements/TechSpecsBadge'
+import { VerificationBadge } from '../elements/VerificationBadge'
 import { SupportingEvidenceList } from '../judge/SupportingEvidenceList'
 import { Award, Awards } from '/imports/api/awards'
 import { Categories, Category } from '/imports/api/categories'
@@ -29,6 +32,7 @@ interface State {
 	entriesList: EntriesList[]
 	drawerVisible: boolean
 	sortBy: { [categoryId: string]: 'name' | 'result' }
+	comments: string
 }
 
 class Hosts extends Component<Props, State> {
@@ -47,7 +51,7 @@ class Hosts extends Component<Props, State> {
 				}).filter((ev) => ev !== undefined) as Evidence[]
 
 				const judgesComments = Scores.findOne({
-					stationId: station._id, categoryId: entry.categoryId, judgedBy: Meteor.userId() || ''
+					stationId: station._id, categoryId: entry.categoryId
 				}, { sort: { date: -1 } })
 
 				return {
@@ -56,7 +60,7 @@ class Hosts extends Component<Props, State> {
 						stationId: entry.stationId,
 						stationName: station ? station.name : '',
 						evidence,
-						comments: judgesComments ? judgesComments.comments : undefined,
+						judgesComments: judgesComments ? judgesComments.comments : undefined,
 						entry
 					}
 				}
@@ -95,7 +99,8 @@ class Hosts extends Component<Props, State> {
 		this.state = {
 			drawerVisible: false,
 			entriesList: [],
-			sortBy: { }
+			sortBy: { },
+			comments: ''
 		}
 	}
 
@@ -196,8 +201,52 @@ class Hosts extends Component<Props, State> {
 						}
 					</Form.Item>
 				</Form>
+				<Divider />
+				<h1>Host Comments</h1>
+				<Form>
+					<Form.Item>
+						<Input value={ this.state.comments } onChange={ (event) => this.commentChange(event) } />
+					</Form.Item>
+					<Button type='primary' onClick={ () => this.saveComments(this.state.activeEntry!.entry.entry) }>
+						Save Comments
+					</Button>
+				</Form>
+				<Divider />
+				<h1>Judge Comments</h1>
+				{
+					this.state.activeEntry.entry.judgesComments || 'No comments yet'
+				}
+				<Divider />
+				{
+					this.state.activeEntry.entry.evidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) ?
+					<React.Fragment>
+						<h2>Video Tech Specs</h2>
+						<p>
+							{
+								this.state.activeEntry.entry.entry.passesTechSpecs === undefined ?
+								'Awaiting Check' :
+								<React.Fragment>
+									Passes Tech Specs?<Checkbox checked={ !!this.state.activeEntry.entry.entry.passesTechSpecs } />
+								</React.Fragment>
+							}
+							{
+								this.state.activeEntry.entry.entry.techSpecFailures ?
+								<React.Fragment>
+									<h3>Issues Meeting Technical Specifications</h3>
+									<TechSpecIssuesList failures={ this.state.activeEntry.entry.entry.techSpecFailures } />
+								</React.Fragment> : undefined
+							}
+						</p>
+						<Button type='primary' onClick={ () => this.rerunCheck(this.state.activeEntry!.entry.entry) }>Rerun Check</Button>
+					</React.Fragment> : undefined
+				}
+				<Divider />
 				<h1>Entry</h1>
+				<p>
+					Entered at: { new Date(this.state.activeEntry.entry.entry.date).toLocaleString() }
+				</p>
 				<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
+				<Divider />
 				<h1>Video Links</h1>
 				<p style={ { wordWrap: 'break-word', whiteSpace: 'pre-wrap' } }>
 					{
@@ -206,6 +255,10 @@ class Hosts extends Component<Props, State> {
 				</p>
 			</React.Fragment>
 		)
+	}
+
+	private rerunCheck (entry: Entry) {
+		Meteor.call('entry:rechecktech', entry._id)
 	}
 
 	private renderSupportingEvidenceAproved (evidence: Evidence) {
@@ -229,6 +282,16 @@ class Hosts extends Component<Props, State> {
 				<Checkbox checked={ evidence.verified } onChange={ (event) => this.setVerified(evidence, event.target.checked) } />
 			</div>
 		)
+	}
+
+	private commentChange (event: React.ChangeEvent<HTMLInputElement>) {
+		this.setState({
+			comments: event.target.value
+		})
+	}
+
+	private saveComments (entry: Entry) {
+		Meteor.call('entry:savecomment', entry._id, this.state.comments)
 	}
 
 	private async setVerified (evidence: Evidence, verified: boolean) {
@@ -324,13 +387,19 @@ class Hosts extends Component<Props, State> {
 		return (
 			<List.Item
 				key={ entry._id} className='item'
-				onClick={ () => this.setState({ activeEntry: entry, drawerVisible: true }) }
+				onClick={
+					() => this.setState({ activeEntry: entry, drawerVisible: true, comments: entry.entry.entry.comments || '' })
+				}
 			>
 				<div className='content'>
 					<b>{ entry.entry.stationName }</b>
 					<span className='badges'>
 						{
 							this.renderJudgedBadge(entry.entry.entry)
+						}
+						{
+							entry.entry.evidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) ?
+							 <TechSpecsBadge entry={ entry.entry.entry } /> : undefined
 						}
 						{
 							this.renderVerificationBadge(entry.entry.entry)
@@ -363,18 +432,7 @@ class Hosts extends Component<Props, State> {
 	}
 
 	private renderVerificationBadge (entry: Entry) {
-		switch (entry.verified) {
-			case VerificationStatus.REJECTED:
-				return <Tag color='red'>Rejected</Tag>
-			case VerificationStatus.DISPUTED:
-				return <Tag color='purple'>Disputed</Tag>
-			case VerificationStatus.VERIFIED:
-				return <Tag color='green'>Verified</Tag>
-			case VerificationStatus.WAITING:
-			default:
-				return <Tag color='orange'>Awaiting Verification</Tag>
-
-		}
+		return <VerificationBadge entry={ entry } />
 	}
 
 	private renderResultBadge (entry: Entry, result?: Result) {

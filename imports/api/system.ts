@@ -5,7 +5,7 @@ import { Collections } from './helpers/enums'
 export interface SystemProps {
 	_id: string
 	version: string
-	message: string
+	messages: string[]
 }
 
 export const System = new Mongo.Collection<SystemProps>(Collections.SYSTEM)

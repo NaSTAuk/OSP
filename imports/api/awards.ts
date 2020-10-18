@@ -11,6 +11,7 @@ export interface Award {
 	submissionsOpen?: number,
 	submissionsClose?: number,
 	active: boolean
+	openForReview: boolean
 }
 
 export const Awards = new Mongo.Collection<Award>(Collections.AWARDS)
@@ -27,12 +28,14 @@ export const DEFAULT_AWARDS: Award[] = [
 	{
 		name: DEFAULT_AWARDS_NAMES.NASTA,
 		categories: [],
-		active: true
+		active: true,
+		openForReview: false
 	},
 	{
 		name: DEFAULT_AWARDS_NAMES.PEOPLES_CHOICE,
 		categories: [],
-		active: false
+		active: false,
+		openForReview: false
 	}
 ]
 

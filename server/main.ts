@@ -86,7 +86,7 @@ Meteor.startup(() => {
 	if (System.find().fetch().length === 0) {
 		System.insert({
 			version: 'v1.0',
-			message: ''
+			messages: []
 		})
 	}
 
@@ -102,6 +102,20 @@ Meteor.startup(() => {
 				}
 			}
 		)
+	}
+
+	if (system && system.version === 'v1.0.1') {
+		const categories = Categories.find({ }).fetch()
+
+		categories.forEach((cat) => {
+			if (cat.name !== DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_FRESHERS_COVERAGE) {
+				Categories.update({ id: cat }, {
+					$set: {
+						openForReview: true
+					}
+				})
+			}
+		})
 	}
 
 	// Clear auth tokens after deploying new version

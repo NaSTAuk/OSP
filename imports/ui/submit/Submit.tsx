@@ -3,7 +3,7 @@ import TextArea from 'antd/lib/input/TextArea'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component, FormEvent } from 'react'
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
+import { Link, Redirect, RouteComponentProps, withRouter } from 'react-router-dom'
 import { Categories, Category } from '../../api/categories'
 import { Entries, Entry } from '../../api/entries'
 import { MINUTE } from '../../api/helpers/constants'
@@ -94,6 +94,7 @@ class Submit extends Component<Props, State> {
 
 	public render () {
 		if (this.props.loading) return <div></div>
+		if (this.props.award && !this.props.award.active) return <Redirect to={ `/submit/${this.props.awardId}` } />
 		return this.renderEntryForm(this.props.categoryId)
 	}
 
@@ -234,6 +235,7 @@ class Submit extends Component<Props, State> {
 			if (
 				cat &&
 				cat.supportingEvidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) &&
+				cat.name !== 'Super Blooper' &&
 				this.state.evidenceLinks.length < 10
 			) {
 				valid = false

@@ -21,7 +21,8 @@ export const enum Roles {
 	HOST = 'host',
 	JUDGE = 'judge',
 	STATION = 'station',
-	ADMIN = 'admin'
+	ADMIN = 'admin',
+	EDITOR = 'editor'
 }
 
 export const enum DEFAULT_AWARDS_NAMES {

@@ -1,5 +1,4 @@
 import { Button, Dropdown, Form, Icon, Input, Menu, message, Popconfirm } from 'antd'
-import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
 import React, { Component } from 'react'
 import { NaSTAUser } from '/imports/api/accounts'
@@ -39,6 +38,9 @@ export class UserTableExpander extends Component<Props, State> {
 				</Menu.Item>
 				<Menu.Item key={ Roles.STATION } onClick={ () => { this.selectAdminRole(Roles.STATION) }}>
 					{ Roles.STATION }
+				</Menu.Item>
+				<Menu.Item key={ Roles.EDITOR } onClick={ () => { this.selectAdminRole(Roles.EDITOR) }}>
+					{ Roles.EDITOR }
 				</Menu.Item>
 			</Menu>
 		)

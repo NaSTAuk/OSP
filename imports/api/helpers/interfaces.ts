@@ -7,6 +7,7 @@ export interface EntryListEvidence {
 	stationName: string
 	evidence: Evidence[]
 	comments?: string
+	judgesComments?: string
 	entry: Entry
 }
 

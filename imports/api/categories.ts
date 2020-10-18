@@ -11,6 +11,7 @@ export interface Category {
 	supportingEvidence: SupportingEvidence[]
 	description: string
 	forAwards: string
+	openForReview?: boolean
 }
 
 export const Categories = new Mongo.Collection<Category>(Collections.CATEGORIES)

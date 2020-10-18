@@ -2,7 +2,7 @@ import { Button, Checkbox, Drawer, Form, Icon, Tag } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
-import { ItemInterface, ReactSortable } from 'react-sortablejs'
+import { ReactSortable } from 'react-sortablejs'
 import { Entries, Entry } from '/imports/api/entries'
 import { Collections, VerificationStatus } from '/imports/api/helpers/enums'
 import { Station, Stations } from '/imports/api/stations'
@@ -53,7 +53,7 @@ class JudgeRankEntries extends Component<Props, State> {
 				}).filter((ev) => ev !== undefined) as Evidence[]
 
 				const judgesComments = Scores.findOne({
-					stationId: station._id, categoryId: entry.categoryId, judgedBy: Meteor.userId() || ''
+					stationId: station._id, categoryId: entry.categoryId
 				}, { sort: { date: -1 } })
 
 				return {

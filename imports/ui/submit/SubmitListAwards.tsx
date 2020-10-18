@@ -24,22 +24,37 @@ class SubmitListAwards extends Component<Props> {
 					<List
 						itemLayout='horizontal'
 						dataSource={ this.props.awards.filter((award) => award.active) }
-						renderItem={ (award) => this.renderAward(award)}
+						renderItem={ (award) => this.renderAward(award, false)}
 						className='list'
 					>
 
 					</List> :
 					<h1>There are currently no awards open, check back soon!</h1>
 				}
+				{
+					this.props.awards.some((award) => award.openForReview) ?
+					<React.Fragment>
+						<h1>Review Entries</h1>
+						<List
+							itemLayout='horizontal'
+							dataSource={ this.props.awards.filter((award) => award.openForReview) }
+							renderItem={ (award) => this.renderAward(award, true)}
+							className='list'
+						>
+
+						</List>
+					</React.Fragment>
+					: undefined
+				}
 			</div>
 		)
 	}
 
-	private renderAward (award: Award) {
+	private renderAward (award: Award, review: boolean) {
 		return (
 			<List.Item
 				key={ award._id} className='item'
-				onClick={ () => this.props.history.push(`/submit/${award._id}`)}
+				onClick={ () => this.props.history.push(`/${review ? 'review' : 'submit'}/${award._id}`)}
 			>
 				<b>{ award.name }</b>
 			</List.Item>

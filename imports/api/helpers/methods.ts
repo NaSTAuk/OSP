@@ -356,7 +356,7 @@ Meteor.methods({
 		check(comments, String)
 
 		return new Promise((resolve, reject) => {
-			const existing = Scores.findOne({ stationId, categoryId, judgedBy })
+			const existing = Scores.findOne({ stationId, categoryId }, { sort: { date: -1 } })
 
 			if (existing) {
 				Scores.update({ _id: existing._id }, {
@@ -472,6 +472,26 @@ Meteor.methods({
 		Awards.update({ _id: awardId }, {
 			$set: {
 				active: !award.active
+			}
+		})
+	},
+	'entry:rechecktech' (entryId: string) {
+		check (entryId, String)
+
+		Entries.update({ _id: entryId }, {
+			$unset: {
+				passesTechSpecs: true,
+				techSpecFailures: true
+			}
+		})
+	},
+	'entry:savecomment' (entryId: string, comments: string) {
+		check (entryId, String)
+		check (comments, String)
+
+		Entries.update({ _id: entryId }, {
+			$set: {
+				comments
 			}
 		})
 	}

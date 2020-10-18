@@ -165,9 +165,8 @@ export default withTracker((props: Props) => {
 
 	const previousScore = Scores.findOne({
 		stationId: props.stationId,
-		categoryId: props.categoryId,
-		judgedBy: Meteor.userId() || undefined
-	})
+		categoryId: props.categoryId
+	}, { sort: { date: -1 } })
 
 	return {
 		...props,

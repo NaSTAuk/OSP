@@ -16,6 +16,8 @@ export function GetDefaultRoute () {
 		)
 	} else if (UserHasRole([Roles.JUDGE])) {
 		return <Redirect to='/judge' />
+	} else if (UserHasRole([Roles.EDITOR])) {
+		return <Redirect to='/hosts/videos' />
 	} else if (UserHasRole([Roles.STATION])) {
 		return <Redirect to='/submit' />
 	} else {

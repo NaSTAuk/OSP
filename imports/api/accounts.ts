@@ -63,9 +63,10 @@ Meteor.methods({
 
 		Meteor.users.remove({ _id: userId })
 	},
-	async 'accounts.new.withStation' (email: string, stationId: string): Promise<any> {
+	async 'accounts.new.withStation' (email: string, stationId: string, sendEmail: boolean): Promise<any> {
 		check(email, String)
 		check(stationId, String)
+		check(sendEmail, Boolean)
 
 		if (Meteor.isServer) {
 			let id = ''
@@ -87,10 +88,12 @@ Meteor.methods({
 				return Promise.reject(error)
 			}
 
-			try {
-				Accounts.sendEnrollmentEmail(id, email)
-			} catch (error) {
-				return Promise.reject(error)
+			if (sendEmail) {
+				try {
+					Accounts.sendEnrollmentEmail(id, email)
+				} catch (error) {
+					return Promise.reject(error)
+				}
 			}
 
 			return new Promise((resolve, reject) => {
@@ -106,6 +109,21 @@ Meteor.methods({
 			})
 		} else {
 			return Promise.resolve()
+		}
+	},
+	async 'accounts.endEnrollment' (userId: string) {
+		check(userId, String)
+
+		const user = Meteor.users.findOne({ _id: userId })
+
+		if (!user) throw new Meteor.Error(`User ${userId} not found`)
+
+		if (!user.emails || !user.emails[0]) throw new Meteor.Error(`User has no emails registered`)
+
+		try {
+			Accounts.sendEnrollmentEmail(user._id, user.emails[0].address)
+		} catch (error) {
+			return Promise.reject(`Error creating account: ${error}`)
 		}
 	},
 	async 'accounts.new' (email: string): Promise<any> {

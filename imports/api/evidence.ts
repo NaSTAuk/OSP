@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
-import { UserHasRole } from './accounts'
+import { NaSTAUser, UserHasRole } from './accounts'
 import { Collections, Roles, SupportingEvidenceType } from './helpers/enums'
 
 export interface EvidenceBase {
@@ -41,8 +41,10 @@ export const EvidenceCollection = new Mongo.Collection<Evidence>(Collections.EVI
 
 if (Meteor.isServer) {
 	Meteor.publish(Collections.EVIDENCE, () => {
-		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE])) {
+		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE, Roles.EDITOR])) {
 			return EvidenceCollection.find({ })
+		} else if (Meteor.user()) {
+			return EvidenceCollection.find({ stationId: (Meteor.user() as NaSTAUser).stationId })
 		}
 	})
 }
