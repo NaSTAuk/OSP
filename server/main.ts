@@ -20,7 +20,7 @@ import { Categories, Category, DEFAULT_CATEGORIES } from '/imports/api/categorie
 import { DEFAULT_CATEGORY_NAMES, Roles } from '/imports/api/helpers/enums'
 import { DEFAULT_STATIONS, Stations } from '/imports/api/stations'
 
-function insertCategory (category: Category) {
+function insertCategory(category: Category) {
 	Categories.insert(category)
 }
 
@@ -46,7 +46,7 @@ Meteor.startup(() => {
 		})
 	}
 
-	if (Meteor.users.find({ }).fetch().length === 0) {
+	if (Meteor.users.find({}).fetch().length === 0) {
 		const password = uuid()
 		console.log(`Creating user "tech@nasta.tv" with password ${password}`)
 		Accounts.createUser({ email: 'tech@nasta.tv', password })
@@ -60,24 +60,24 @@ Meteor.startup(() => {
 				Stations.insert({
 					...station,
 					...{
-						authorizedUsers: [user._id]
-					}
+						authorizedUsers: [user._id],
+					},
 				})
 			})
 
 			const nasta = Stations.findOne({ name: 'NaSTA' })
 			if (nasta) {
-				Meteor.users.update(user._id, {
+				Meteor.users.update(user._id, ({
 					...user,
 					stationId: nasta._id,
-					roles: [Roles.ADMIN, Roles.JUDGE, Roles.HOST, Roles.STATION]
-				} as NaSTAUser as Meteor.User)
+					roles: [Roles.ADMIN, Roles.JUDGE, Roles.HOST, Roles.STATION],
+				} as NaSTAUser) as Meteor.User)
 
 				const bestBroadcaster = Categories.findOne({ name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_BROADCASTER })
 				if (bestBroadcaster && nasta._id && bestBroadcaster._id) {
 					JudgeToCategory.insert({
 						judgeId: user._id,
-						categoryId: bestBroadcaster._id
+						categoryId: bestBroadcaster._id,
 					})
 				}
 			}
@@ -87,12 +87,12 @@ Meteor.startup(() => {
 	if (System.find().fetch().length === 0) {
 		System.insert({
 			version: 'v1.0',
-			messages: []
+			messages: [],
 		})
 	}
 
 	// Clear auth tokens after deploying new version
 	if (Meteor.isProduction) {
-		Meteor.users.update({ }, { $set: { 'services.resume.loginTokens': [] } }, { multi: true })
+		Meteor.users.update({}, { $set: { 'services.resume.loginTokens': [] } }, { multi: true })
 	}
 })

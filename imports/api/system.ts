@@ -12,6 +12,6 @@ export const System = new Mongo.Collection<SystemProps>(Collections.SYSTEM)
 
 if (Meteor.isServer) {
 	Meteor.publish(Collections.SYSTEM, () => {
-		return System.find({ })
+		return System.find({})
 	})
 }

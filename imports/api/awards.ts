@@ -5,11 +5,11 @@ import { Collections, DEFAULT_AWARDS_NAMES, DEFAULT_CATEGORY_NAMES } from './hel
 export interface Award {
 	_id?: string
 	/** Name of awards ceremony. */
-	name: string,
+	name: string
 	/** IDs of categories belonging to this awards ceremony. */
-	categories: string[],
-	submissionsOpen?: number,
-	submissionsClose?: number,
+	categories: string[]
+	submissionsOpen?: number
+	submissionsClose?: number
 	active: boolean
 	openForReview: boolean
 }
@@ -17,7 +17,7 @@ export interface Award {
 export const Awards = new Mongo.Collection<Award>(Collections.AWARDS)
 
 if (Meteor.isServer) {
-	Meteor.publish(Collections.AWARDS, function awardsPublictaion () {
+	Meteor.publish(Collections.AWARDS, function awardsPublictaion() {
 		if (Meteor.userId()) {
 			return Awards.find()
 		}
@@ -29,14 +29,14 @@ export const DEFAULT_AWARDS: Award[] = [
 		name: DEFAULT_AWARDS_NAMES.NASTA,
 		categories: [],
 		active: true,
-		openForReview: false
+		openForReview: false,
 	},
 	{
 		name: DEFAULT_AWARDS_NAMES.PEOPLES_CHOICE,
 		categories: [],
 		active: false,
-		openForReview: false
-	}
+		openForReview: false,
+	},
 ]
 
 export const DEFAULT_CATEGORIES_FOR_AWARDS: { [awards: string]: string[] } = {
@@ -61,7 +61,7 @@ export const DEFAULT_CATEGORIES_FOR_AWARDS: { [awards: string]: string[] } = {
 		DEFAULT_CATEGORY_NAMES.NASTA_AWARDS_DOCUMENTARY_AND_FACTUAL,
 		DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SPORT,
 		DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_POST_PRODUCTION_AWARD,
-		DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER
+		DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_SUPER_BLOOPER,
 	],
 	[DEFAULT_AWARDS_NAMES.PEOPLES_CHOICE]: [
 		DEFAULT_CATEGORY_NAMES.PCAs_OPEN,
@@ -71,6 +71,6 @@ export const DEFAULT_CATEGORIES_FOR_AWARDS: { [awards: string]: string[] } = {
 		DEFAULT_CATEGORY_NAMES.PCAs_VISUAL_CREATIVITY_AND_QUALITY,
 		DEFAULT_CATEGORY_NAMES.PCAs_BEST_ON_SCREEN_TALENT,
 		DEFAULT_CATEGORY_NAMES.PCAs_UN_SUNG_HERO,
-		DEFAULT_CATEGORY_NAMES.PCAs_STATION_OF_THE_YEAR
-	]
+		DEFAULT_CATEGORY_NAMES.PCAs_STATION_OF_THE_YEAR,
+	],
 }

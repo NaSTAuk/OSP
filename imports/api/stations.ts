@@ -22,7 +22,7 @@ if (Meteor.isServer) {
 			const user = GetUserFromId()
 			if (user) {
 				if (UserHasRole([Roles.ADMIN, Roles.HOST])) {
-					return Stations.find({ })
+					return Stations.find({})
 				} else if (UserHasRole([Roles.JUDGE, Roles.EDITOR])) {
 					return Stations.find({ name: { $ne: 'NaSTA' } })
 				} else {
@@ -33,7 +33,7 @@ if (Meteor.isServer) {
 	})
 }
 
-export function GetStationForUser (): Station | undefined {
+export function GetStationForUser(): Station | undefined {
 	const id = Meteor.userId()
 	if (id) {
 		const user = GetUserFromId()
@@ -48,6 +48,6 @@ export const DEFAULT_STATIONS: Station[] = [
 		_id: '',
 		name: 'NaSTA',
 		eligibleForEntry: true,
-		authorizedUsers: []
-	}
+		authorizedUsers: [],
+	},
 ]

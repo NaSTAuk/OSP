@@ -7,7 +7,7 @@ import { Roles } from './helpers/enums'
 import { Station, Stations } from './stations'
 
 export interface NaSTAUser extends Meteor.User {
-	roles: Roles[],
+	roles: Roles[]
 	stationId?: string
 }
 
@@ -15,7 +15,7 @@ if (Meteor.isServer) {
 	Accounts.onCreateUser((options, user) => {
 		const nastaUser: NaSTAUser = {
 			...user,
-			roles: [ Roles.STATION ] // TODO: Replace
+			roles: [Roles.STATION], // TODO: Replace
 		}
 
 		if (options.profile) {
@@ -31,9 +31,11 @@ if (Meteor.isServer) {
 		return `You have been invited to the NaSTA submissions portal`
 	}
 	Accounts.emailTemplates.enrollAccount.text = (_user, url) => {
-		return `You have been invited to the NaSTA submissions portal, click the link below to activate your account\n`
-		+ `${url}\n`
-		+ `Any issues, please contact tech@nasta.tv. Replies to this email will not be delivered.`
+		return (
+			`You have been invited to the NaSTA submissions portal, click the link below to activate your account\n` +
+			`${url}\n` +
+			`Any issues, please contact tech@nasta.tv. Replies to this email will not be delivered.`
+		)
 	}
 	Accounts.urls.enrollAccount = (token) => {
 		return Meteor.absoluteUrl(`enroll-account/${token}`)
@@ -43,7 +45,7 @@ if (Meteor.isServer) {
 	}
 
 	Meteor.publish('users', () => {
-		return Meteor.users.find({ }, { fields: { stationId: 1, emails: 1, roles: 1 } })
+		return Meteor.users.find({}, { fields: { stationId: 1, emails: 1, roles: 1 } })
 	})
 
 	Meteor.publish('enrolledUser', (token) => {
@@ -52,18 +54,18 @@ if (Meteor.isServer) {
 }
 
 Meteor.methods({
-	'accounts.create' (email: string, password: string) {
+	'accounts.create'(email: string, password: string) {
 		check(email, String)
 		check(password, String)
 
-		Accounts.createUser({ email, password})
+		Accounts.createUser({ email, password })
 	},
-	'accounts.delete' (userId: string) {
+	'accounts.delete'(userId: string) {
 		check(userId, String)
 
 		Meteor.users.remove({ _id: userId })
 	},
-	async 'accounts.new.withStation' (email: string, stationId: string, sendEmail: boolean): Promise<any> {
+	async 'accounts.new.withStation'(email: string, stationId: string, sendEmail: boolean): Promise<any> {
 		check(email, String)
 		check(stationId, String)
 		check(sendEmail, Boolean)
@@ -97,21 +99,16 @@ Meteor.methods({
 			}
 
 			return new Promise((resolve, reject) => {
-				Stations.update(
-					{ _id: (stationdb as Station)._id },
-					{ $push: { authorizedUsers: id } },
-					{ },
-					((err: string) => {
-						if (err) reject()
-						resolve()
-					})
-				)
+				Stations.update({ _id: (stationdb as Station)._id }, { $push: { authorizedUsers: id } }, {}, (err: string) => {
+					if (err) reject()
+					resolve()
+				})
 			})
 		} else {
 			return Promise.resolve()
 		}
 	},
-	async 'accounts.endEnrollment' (userId: string) {
+	async 'accounts.endEnrollment'(userId: string) {
 		check(userId, String)
 
 		const user = Meteor.users.findOne({ _id: userId })
@@ -126,7 +123,7 @@ Meteor.methods({
 			return Promise.reject(`Error creating account: ${error}`)
 		}
 	},
-	async 'accounts.new' (email: string): Promise<any> {
+	async 'accounts.new'(email: string): Promise<any> {
 		check(email, String)
 
 		let id = ''
@@ -147,15 +144,15 @@ Meteor.methods({
 
 		return Promise.resolve(id)
 	},
-	'accounts.login' (email: string, password: string) {
+	'accounts.login'(email: string, password: string) {
 		check(email, String)
 		check(password, String)
 
 		Meteor.loginWithPassword(email, password)
 	},
-	'accounts.setPassword' (userId: string, password: string) {
-		check (userId, String)
-		check (password, String)
+	'accounts.setPassword'(userId: string, password: string) {
+		check(userId, String)
+		check(password, String)
 
 		if (!this.isSimulation) {
 			try {
@@ -164,10 +161,10 @@ Meteor.methods({
 				throw new Meteor.Error(`Could not set password for user ${userId}`)
 			}
 		}
-	}
+	},
 })
 
-export function GetUserFromId (): NaSTAUser | undefined {
+export function GetUserFromId(): NaSTAUser | undefined {
 	const id = Meteor.userId()
 	if (id) {
 		const user = Meteor.users.findOne({ _id: id })
@@ -177,7 +174,7 @@ export function GetUserFromId (): NaSTAUser | undefined {
 	}
 }
 
-export function UserHasRole (roles: Roles[]) {
+export function UserHasRole(roles: Roles[]) {
 	const user = GetUserFromId()
 	if (user) {
 		return roles.some((role) => {
@@ -188,8 +185,8 @@ export function UserHasRole (roles: Roles[]) {
 	}
 }
 
-function createAccount (email: string): Promise<any> {
-	if (Meteor.users.find({ emails: { $elemMatch: { address: email } } } ).count()) {
+function createAccount(email: string): Promise<any> {
+	if (Meteor.users.find({ emails: { $elemMatch: { address: email } } }).count()) {
 		throw new Meteor.Error('Email already registered')
 	}
 
@@ -200,14 +197,10 @@ function createAccount (email: string): Promise<any> {
 	})
 }
 
-function addStationIdToUser (userId: string, stationId: string): Promise<any> {
+function addStationIdToUser(userId: string, stationId: string): Promise<any> {
 	return new Promise((resolve) => {
-		(Meteor.users as Mongo.Collection<NaSTAUser>).update(
-			{ _id: userId }, { $set: { stationId } },
-			{ },
-			(() => {
-				resolve()
-			})
-		)
+		;(Meteor.users as Mongo.Collection<NaSTAUser>).update({ _id: userId }, { $set: { stationId } }, {}, () => {
+			resolve()
+		})
 	})
 }

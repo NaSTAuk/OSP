@@ -8,15 +8,15 @@ interface Props {
 
 /** Displays a progress bar */
 export class Progress extends Component<Props> {
-	constructor (props: any) {
+	constructor(props: any) {
 		super(props)
-		this.state = { }
+		this.state = {}
 	}
 
-	public render () {
+	public render() {
 		return (
-			<div className='ProgressBar'>
-				<div className='Progress' style={ { width: this.props.progress + `%`}}></div>
+			<div className="ProgressBar">
+				<div className="Progress" style={{ width: this.props.progress + `%` }}></div>
 			</div>
 		)
 	}

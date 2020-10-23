@@ -4,7 +4,7 @@ import { NaSTAUser } from '../api/accounts'
 import { Roles } from '../api/helpers/enums'
 import { SignIn } from './auth/SignIn'
 
-export function WithAuth (element: ReactFragment, acceptedRoles?: Roles[]) {
+export function WithAuth(element: ReactFragment, acceptedRoles?: Roles[]) {
 	const id = Meteor.userId()
 	if (!id) return <SignIn />
 
@@ -17,7 +17,7 @@ export function WithAuth (element: ReactFragment, acceptedRoles?: Roles[]) {
 
 	if (!user.roles) return
 
-	if(user.roles.filter((r) => acceptedRoles.includes(r)).length) return element
+	if (user.roles.filter((r) => acceptedRoles.includes(r)).length) return element
 
-	return 'You\'re not authorized to view this page'
+	return "You're not authorized to view this page"
 }

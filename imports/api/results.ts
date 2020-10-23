@@ -32,16 +32,16 @@ export const Results = new Mongo.Collection<Result>(Collections.RESULTS, {
 
 		return {
 			...result,
-			order: newOrder
+			order: newOrder,
 		}
-	}
+	},
 })
 
 if (Meteor.isServer) {
 	Meteor.publish(Collections.RESULTS, () => {
 		if (Meteor.userId()) {
 			if (UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE])) {
-				return Results.find({ })
+				return Results.find({})
 			} else if (UserHasRole([Roles.JUDGE])) {
 				return [] // TODO
 			} else {

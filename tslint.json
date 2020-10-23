@@ -1,75 +1,38 @@
 {
-  "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended"
-  ],
-  "jsRules": {},
-  "rules": {
-    "trailing-comma": [
-      true,
-      {
-        "multiline": "never",
-        "singleline": "never"
-      }
-    ],
-    "semicolon": [
-      true,
-      "never"
-    ],
-    "indent": [
-      true,
-      "tabs",
-      4
-    ],
-    "quotemark": [
-      true,
-      "single",
-      "jsx-single",
-      "avoid-escape"
-    ],
-    "space-before-function-paren": [
-      true,
-      "always"
-    ],
-    "whitespace": [
-      true,
-      "check-decl",
-      "check-rest-spread",
-      "check-type",
-      "check-postbrace",
-      "check-preblock"
-    ],
-    "typedef": [
-      true,
-      "parameter",
-      "property-declaration",
-      "member-variable-declaration"
-    ],
-    "curly": [
-      true,
-      "ignore-same-line"
-    ],
-    "completed-docs": [
-      true,
-      {
-        "classes": true
-      }
-    ],
-    "interface-name": [
-      true,
-      "never-prefix"
-    ],
-    "variable-name": false,
-    "only-arrow-functions": false,
-    "object-literal-sort-keys": false,
-    "no-unused-variable": true,
-    "no-unused-expression": true
-  },
-  "rulesDirectory": [],
-  "linterOptions": {
-    "exclude": [
-      "node_modules"
-    ],
-    "format": "codeFrame"
-  }
+	"defaultSeverity": "error",
+	"extends": ["tslint:recommended"],
+	"jsRules": {},
+	"rules": {
+		"trailing-comma": [
+			true,
+			{
+				"multiline": "never",
+				"singleline": "never"
+			}
+		],
+		"semicolon": [true, "never"],
+		"indent": [true, "tabs", 4],
+		"quotemark": [true, "single", "jsx-single", "avoid-escape"],
+		"space-before-function-paren": [true, "always"],
+		"whitespace": [true, "check-decl", "check-rest-spread", "check-type", "check-postbrace", "check-preblock"],
+		"typedef": [true, "parameter", "property-declaration", "member-variable-declaration"],
+		"curly": [true, "ignore-same-line"],
+		"completed-docs": [
+			true,
+			{
+				"classes": true
+			}
+		],
+		"interface-name": [true, "never-prefix"],
+		"variable-name": false,
+		"only-arrow-functions": false,
+		"object-literal-sort-keys": false,
+		"no-unused-variable": true,
+		"no-unused-expression": true
+	},
+	"rulesDirectory": [],
+	"linterOptions": {
+		"exclude": ["node_modules"],
+		"format": "codeFrame"
+	}
 }

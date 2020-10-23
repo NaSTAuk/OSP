@@ -14,70 +14,66 @@ interface State {
 }
 
 class ManageStations extends Component<Props, State> {
-	constructor (props: Props) {
-		super (props)
+	constructor(props: Props) {
+		super(props)
 
 		this.state = {
-			stationNameRef: React.createRef<Input>()
+			stationNameRef: React.createRef<Input>(),
 		}
 	}
-	public render () {
+	public render() {
 		return (
 			<div>
-				<Link to='/manage'>Back</Link>
+				<Link to="/manage">Back</Link>
 				<h1>Stations</h1>
-				{ this.renderAddStationForm() }
+				{this.renderAddStationForm()}
 				<h2>Registered Stations</h2>
-				{
-					this.props.stations.map((station) => {
-						const deleteStation = () => {
-							this.deleteStation(station._id)
-							message.success('Station deleted')
-						}
-						return (
-							<div key={ station._id }>
-								{ station.name }
-								{
-									station.name !== 'NaSTA' ?
-
-									<Popconfirm
-										title='Are you sure you want to delete this station?'
-										onConfirm={ () => deleteStation() }
-										okText='Yes'
-										cancelText='No'
-									>
-										<Button type= 'danger'>Remove</Button>
-									</Popconfirm> :
-									undefined
-								}
-							</div>
-						)
-					})
-				}
+				{this.props.stations.map((station) => {
+					const deleteStation = () => {
+						this.deleteStation(station._id)
+						message.success('Station deleted')
+					}
+					return (
+						<div key={station._id}>
+							{station.name}
+							{station.name !== 'NaSTA' ? (
+								<Popconfirm
+									title="Are you sure you want to delete this station?"
+									onConfirm={() => deleteStation()}
+									okText="Yes"
+									cancelText="No">
+									<Button type="danger">Remove</Button>
+								</Popconfirm>
+							) : undefined}
+						</div>
+					)
+				})}
 			</div>
 		)
 	}
 
-	private renderAddStationForm () {
+	private renderAddStationForm() {
 		return (
-			<Form layout='inline'>
+			<Form layout="inline">
 				<Form.Item>
-					<Input placeholder='name' ref={ this.state.stationNameRef } />
+					<Input placeholder="name" ref={this.state.stationNameRef} />
 				</Form.Item>
 				<Form.Item>
-					<Button type='default' onClick={ () => this.addStation()}>Add</Button>
+					<Button type="default" onClick={() => this.addStation()}>
+						Add
+					</Button>
 				</Form.Item>
 			</Form>
 		)
 	}
 
-	private deleteStation (id?: string) {
+	private deleteStation(id?: string) {
 		if (!id) return
 
 		Meteor.call('station.delete', id as string)
 	}
 
-	private addStation () {
+	private addStation() {
 		const node = this.state.stationNameRef.current
 
 		if (node) {
@@ -90,6 +86,6 @@ export default withTracker(() => {
 	Meteor.subscribe('stations')
 
 	return {
-		stations: Stations.find().fetch()
+		stations: Stations.find().fetch(),
 	}
 })(ManageStations as any)

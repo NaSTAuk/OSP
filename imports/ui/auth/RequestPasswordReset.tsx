@@ -8,33 +8,33 @@ interface State {
 }
 
 class RequestPasswordReset extends Component<RouteComponentProps, State> {
-	public render () {
+	public render() {
 		return (
-			<div className='signin container compact'>
+			<div className="signin container compact">
 				<h1>Request Password Reset</h1>
 				<Form>
 					<Form.Item>
 						<h3>Enter Your Email</h3>
-						<Input onChange={ (event) => this.emailChange(event)}></Input>
+						<Input onChange={(event) => this.emailChange(event)}></Input>
 					</Form.Item>
-					<Button type='primary' onClick={ () => this.handleSubmit() }>
+					<Button type="primary" onClick={() => this.handleSubmit()}>
 						Submit
 					</Button>
 				</Form>
 				<p>
-					If you require further assistance, contact <a href='mailto:tech@nasta.tv'>tech@nasta.tv</a>
+					If you require further assistance, contact <a href="mailto:tech@nasta.tv">tech@nasta.tv</a>
 				</p>
 			</div>
 		)
 	}
 
-	private emailChange (event: React.ChangeEvent<HTMLInputElement>) {
+	private emailChange(event: React.ChangeEvent<HTMLInputElement>) {
 		this.setState({
-			email: event.target.value
+			email: event.target.value,
 		})
 	}
 
-	private handleSubmit () {
+	private handleSubmit() {
 		Accounts.forgotPassword({ email: this.state.email }, (err?: Error) => {
 			if (err) {
 				message.error('Could not find an account with that email address')

@@ -42,14 +42,14 @@ export const EvidenceCollection = new Mongo.Collection<Evidence>(Collections.EVI
 if (Meteor.isServer) {
 	Meteor.publish(Collections.EVIDENCE, () => {
 		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE, Roles.EDITOR])) {
-			return EvidenceCollection.find({ })
+			return EvidenceCollection.find({})
 		} else if (Meteor.user()) {
 			return EvidenceCollection.find({ stationId: (Meteor.user() as NaSTAUser).stationId })
 		}
 	})
 }
 
-export async function InsertEvidence (evidence: Evidence): Promise<string> {
+export async function InsertEvidence(evidence: Evidence): Promise<string> {
 	return new Promise((resolve, reject) => {
 		EvidenceCollection.insert(evidence, (error: any, id: string) => {
 			if (error) reject(error)

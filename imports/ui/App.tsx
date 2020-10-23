@@ -40,189 +40,189 @@ const browserHistory = history.createBrowserHistory()
 
 /** App */
 class App extends Component<AppProps, State> {
-
-	public static getDerivedStateFromProps (nextProps: AppProps, prevState: State): State {
-
+	public static getDerivedStateFromProps(nextProps: AppProps, prevState: State): State {
 		if (!Meteor.userId()) {
 			return {
 				...prevState,
-				messageSent: true
+				messageSent: true,
 			}
 		}
 
-		if(nextProps.system && nextProps.system.messages && Meteor.userId()) {
+		if (nextProps.system && nextProps.system.messages && Meteor.userId()) {
 			nextProps.system.messages.forEach((message) => {
 				notification.info({
-					message
+					message,
 				})
 			})
 
 			return {
 				...prevState,
-				messageSent: true
+				messageSent: true,
 			}
 		}
 
 		return prevState
 	}
-	constructor (props: AppProps) {
-		super (props)
+	constructor(props: AppProps) {
+		super(props)
 
 		this.state = {
-			messageSent: false
+			messageSent: false,
 		}
 	}
 
-	public shouldComponentUpdate (nextProps: AppProps, _nextState: any) {
+	public shouldComponentUpdate(nextProps: AppProps, _nextState: any) {
 		return !nextProps.loading
 	}
 
 	/** Render */
-	public render () {
+	public render() {
 		if (Meteor.userId() && this.props.loading) return <div></div>
 		return (
-			<div className={ Meteor.userId() ? 'container' : '' }>
+			<div className={Meteor.userId() ? 'container' : ''}>
+				{Meteor.userId() ? (
+					<Button type="link" onClick={() => this.logoutUser()} style={{ float: 'right' }}>
+						Logout
+					</Button>
+				) : undefined}
 				{
-					Meteor.userId() ?
-					<Button type='link' onClick={ () => this.logoutUser() } style={ { float: 'right'} }>Logout</Button> :
-					undefined
-				}
-				{
-					<Router history={ browserHistory }>
+					<Router history={browserHistory}>
 						<Switch>
-							<Route exact path='/signin' component={ SignIn } />
-							<Route exact path='/resetredirect'>
-								<Redirect to='/' />
+							<Route exact path="/signin" component={SignIn} />
+							<Route exact path="/resetredirect">
+								<Redirect to="/" />
 							</Route>
-							<Route exact path='/forgotpassword' render={ (props) => <RequestPasswordReset { ...props } /> } />
-							<Route exact path='/' render={
-								() => WithAuth(
-									GetDefaultRoute()
-								)
-							} />
-							<Route exact path='/enroll-account/:token' render={
-								(props) => <ResetPassword token={ props.match.params.token } />
-							}/>
-							<Route exact path='/reset-password/:token' render={
-								(props) => <ResetPassword token={ props.match.params.token } />
-							}/>
-							<Route exact path='/reset-password/:token' render={
-								(props) => <ResetPassword token={ props.match.params.token } />
-							}/>
-							<Route exact path='/submit' render={
-								() => WithAuth(<SubmitListAwards />)
-							} />
-							<Route exact path='/submit/:awardId' render={
-								(props) => WithAuth(
-									<SubmitListCategories review={ false } awardId={ props.match.params.awardId } { ...props } />
-								)
-							} />
-							<Route exact path='/review/:awardId' render={
-								(props) => WithAuth(
-									<SubmitListCategories review={ true } awardId={ props.match.params.awardId } { ...props } />
-								)
-							} />
-							<Route exact path='/submit/:awardId/:categoryId' render={
-								(props) => WithAuth(
-									<Submit awardId={ props.match.params.awardId } categoryId={ props.match.params.categoryId } { ...props } />
-								)
-							} />
-							<Route exact path='/judge' render={
-								(props) => WithAuth(
-									<JudgeCategoriesList { ...props }  />,
-									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
-								)
-							} />
-							<Route exact path='/judge/rank/:categoryId' render={
-								(props) => WithAuth(
-									<JudgeRankEntries categoryId={ props.match.params.categoryId } { ...props } />,
-									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
-								)
-							} />
-							<Route exact path='/judge/:categoryId' render={
-								(props) => WithAuth(
-									<Judge categoryId={ props.match.params.categoryId } { ...props } />,
-									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
-								)
-							} />
-							{ /* TODO: swap stationId and categoryId */ }
-							<Route exact path='/judge/:stationId/:categoryId' render={
-								(props) => WithAuth(
-									<JudgeCategory
-										stationId={ props.match.params.stationId }
-										categoryId={ props.match.params.categoryId }
-										{ ...props }
-									/>,
-									[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
-								)
-							} />
-							<Route exact path='/hosts' render={
-								() => WithAuth(
-									<Hosts />,
-									[Roles.ADMIN, Roles.HOST]
-								)
-							} />
-							<Route exact path='/hosts/videos' render={
-								() => WithAuth(
-									<VideosPage />,
-									[ Roles.ADMIN, Roles.HOST, Roles.EDITOR ]
-								)
-							} />
-							<Route exact path='/manage' render={
-								(props) => WithAuth(
-									<Manage { ...props } />,
-									[Roles.ADMIN]
-								)
-							} />
-							<Route exact path='/manage/users' render={
-								(props) => WithAuth(
-									<ManageUsers { ...props } />,
-									[Roles.ADMIN]
-								)
-							} />
-							<Route exact path='/manage/stations' render={
-								() => WithAuth(
-									<ManageStations />,
-									[Roles.ADMIN]
-								)
-							} />
-							<Route exact path='/manage/judges' render={
-								(props) => WithAuth(
-									<ManageJudges { ...props } />,
-									[Roles.ADMIN]
-								)
-							} />
-							<Route exact path='/manage/awards' render={
-								(props) => WithAuth(
-									<ManageAwards { ...props } />,
-									[Roles.ADMIN]
-								)
-							} />
+							<Route exact path="/forgotpassword" render={(props) => <RequestPasswordReset {...props} />} />
+							<Route exact path="/" render={() => WithAuth(GetDefaultRoute())} />
+							<Route
+								exact
+								path="/enroll-account/:token"
+								render={(props) => <ResetPassword token={props.match.params.token} />}
+							/>
+							<Route
+								exact
+								path="/reset-password/:token"
+								render={(props) => <ResetPassword token={props.match.params.token} />}
+							/>
+							<Route
+								exact
+								path="/reset-password/:token"
+								render={(props) => <ResetPassword token={props.match.params.token} />}
+							/>
+							<Route exact path="/submit" render={() => WithAuth(<SubmitListAwards />)} />
+							<Route
+								exact
+								path="/submit/:awardId"
+								render={(props) =>
+									WithAuth(<SubmitListCategories review={false} awardId={props.match.params.awardId} {...props} />)
+								}
+							/>
+							<Route
+								exact
+								path="/review/:awardId"
+								render={(props) =>
+									WithAuth(<SubmitListCategories review={true} awardId={props.match.params.awardId} {...props} />)
+								}
+							/>
+							<Route
+								exact
+								path="/submit/:awardId/:categoryId"
+								render={(props) =>
+									WithAuth(
+										<Submit
+											awardId={props.match.params.awardId}
+											categoryId={props.match.params.categoryId}
+											{...props}
+										/>
+									)
+								}
+							/>
+							<Route
+								exact
+								path="/judge"
+								render={(props) => WithAuth(<JudgeCategoriesList {...props} />, [Roles.ADMIN, Roles.JUDGE, Roles.HOST])}
+							/>
+							<Route
+								exact
+								path="/judge/rank/:categoryId"
+								render={(props) =>
+									WithAuth(<JudgeRankEntries categoryId={props.match.params.categoryId} {...props} />, [
+										Roles.ADMIN,
+										Roles.JUDGE,
+										Roles.HOST,
+									])
+								}
+							/>
+							<Route
+								exact
+								path="/judge/:categoryId"
+								render={(props) =>
+									WithAuth(<Judge categoryId={props.match.params.categoryId} {...props} />, [
+										Roles.ADMIN,
+										Roles.JUDGE,
+										Roles.HOST,
+									])
+								}
+							/>
+							{/* TODO: swap stationId and categoryId */}
+							<Route
+								exact
+								path="/judge/:stationId/:categoryId"
+								render={(props) =>
+									WithAuth(
+										<JudgeCategory
+											stationId={props.match.params.stationId}
+											categoryId={props.match.params.categoryId}
+											{...props}
+										/>,
+										[Roles.ADMIN, Roles.JUDGE, Roles.HOST]
+									)
+								}
+							/>
+							<Route exact path="/hosts" render={() => WithAuth(<Hosts />, [Roles.ADMIN, Roles.HOST])} />
+							<Route
+								exact
+								path="/hosts/videos"
+								render={() => WithAuth(<VideosPage />, [Roles.ADMIN, Roles.HOST, Roles.EDITOR])}
+							/>
+							<Route exact path="/manage" render={(props) => WithAuth(<Manage {...props} />, [Roles.ADMIN])} />
+							<Route
+								exact
+								path="/manage/users"
+								render={(props) => WithAuth(<ManageUsers {...props} />, [Roles.ADMIN])}
+							/>
+							<Route exact path="/manage/stations" render={() => WithAuth(<ManageStations />, [Roles.ADMIN])} />
+							<Route
+								exact
+								path="/manage/judges"
+								render={(props) => WithAuth(<ManageJudges {...props} />, [Roles.ADMIN])}
+							/>
+							<Route
+								exact
+								path="/manage/awards"
+								render={(props) => WithAuth(<ManageAwards {...props} />, [Roles.ADMIN])}
+							/>
 						</Switch>
 					</Router>
 				}
-
 			</div>
 		)
 	}
 
-	private logoutUser () {
-		Meteor.logout(((error) => {
+	private logoutUser() {
+		Meteor.logout((error) => {
 			if (!error) setTimeout(() => document.location.replace('/'), 1000)
-		}))
+		})
 	}
 }
 
 export default withTracker(() => {
-	const handles = [
-		Meteor.subscribe('users'),
-		Meteor.subscribe(Collections.SYSTEM)
-	]
+	const handles = [Meteor.subscribe('users'), Meteor.subscribe(Collections.SYSTEM)]
 
 	const loading = handles.some((handle) => !handle.ready())
 
 	return {
 		loading,
-		system: System.findOne({ })
+		system: System.findOne({}),
 	}
 })(App as any)

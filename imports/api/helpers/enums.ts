@@ -13,7 +13,7 @@ export const enum Collections {
 	JudgeToCategory = 'judgeToCategory',
 	SCORES = 'scores',
 	RESULTS = 'results',
-	SYSTEM = 'system'
+	SYSTEM = 'system',
 }
 
 export const enum Roles {
@@ -22,31 +22,31 @@ export const enum Roles {
 	JUDGE = 'judge',
 	STATION = 'station',
 	ADMIN = 'admin',
-	EDITOR = 'editor'
+	EDITOR = 'editor',
 }
 
 export const enum DEFAULT_AWARDS_NAMES {
 	NASTA = 'NaSTA Awards',
-	PEOPLES_CHOICE = 'People\'s Choice Awards'
+	PEOPLES_CHOICE = "People's Choice Awards",
 }
 
 export const enum SupportingEvidenceType {
 	VIDEO = 'VIDEO',
 	TEXT = 'TEXT',
 	PDF = 'PDF',
-	CALL = 'CALL'
+	CALL = 'CALL',
 }
 
 export const enum EntryType {
 	VIDEO = 'entry_video',
-	DOCUMENT = 'entry_document'
+	DOCUMENT = 'entry_document',
 }
 
 export const enum VerificationStatus {
 	WAITING = 'status_waiting',
 	VERIFIED = 'status_verified',
 	REJECTED = 'status_rejected',
-	DISPUTED = 'status_disputed'
+	DISPUTED = 'status_disputed',
 }
 
 export const enum DEFAULT_CATEGORY_NAMES {
@@ -56,7 +56,7 @@ export const enum DEFAULT_CATEGORY_NAMES {
 	NaSTA_AWARDS_BEST_ON_SCREEN_TALENT = 'Best On-Screen Talent',
 	NaSTA_AWARDS_STATION_MARKETING = 'Station Marketing',
 	NaSTA_AWARDS_TECHNICAL_ACHIEVEMENT = 'Technical Achievement',
-	NaSTA_AWARDS_FRESHERS_COVERAGE = 'Freshers\' Coverage',
+	NaSTA_AWARDS_FRESHERS_COVERAGE = "Freshers' Coverage",
 	NaSTA_AWARDS_ANIMATION = 'Animation',
 	NaSTA_AWARDS_NEWS_AND_CURRENT_AFFAIRS = 'News and Current Affairs',
 	NaSTA_AWARDS_MARS_ELKINS_EL_BROGY = 'The Mars Elkins El-Brogy Award for Multimedia Content',
@@ -78,5 +78,5 @@ export const enum DEFAULT_CATEGORY_NAMES {
 	PCAs_VISUAL_CREATIVITY_AND_QUALITY = 'Visual Creativity & Quality',
 	PCAs_BEST_ON_SCREEN_TALENT = 'Best On-Screen Talent',
 	PCAs_UN_SUNG_HERO = 'Un-Sung Hero',
-	PCAs_STATION_OF_THE_YEAR = 'Station Of The Year'
+	PCAs_STATION_OF_THE_YEAR = 'Station Of The Year',
 }
