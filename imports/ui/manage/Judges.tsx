@@ -135,39 +135,37 @@ class ManageJudges extends Component<Props, State> {
 	}
 }
 
-export default withTracker(
-	(props: Props): Props => {
-		const handles = [
-			Meteor.subscribe(Collections.JudgeToCategory),
-			Meteor.subscribe(Collections.CATEGORIES),
-			Meteor.subscribe('users'),
-		]
+export default withTracker((props: Props): Props => {
+	const handles = [
+		Meteor.subscribe(Collections.JudgeToCategory),
+		Meteor.subscribe(Collections.CATEGORIES),
+		Meteor.subscribe('users'),
+	]
 
-		const loading = handles.some((handle) => !handle.ready())
+	const loading = handles.some((handle) => !handle.ready())
 
-		const judges = Meteor.users
-			.find({})
-			.fetch()
-			.filter(
-				(user) =>
-					(user as NaSTAUser).roles.includes(Roles.JUDGE) &&
-					(!user.emails || !user.emails.some((email) => email.address === 'tech@nasta.tv'))
-			)
+	const judges = Meteor.users
+		.find({})
+		.fetch()
+		.filter(
+			(user) =>
+				(user as NaSTAUser).roles.includes(Roles.JUDGE) &&
+				(!user.emails || !user.emails.some((email) => email.address === 'tech@nasta.tv'))
+		)
 
-		const awards: { [awardId: string]: string } = {}
+	const awards: { [awardId: string]: string } = {}
 
-		Awards.find({})
-			.fetch()
-			.forEach((award) => {
-				if (!award._id) return
-				awards[award._id] = award.name
-			})
+	Awards.find({})
+		.fetch()
+		.forEach((award) => {
+			if (!award._id) return
+			awards[award._id] = award.name
+		})
 
-		return {
-			...props,
-			loading,
-			judges,
-			categories: Categories.find({}).fetch(),
-		}
+	return {
+		...props,
+		loading,
+		judges,
+		categories: Categories.find({}).fetch(),
 	}
-)(withRouter(ManageJudges) as any)
+})(withRouter(ManageJudges) as any)

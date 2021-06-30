@@ -372,25 +372,23 @@ class Submit extends Component<Props, State> {
 	}
 }
 
-export default withTracker(
-	(props: Props): Props => {
-		const handles = [
-			Meteor.subscribe(Collections.CATEGORIES),
-			Meteor.subscribe(Collections.ENTRIES),
-			Meteor.subscribe(Collections.AWARDS),
-			Meteor.subscribe(Collections.STATIONS),
-			Meteor.subscribe('users'),
-		]
+export default withTracker((props: Props): Props => {
+	const handles = [
+		Meteor.subscribe(Collections.CATEGORIES),
+		Meteor.subscribe(Collections.ENTRIES),
+		Meteor.subscribe(Collections.AWARDS),
+		Meteor.subscribe(Collections.STATIONS),
+		Meteor.subscribe('users'),
+	]
 
-		const loading = handles.some((handle) => !handle.ready())
+	const loading = handles.some((handle) => !handle.ready())
 
-		return {
-			...props,
-			loading,
-			categories: Categories.find().fetch(),
-			entries: Entries.find().fetch(),
-			userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0],
-			award: Awards.findOne({ _id: props.awardId }),
-		}
+	return {
+		...props,
+		loading,
+		categories: Categories.find().fetch(),
+		entries: Entries.find().fetch(),
+		userStation: Stations.find({ authorizedUsers: Meteor.userId() || '_' }).fetch()[0],
+		award: Awards.findOne({ _id: props.awardId }),
 	}
-)(withRouter(Submit) as any)
+})(withRouter(Submit) as any)

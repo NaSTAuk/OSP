@@ -95,57 +95,55 @@ class VideosPage extends Component<Props> {
 	}
 }
 
-export default withTracker(
-	(props: Props): Props => {
-		const handles = [
-			Meteor.subscribe(Collections.AWARDS),
-			Meteor.subscribe(Collections.CATEGORIES),
-			Meteor.subscribe(Collections.ENTRIES),
-			Meteor.subscribe(Collections.STATIONS),
-			Meteor.subscribe(Collections.EVIDENCE),
-		]
+export default withTracker((props: Props): Props => {
+	const handles = [
+		Meteor.subscribe(Collections.AWARDS),
+		Meteor.subscribe(Collections.CATEGORIES),
+		Meteor.subscribe(Collections.ENTRIES),
+		Meteor.subscribe(Collections.STATIONS),
+		Meteor.subscribe(Collections.EVIDENCE),
+	]
 
-		const categories = Categories.find({}).fetch()
-		const stations = Stations.find({})
-			.fetch()
-			.sort((a, b) => a.name.localeCompare(b.name))
-		const entries: Entry[] = []
+	const categories = Categories.find({}).fetch()
+	const stations = Stations.find({})
+		.fetch()
+		.sort((a, b) => a.name.localeCompare(b.name))
+	const entries: Entry[] = []
 
-		categories.forEach((category) => {
-			stations.forEach((station) => {
-				const entry = Entries.findOne(
-					{
-						stationId: station._id,
-						categoryId: category._id,
-					},
-					{ sort: { date: -1 } }
-				)
+	categories.forEach((category) => {
+		stations.forEach((station) => {
+			const entry = Entries.findOne(
+				{
+					stationId: station._id,
+					categoryId: category._id,
+				},
+				{ sort: { date: -1 } }
+			)
 
-				if (entry) entries.push(entry)
-			})
+			if (entry) entries.push(entry)
 		})
+	})
 
-		const entriesWithEvidence: EntryWithEvidence[] = []
+	const entriesWithEvidence: EntryWithEvidence[] = []
 
-		entries.forEach((entry) => {
-			const evidenceList: Evidence[] = []
-			entry.evidenceIds.forEach((ev) => {
-				const evidence = EvidenceCollection.findOne({ _id: ev })
+	entries.forEach((entry) => {
+		const evidenceList: Evidence[] = []
+		entry.evidenceIds.forEach((ev) => {
+			const evidence = EvidenceCollection.findOne({ _id: ev })
 
-				if (evidence) evidenceList.push(evidence)
-			})
-			entriesWithEvidence.push({ entry, evidence: evidenceList })
+			if (evidence) evidenceList.push(evidence)
 		})
+		entriesWithEvidence.push({ entry, evidence: evidenceList })
+	})
 
-		const loading = handles.some((handle) => !handle.ready())
+	const loading = handles.some((handle) => !handle.ready())
 
-		return {
-			...props,
-			loading,
-			awards: Awards.find({}).fetch(),
-			categories,
-			entries: entriesWithEvidence,
-			stations,
-		}
+	return {
+		...props,
+		loading,
+		awards: Awards.find({}).fetch(),
+		categories,
+		entries: entriesWithEvidence,
+		stations,
 	}
-)(VideosPage)
+})(VideosPage)

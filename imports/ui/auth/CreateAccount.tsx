@@ -21,7 +21,6 @@ export class CreateAccount extends Component {
 		const email = (ReactDOM.findDOMNode(this.refs.emailInput) as HTMLInputElement).value.trim()
 
 		Meteor.call('accounts.create', email, '1234')
-
 		;(ReactDOM.findDOMNode(this.refs.emailInput) as HTMLInputElement).value = ''
 	}
 }

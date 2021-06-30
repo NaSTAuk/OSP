@@ -43,9 +43,8 @@ export function GetStationForUser(): Station | undefined {
 	}
 }
 
-export const DEFAULT_STATIONS: Station[] = [
+export const DEFAULT_STATIONS: Omit<Station, '_id'>[] = [
 	{
-		_id: '',
 		name: 'NaSTA',
 		eligibleForEntry: true,
 		authorizedUsers: [],

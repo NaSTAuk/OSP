@@ -10,7 +10,6 @@ import '../imports/api/helpers/methods'
 import '../imports/api/judgeToCategory'
 import { JudgeToCategory } from '../imports/api/judgeToCategory'
 import '../imports/api/results'
-import { Results } from '../imports/api/results'
 import '../imports/api/scores'
 import '../imports/api/stations'
 import '../imports/api/system'
@@ -67,11 +66,11 @@ Meteor.startup(() => {
 
 			const nasta = Stations.findOne({ name: 'NaSTA' })
 			if (nasta) {
-				Meteor.users.update(user._id, ({
+				Meteor.users.update(user._id, {
 					...user,
 					stationId: nasta._id,
 					roles: [Roles.ADMIN, Roles.JUDGE, Roles.HOST, Roles.STATION],
-				} as NaSTAUser) as Meteor.User)
+				} as NaSTAUser as Meteor.User)
 
 				const bestBroadcaster = Categories.findOne({ name: DEFAULT_CATEGORY_NAMES.NaSTA_AWARDS_BEST_BROADCASTER })
 				if (bestBroadcaster && nasta._id && bestBroadcaster._id) {

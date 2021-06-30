@@ -2,20 +2,44 @@ import { Meteor } from 'meteor/meteor'
 import { Component } from 'react'
 import React from 'react'
 import { Checkbox, Menu, Form, Dropdown, Divider, Button, Input, Icon } from 'antd'
-import { Entry } from '/imports/api/entries'
-import { Evidence } from '/imports/api/evidence'
-import { SupportingEvidenceType, VerificationStatus } from '/imports/api/helpers/enums'
+import { Entries, Entry } from '/imports/api/entries'
+import { Evidence, EvidenceCollection } from '/imports/api/evidence'
+import { Collections, SupportingEvidenceType, VerificationStatus } from '/imports/api/helpers/enums'
 import { TechSpecIssuesList } from '../elements/TechSpecFailures'
 import { SupportingEvidenceList } from '../judge/SupportingEvidenceList'
-import { EntryListEvidence } from '/imports/api/helpers/interfaces'
+import { Score, Scores } from '/imports/api/scores'
+import { withTracker } from 'meteor/react-meteor-data'
 
 interface Props {
-	activeEntry: EntryListEvidence
+	entryId: string
+	entry?: Entry
+	evidence?: Evidence[]
+	score?: Score
 }
 
-export class EntryPanel extends Component<Props> {
+interface State {
+	comments?: string
+}
+
+class EntryPanel extends Component<Props, State> {
+	constructor(props: Props) {
+		super(props)
+
+		this.state = {}
+	}
+
+	public static getDerivedStateFromProps(nextProps: Props, prevState: State): State {
+		if (!nextProps.entry) {
+			return prevState
+		}
+
+		return {
+			comments: nextProps.entry.comments,
+		}
+	}
+
 	public render() {
-		if (!this.props.activeEntry) return <div></div>
+		if (!this.props.entry) return <div></div>
 
 		const translateStatus = (stat: VerificationStatus) => {
 			switch (stat) {
@@ -31,7 +55,7 @@ export class EntryPanel extends Component<Props> {
 		}
 
 		const changeStatus = (status: VerificationStatus) => {
-			this.setEntryVerificationStatus(this.props.activeEntry.entry, status)
+			this.setEntryVerificationStatus(status)
 		}
 
 		const verifiedDropdown = (
@@ -57,11 +81,11 @@ export class EntryPanel extends Component<Props> {
 				<Form>
 					<h4>Set Entry Status</h4>
 					<Dropdown.Button overlay={verifiedDropdown} icon={<Icon key="down" type="down" />}>
-						{translateStatus(this.props.activeEntry.entry.verified)}
+						{translateStatus(this.props.entry.verified)}
 					</Dropdown.Button>
 					<Form.Item>
-						{this.props.activeEntry.evidence.map((evidence) => {
-							return this.renderSupportingEvidenceAproved(evidence)
+						{this.props.evidence?.map((evidence) => {
+							return this.renderSupportingEvidenceApproved(evidence)
 						})}
 					</Form.Item>
 				</Form>
@@ -69,60 +93,60 @@ export class EntryPanel extends Component<Props> {
 				<h1>Host Comments</h1>
 				<Form>
 					<Form.Item>
-						<Input value={this.props.activeEntry.comments} onChange={(event) => this.commentChange(event)} />
+						<Input value={this.state.comments} onChange={(event) => this.commentChange(event)} />
 					</Form.Item>
-					<Button type="primary" onClick={() => this.saveComments(this.props.activeEntry!.entry)}>
+					<Button type="primary" onClick={() => this.saveComments()}>
 						Save Comments
 					</Button>
 				</Form>
 				<Divider />
 				<h1>Judge Comments</h1>
-				{this.props.activeEntry.judgesComments || 'No comments yet'}
+				{this.props.score?.comments ?? 'No comments yet'}
 				<Divider />
-				{this.props.activeEntry.evidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) ? (
+				{this.props.evidence?.some((ev) => ev.type === SupportingEvidenceType.VIDEO) ? (
 					<React.Fragment>
 						<h2>Video Tech Specs</h2>
 						<p>
-							{this.props.activeEntry.entry.passesTechSpecs === undefined ? (
+							{this.props.entry.passesTechSpecs === undefined ? (
 								'Awaiting Check'
 							) : (
 								<React.Fragment>
 									Passes Tech Specs?
-									<Checkbox checked={!!this.props.activeEntry.entry.passesTechSpecs} />
+									<Checkbox checked={!!this.props.entry.passesTechSpecs} />
 								</React.Fragment>
 							)}
-							{this.props.activeEntry.entry.techSpecFailures ? (
+							{this.props.entry.techSpecFailures ? (
 								<React.Fragment>
 									<h3>Issues Meeting Technical Specifications</h3>
-									<TechSpecIssuesList failures={this.props.activeEntry.entry.techSpecFailures} />
+									<TechSpecIssuesList failures={this.props.entry.techSpecFailures} />
 								</React.Fragment>
 							) : undefined}
 						</p>
-						<Button type="primary" onClick={() => this.rerunCheck(this.props.activeEntry!.entry)}>
+						<Button type="primary" onClick={() => this.rerunCheck()}>
 							Rerun Check
 						</Button>
 					</React.Fragment>
 				) : undefined}
 				<Divider />
 				<h1>Entry</h1>
-				<p>Entered at: {new Date(this.props.activeEntry.entry.date).toLocaleString()}</p>
-				<SupportingEvidenceList evidence={this.props.activeEntry.evidence} />
+				<p>Entered at: {new Date(this.props.entry.date).toLocaleString()}</p>
+				{this.props.evidence && <SupportingEvidenceList evidence={this.props.evidence} />}
 				<Divider />
 				<h1>Video Links</h1>
-				<p style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>{this.props.activeEntry.entry.videoLinks}</p>
+				<p style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>{this.props.entry.videoLinks}</p>
 			</React.Fragment>
 		)
 	}
 
-	private setEntryVerificationStatus(entry: Entry, status: VerificationStatus) {
-		Meteor.call('entry:setVerification', entry._id, status)
+	private setEntryVerificationStatus(status: VerificationStatus) {
+		Meteor.call('entry:setVerification', this.props.entryId, status)
 	}
 
-	private rerunCheck(entry: Entry) {
-		Meteor.call('entry:rechecktech', entry._id)
+	private rerunCheck() {
+		Meteor.call('entry:rechecktech', this.props.entryId)
 	}
 
-	private renderSupportingEvidenceAproved(evidence: Evidence) {
+	private renderSupportingEvidenceApproved(evidence: Evidence) {
 		return (
 			<div key={evidence._id}>
 				<b style={{ marginRight: '1%' }}>{this.translateType(evidence.type)}</b>
@@ -150,8 +174,8 @@ export class EntryPanel extends Component<Props> {
 		})
 	}
 
-	private saveComments(entry: Entry) {
-		Meteor.call('entry:savecomment', entry._id, this.props.activeEntry.comments)
+	private saveComments() {
+		Meteor.call('entry:savecomment', this.props.entryId, this.state.comments)
 	}
 
 	private async setVerified(evidence: Evidence, verified: boolean) {
@@ -159,3 +183,28 @@ export class EntryPanel extends Component<Props> {
 		setTimeout(() => this.forceUpdate(), 1000)
 	}
 }
+
+export default withTracker((props: Props): Props => {
+	Meteor.subscribe(Collections.ENTRIES)
+	Meteor.subscribe(Collections.SCORES)
+	Meteor.subscribe(Collections.EVIDENCE)
+
+	const entry = Entries.findOne({ _id: props.entryId })
+
+	if (!entry) {
+		return props
+	}
+
+	return {
+		entryId: props.entryId,
+		entry,
+		evidence: EvidenceCollection.find({ _id: { $in: entry.evidenceIds } }).fetch(),
+		score: Scores.findOne(
+			{
+				stationId: entry.stationId,
+				categoryId: entry.categoryId,
+			},
+			{ sort: { date: -1 } }
+		),
+	}
+})(EntryPanel as any)
