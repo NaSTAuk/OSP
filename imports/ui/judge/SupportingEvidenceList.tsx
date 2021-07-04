@@ -41,7 +41,7 @@ export class SupportingEvidenceList extends Component<Props> {
 						height="480"
 						src={`${evidence.sharingLink.replace(/\?dl=0$/, '')}?raw=1`}
 						style={{ width: '100%' }}
-						autoPlay={true}></video>
+						autoPlay={false}></video>
 				)
 			case SupportingEvidenceType.TEXT:
 				return (

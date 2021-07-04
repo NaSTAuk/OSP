@@ -1,4 +1,4 @@
-import { Col, Drawer } from 'antd'
+import { Drawer } from 'antd'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
@@ -44,7 +44,7 @@ class Hosts extends Component<Props & TrackedProps, State> {
 				{this.renderAwards()}
 				{this.state.activeEntryId && (
 					<Drawer
-						title="REPLACEME"
+						title="Entry"
 						placement="right"
 						width={'50%'}
 						closable={true}

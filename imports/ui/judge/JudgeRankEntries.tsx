@@ -68,37 +68,15 @@ class JudgeRankEntries extends Component<Props, State> {
 						evidence,
 						comments: judgesComments ? judgesComments.comments : undefined,
 						entry,
+						entryId: entry._id,
+						id: entry._id,
 					}
 				})
 				.filter((entry) => entry !== undefined) as EntryListEvidence[]
 
-			let showEntries: EntryListEvidence[] = []
-
-			if (nextProps.previousResult) {
-				Object.entries(nextProps.previousResult.order)
-					.sort((a, b) => {
-						if (a[1] > b[1]) return 1
-						if (a[1] < b[1]) return -1
-
-						return 0
-					})
-					.forEach((val) => {
-						const station = entries.find((entry) => entry.entry.stationId === val[0])
-						if (station) showEntries.push(station)
-					})
-
-				entries.forEach((entry) => {
-					if (!showEntries.some((ent) => ent.entry.stationId === entry.entry.stationId)) {
-						showEntries.push(entry)
-					}
-				})
-			} else {
-				showEntries = entries
-			}
-
 			return {
 				init: false,
-				entriesList: showEntries,
+				entriesList: entries,
 				drawerVisible: false,
 				jointFirstPlace: nextProps.previousResult ? !!nextProps.previousResult.jointFirst : false,
 				jointHighlyCommended: nextProps.previousResult ? !!nextProps.previousResult.jointHighlyCommended : false,
@@ -166,6 +144,8 @@ class JudgeRankEntries extends Component<Props, State> {
 									<Icon type="trophy" style={{ color: 'silver', marginRight: '8px' }} />
 								) : index === 2 && (this.state.jointFirstPlace || this.state.jointHighlyCommended) ? (
 									<Icon type="trophy" style={{ color: 'silver', marginRight: '8px' }} />
+								) : index === 3 && (this.state.jointFirstPlace && this.state.jointHighlyCommended) ? (
+									<Icon type="trophy" style={{ color: 'silver', marginRight: '8px' }} />
 								) : (
 									<Tag color={index < 5 ? 'green' : 'lime'}>{index + 1}</Tag>
 								)}
@@ -192,7 +172,7 @@ class JudgeRankEntries extends Component<Props, State> {
 			return (
 				<React.Fragment>
 					<h1>Your Comments</h1>
-					<p style={{ whiteSpace: 'pre-wrap' }}>{this.state.activeEntry.entry.comments}</p>
+					<p style={{ whiteSpace: 'pre-wrap' }}>{this.state.activeEntry.comments}</p>
 					<h1>Entry</h1>
 					<SupportingEvidenceList evidence={this.state.activeEntry.evidence} />
 				</React.Fragment>
@@ -232,13 +212,16 @@ class JudgeRankEntries extends Component<Props, State> {
 					}
 				} else if (this.state.jointFirstPlace && (index === 0 || index === 1)) {
 					order.set(entry.stationId, 1)
-				} else if (this.state.jointHighlyCommended && (index === 1 || index === 2)) {
+				} else if (
+					(!this.state.jointFirstPlace && this.state.jointHighlyCommended && (index === 1 || index === 2)) ||
+					(this.state.jointFirstPlace && this.state.jointHighlyCommended && (index === 2 || index == 3))
+				) {
 					order.set(entry.stationId, 2)
 				} else {
 					order.set(entry.stationId, index + 1)
 				}
 			} else {
-				order.set(entry.entry.stationId, index + 1)
+				order.set(entry.stationId, index + 1)
 			}
 		})
 
@@ -254,51 +237,49 @@ class JudgeRankEntries extends Component<Props, State> {
 	}
 }
 
-export default withTracker(
-	(props: Props): Props => {
-		const handles = [
-			Meteor.subscribe(Collections.ENTRIES),
-			Meteor.subscribe(Collections.STATIONS),
-			Meteor.subscribe(Collections.EVIDENCE),
-			Meteor.subscribe(Collections.CATEGORIES),
-			Meteor.subscribe(Collections.RESULTS),
-			Meteor.subscribe(Collections.SCORES),
-		]
+export default withTracker((props: Props): Props => {
+	const handles = [
+		Meteor.subscribe(Collections.ENTRIES),
+		Meteor.subscribe(Collections.STATIONS),
+		Meteor.subscribe(Collections.EVIDENCE),
+		Meteor.subscribe(Collections.CATEGORIES),
+		Meteor.subscribe(Collections.RESULTS),
+		Meteor.subscribe(Collections.SCORES),
+	]
 
-		const stations = Stations.find({}).fetch()
+	const stations = Stations.find({}).fetch()
 
-		if (!stations) return { ...props, loading: true }
+	if (!stations) return { ...props, loading: true }
 
-		const categoryName = Categories.findOne({ _id: props.categoryId })
+	const categoryName = Categories.findOne({ _id: props.categoryId })
 
-		if (!categoryName) return { ...props, loading: true }
+	if (!categoryName) return { ...props, loading: true }
 
-		const entries: Entry[] = []
+	const entries: Entry[] = []
 
-		stations.forEach((station) => {
-			const entry = Entries.findOne(
-				{
-					stationId: station._id,
-					categoryId: props.categoryId,
-					verified: VerificationStatus.VERIFIED,
-				},
-				{ sort: { date: -1 } }
-			)
+	stations.forEach((station) => {
+		const entry = Entries.findOne(
+			{
+				stationId: station._id,
+				categoryId: props.categoryId,
+				verified: VerificationStatus.VERIFIED,
+			},
+			{ sort: { date: -1 } }
+		)
 
-			if (entry) entries.push(entry)
-		})
+		if (entry) entries.push(entry)
+	})
 
-		const previousResult = Results.findOne({ categoryId: props.categoryId })
+	const previousResult = Results.findOne({ categoryId: props.categoryId })
 
-		const loading = handles.some((handle) => !handle.ready())
+	const loading = handles.some((handle) => !handle.ready())
 
-		return {
-			...props,
-			entries,
-			stations,
-			loading,
-			categoryName: categoryName.name,
-			previousResult,
-		}
+	return {
+		...props,
+		entries,
+		stations,
+		loading,
+		categoryName: categoryName.name,
+		previousResult,
 	}
-)(withRouter(JudgeRankEntries) as any)
+})(withRouter(JudgeRankEntries) as any)

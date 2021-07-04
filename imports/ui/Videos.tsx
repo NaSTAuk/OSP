@@ -25,7 +25,7 @@ interface Props {
 
 class VideosPage extends Component<Props> {
 	public render() {
-		if (this.props.loading) return <div></div>
+		if (this.props.loading) return <div>Loading...</div>
 		return (
 			<div>
 				<Link to="/">Back</Link>
@@ -87,7 +87,7 @@ class VideosPage extends Component<Props> {
 				.map((video) => {
 					return (
 						<li key={`${linkType}_${video._id}`}>
-							<a href={(video as EvidenceVideo)[linkType].replace(/dl=0/, 'dl=1')}>{station.name}</a>
+							<a href={(video as EvidenceVideo)[linkType].replace(/dl=0/, 'dl=1')} target="_blank">{station.name}</a>
 						</li>
 					)
 				})

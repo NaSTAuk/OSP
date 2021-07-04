@@ -102,7 +102,8 @@ class ManageUsers extends Component<Props, State> {
 					<Form.Item>
 						<Checkbox
 							value={this.state.sendEmail}
-							onChange={(event) => this.setState({ sendEmail: event.target.checked })}>
+							onChange={(event) => this.setState({ sendEmail: event.target.checked })}
+							style={{color: 'white'}}>
 							Send enrollment email
 						</Checkbox>
 					</Form.Item>
