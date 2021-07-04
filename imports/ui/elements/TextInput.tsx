@@ -7,9 +7,9 @@ import '/imports/ui/css/TextInput.css'
 interface Props {
 	maxWords?: number
 	uuid: string
-	onValid (uuid: string): void
-	onInvalid (uuid: string): void
-	onChange (uuid: string, value: string): void
+	onValid(uuid: string): void
+	onInvalid(uuid: string): void
+	onChange(uuid: string, value: string): void
 }
 
 interface State {
@@ -21,28 +21,30 @@ interface State {
 export class TextInput extends Component<Props, State> {
 	private textAreaRef: RefObject<any>
 
-	constructor (props: Props) {
+	constructor(props: Props) {
 		super(props)
 		this.textAreaRef = React.createRef()
 		this.state = {
 			wordCount: 0,
-			wordCountClass: 'good'
+			wordCountClass: 'good',
 		}
 
 		this.onType = this.onType.bind(this)
 	}
-	public render () {
+	public render() {
 		return (
 			<div>
-				<textarea ref={ this.textAreaRef } placeholder='Your entry here' onChange={ this.onType }></textarea>
-				<span className={ classnames('wordCount', this.state.wordCountClass) }>
-					<p>{ this.state.wordCount }/{ this.props.maxWords || 0 }</p>
+				<textarea ref={this.textAreaRef} placeholder="Your entry here" onChange={this.onType}></textarea>
+				<span className={classnames('wordCount', this.state.wordCountClass)}>
+					<p>
+						{this.state.wordCount}/{this.props.maxWords || 0}
+					</p>
 				</span>
 			</div>
 		)
 	}
 
-	private onType () {
+	private onType() {
 		this.setState({ wordCount: wordcount(this.textAreaRef.current.value), wordCountClass: this.getCountClass() })
 
 		this.props.onChange(this.props.uuid, this.textAreaRef.current.value)
@@ -56,8 +58,11 @@ export class TextInput extends Component<Props, State> {
 		}, 200)
 	}
 
-	private getCountClass () {
-		return  this.state.wordCount > (this.props.maxWords || 0) ? 'error' :
-		    this.state.wordCount > (this.props.maxWords || 0) * 0.8 ? 'warning' : 'good'
+	private getCountClass() {
+		return this.state.wordCount > (this.props.maxWords || 0)
+			? 'error'
+			: this.state.wordCount > (this.props.maxWords || 0) * 0.8
+			? 'warning'
+			: 'good'
 	}
 }

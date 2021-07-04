@@ -2,7 +2,7 @@ import { List } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
-import { Redirect, RouteComponentProps, withRouter } from 'react-router'
+import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { NaSTAUser } from '../../api/accounts'
 import { Categories, Category } from '../../api/categories'
@@ -15,46 +15,46 @@ interface Props extends RouteComponentProps {
 }
 
 class JudgeCategoriesList extends Component<Props> {
-	public render () {
+	public render() {
 		if (this.props.loading) return <div></div>
 		if (this.props.categories && this.props.categories.length && this.props.categories.length === 1) {
-			return <Redirect to={ `/judge/${this.props.categories[0]._id}`} />
+			return <Redirect to={`/judge/${this.props.categories[0]._id}`} />
 		}
 		return (
-			<div key='categoriesList'>
-				<Link to='/'>Back</Link>
-				{ this.renderCategories() }
+			<div key="categoriesList">
+				<Link to="/">Back</Link>
+				{this.renderCategories()}
 			</div>
 		)
 	}
 
-	private renderCategories () {
+	private renderCategories() {
 		return (
-			<div className='judge'>
-				<h1>
-					Categories available for judging
-				</h1>
+			<div className="judge">
+				<h1>Categories available for judging</h1>
 				<List
-					itemLayout='horizontal'
-					dataSource={ this.props.categories }
-					renderItem={ (category) => this.renderCategory(category)}
-					className='list'
-				>
-
-				</List>
+					itemLayout="horizontal"
+					dataSource={this.props.categories}
+					renderItem={(category) => this.renderCategory(category)}
+					className="list"></List>
 			</div>
 		)
 	}
 
-	private renderCategory (category: Category) {
+	private renderCategory(category: Category) {
 		return (
-			<List.Item key={ category._id } className='item' onClick={ () => { this.goToCategoryPage(category._id) }} >
-				<b>{ category.name }</b>
+			<List.Item
+				key={category._id}
+				className="item"
+				onClick={() => {
+					this.goToCategoryPage(category._id)
+				}}>
+				<b>{category.name}</b>
 			</List.Item>
 		)
 	}
 
-	private goToCategoryPage (categoryId?: string) {
+	private goToCategoryPage(categoryId?: string) {
 		if (!categoryId) return
 
 		this.props.history.push(`/judge/${categoryId}`)
@@ -65,7 +65,7 @@ export default withTracker((props: Props) => {
 	const handles = [
 		Meteor.subscribe(Collections.CATEGORIES),
 		Meteor.subscribe(Collections.JudgeToCategory),
-		Meteor.subscribe('users')
+		Meteor.subscribe('users'),
 	]
 
 	const user = Meteor.user() as NaSTAUser
@@ -91,6 +91,6 @@ export default withTracker((props: Props) => {
 	return {
 		...props,
 		loading,
-		categories
- 	}
+		categories,
+	}
 })(withRouter(JudgeCategoriesList) as any)

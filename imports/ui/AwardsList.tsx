@@ -11,48 +11,42 @@ interface Props {
 
 /** Renders a list of registered awards in the system. */
 export class AwardsList extends Component<Props> {
-	public render () {
+	public render() {
 		return (
 			<div>
 				<h1>Awards in System</h1>
-				{ this.renderAwards() }
+				{this.renderAwards()}
 				<h1>Stations Registered</h1>
-				{ this.renderStations() }
+				{this.renderStations()}
 			</div>
 		)
 	}
 
-	private renderAwards () {
+	private renderAwards() {
 		return this.props.awards.map((award) => {
-			return (<div>
-				<h4>{ award.name }</h4>
-				<ul>
-					{ this.renderCategories(award) }
-				</ul>
-			</div>)
+			return (
+				<div>
+					<h4>{award.name}</h4>
+					<ul>{this.renderCategories(award)}</ul>
+				</div>
+			)
 		})
 	}
 
-	private renderCategories (award: Award) {
+	private renderCategories(award: Award) {
 		return this.props.categories
 			.filter((category) => category._id && award.categories.indexOf(category._id) !== -1)
 			.map((category) => {
-				return (
-					<li key={ category._id }>{ category.name }</li>
-				)
+				return <li key={category._id}>{category.name}</li>
 			})
 	}
 
-	private renderStations () {
+	private renderStations() {
 		return (
 			<ul>
-				{
-					this.props.stations.map((station) => {
-						return (
-							<li key={ station._id }>{ station.name }</li>
-						)
-					})
-				}
+				{this.props.stations.map((station) => {
+					return <li key={station._id}>{station.name}</li>
+				})}
 			</ul>
 		)
 	}

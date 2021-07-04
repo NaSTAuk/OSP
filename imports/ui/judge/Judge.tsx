@@ -2,8 +2,7 @@ import { List, Tag } from 'antd'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
-import { withRouter } from 'react-router'
-import { RouteComponentProps } from 'react-router'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { NaSTAUser } from '../../api/accounts'
 import { Categories, Category } from '../../api/categories'
@@ -23,53 +22,43 @@ interface Props extends RouteComponentProps {
 }
 
 class Judge extends Component<Props> {
-
-	constructor (props: Props) {
+	constructor(props: Props) {
 		super(props)
 
-		this.state = { }
+		this.state = {}
 	}
 
-	public shouldComponentUpdate (nextProps: Props, _nextState: any) {
+	public shouldComponentUpdate(nextProps: Props, _nextState: any) {
 		return !nextProps.loading
 	}
 
-	public render () {
+	public render() {
 		if (this.props.loading) return <div></div>
 		return (
-			<div className='judge'>
-				<Link to='/'>Home</Link>
-				<h1>
-					Judging{ this.props.category ? ` ${this.props.category.name}` : '' }
-				</h1>
+			<div className="judge">
+				<Link to="/">Home</Link>
+				<h1>Judging{this.props.category ? ` ${this.props.category.name}` : ''}</h1>
 				<h2>Provide Final Ranking</h2>
 				<p>
 					After providing comments for all entries, follow&nbsp;
-					{
-						this.props.category ?
-						<Link
-							className='list-link'
-							to={ `/judge/rank/${this.props.category._id}`}
-						>
+					{this.props.category ? (
+						<Link className="list-link" to={`/judge/rank/${this.props.category._id}`}>
 							this link
-						</Link> : undefined
-					}&nbsp;
-					to provide your final ranking of entrants, which will be used as the overall results.
+						</Link>
+					) : undefined}
+					&nbsp; to provide your final ranking of entrants, which will be used as the overall results.
 				</p>
 				<h2>Entries to judge</h2>
 				<List
-					itemLayout='horizontal'
-					dataSource={ this.props.entries }
-					renderItem={ (entry) => this.renderEntry(entry)}
-					className='list'
-				>
-
-				</List>
+					itemLayout="horizontal"
+					dataSource={this.props.entries}
+					renderItem={(entry) => this.renderEntry(entry)}
+					className="list"></List>
 			</div>
 		)
 	}
 
-	private renderEntry (entry: Entry) {
+	private renderEntry(entry: Entry) {
 		const station = Stations.findOne({ _id: entry.stationId })
 
 		if (!station) return
@@ -81,14 +70,14 @@ class Judge extends Component<Props> {
 		const judged = !!Scores.findOne({ categoryId, stationId: station._id })
 
 		return (
-			<List.Item key={ entry._id} className='item' onClick={ () => this.goToJudgePage(station._id, categoryId)} >
-				{ judged ? <Tag color='green' >Judged</Tag> : <Tag color='orange' >Not Judged</Tag> }
-				<b>{ station.name }</b>
+			<List.Item key={entry._id} className="item" onClick={() => this.goToJudgePage(station._id, categoryId)}>
+				{judged ? <Tag color="green">Judged</Tag> : <Tag color="orange">Not Judged</Tag>}
+				<b>{station.name}</b>
 			</List.Item>
 		)
 	}
 
-	private goToJudgePage (stationId?: string, categoryId?: string) {
+	private goToJudgePage(stationId?: string, categoryId?: string) {
 		if (!stationId || !categoryId) return
 
 		this.props.history.push(`/judge/${stationId}/${categoryId}`)
@@ -102,7 +91,7 @@ export default withTracker((props: Props) => {
 		Meteor.subscribe(Collections.ENTRIES),
 		Meteor.subscribe(Collections.STATIONS),
 		Meteor.subscribe(Collections.SCORES),
-		Meteor.subscribe('users')
+		Meteor.subscribe('users'),
 	]
 
 	const user = Meteor.user() as NaSTAUser
@@ -122,17 +111,22 @@ export default withTracker((props: Props) => {
 	const entries: Entry[] = []
 
 	/** Find only the latest entry for each station. */
-	Stations.find({ }).fetch().forEach((station) => {
-		const latest = Entries.findOne({
-			categoryId: category._id,
-			stationId: station._id,
-			verified: VerificationStatus.VERIFIED
-		}, {
-			sort: { date: -1 }
-		})
+	Stations.find({})
+		.fetch()
+		.forEach((station) => {
+			const latest = Entries.findOne(
+				{
+					categoryId: category._id,
+					stationId: station._id,
+					verified: VerificationStatus.VERIFIED,
+				},
+				{
+					sort: { date: -1 },
+				}
+			)
 
-		if (latest) entries.push(latest)
-	})
+			if (latest) entries.push(latest)
+		})
 
 	const loading = handles.some((handle) => !handle.ready())
 
@@ -140,6 +134,6 @@ export default withTracker((props: Props) => {
 		loading,
 		category,
 		entries,
-		user
+		user,
 	}
 })(withRouter(Judge) as any)

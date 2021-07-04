@@ -1,127 +1,129 @@
 body {
-    background-image: url('/background.jpg');
-    background-size: cover;
-    height: 90% !important;
+	background-image: url('/background.jpg');
+	background-size: cover;
+	height: 90% !important;
 }
 
 .container p {
-    color: rgb(253, 253, 253) !important;
-    font-size: medium;
-    /*text-shadow: 1px 1px 1px black;*/
+	color: rgb(253, 253, 253) !important;
+	font-size: medium;
+	/*text-shadow: 1px 1px 1px black;*/
 }
 
 .Card {
-    background-color: white;
-    padding: 32px;
-    width: 50%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.11), 0 5px 15px 0 rgba(0, 0, 0, 0.08);
-    box-sizing: border-box;
+	background-color: white;
+	padding: 32px;
+	width: 50%;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.11), 0 5px 15px 0 rgba(0, 0, 0, 0.08);
+	box-sizing: border-box;
 }
 
 .App .container a {
-    color: rgb(253, 253, 253);
-    /*text-shadow: 1px 1px 1px #555;*/
+	color: rgb(253, 253, 253);
+	/*text-shadow: 1px 1px 1px #555;*/
 }
 
 .App .container a:hover {
-    color: rgb(221, 218, 218);
-    /*text-shadow: 1px 1px 1px #555;*/
+	color: rgb(221, 218, 218);
+	/*text-shadow: 1px 1px 1px #555;*/
 }
 
 .App .container {
-    box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);   
-    border-radius: 5px;
-    position: relative;
-    z-index: 1;
-    background: inherit;
-    padding: 10px;
-    width: 90%;
-    margin: 5%;
+	box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
+	border-radius: 5px;
+	position: relative;
+	z-index: 1;
+	background: inherit;
+	padding: 10px;
+	width: 90%;
+	margin: 5%;
 }
 
 .App .container.compact {
-    width: 30rem;
-    height: 20rem;
-    box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);   
-    border-radius: 5px;
-    position: relative;
-    z-index: 1;
-    background: inherit;
-    overflow: hidden;
-    padding: 10px;
+	width: 30rem;
+	height: 20rem;
+	box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
+	border-radius: 5px;
+	position: relative;
+	z-index: 1;
+	background: inherit;
+	overflow: hidden;
+	padding: 10px;
 }
 
 .App .container.compact .ant-btn {
-    width: 100%;
+	width: 100%;
 }
 
 .App .container:before {
-    content: "";
-    position: absolute;
-    background: inherit;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(45, 40, 40, 0.6);
-    /*box-shadow: inset 0 0 2000px rgba(255, 255, 255, .4);*/
-    /*filter: blur(10px);*/
-    /*margin: -20px;*/
+	content: '';
+	position: absolute;
+	background: inherit;
+	z-index: -1;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(45, 40, 40, 0.6);
+	/*box-shadow: inset 0 0 2000px rgba(255, 255, 255, .4);*/
+	/*filter: blur(10px);*/
+	/*margin: -20px;*/
 }
 
-.container h1, .container h2, .container h3 {
-    color: rgb(253, 253, 253);
-    /*text-shadow: 1px 1px 1px #555;*/
+.container h1,
+.container h2,
+.container h3 {
+	color: rgb(253, 253, 253);
+	/*text-shadow: 1px 1px 1px #555;*/
 }
 
 .container .ant-btn.ant-btn-link {
-    color: rgb(253, 253, 253) !important;
-    /*text-shadow: 1px 1px 1px #555;*/
+	color: rgb(253, 253, 253) !important;
+	/*text-shadow: 1px 1px 1px #555;*/
 }
 
 .container .ant-btn.ant-btn-link:hover {
-    color: rgb(221, 218, 218);
-    /*text-shadow: 1px 1px 1px #555;*/
+	color: rgb(221, 218, 218);
+	/*text-shadow: 1px 1px 1px #555;*/
 }
 
 .container .list .item {
-    color: rgb(251, 251, 251);
-    background-color: rgba(251, 251, 251, 0.15);
-    padding: 1%;
-    cursor: pointer;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select:none;
-    user-select:none;
-    -o-user-select:none;
+	color: rgb(251, 251, 251);
+	background-color: rgba(251, 251, 251, 0.15);
+	padding: 1%;
+	cursor: pointer;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-o-user-select: none;
 }
 
 .container .submit .list .item.interactive {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .container .list .item:hover {
-    background-color: rgba(30, 223, 213, 0.15);
+	background-color: rgba(30, 223, 213, 0.15);
 }
 
 .container .list .item.divider {
-    border-bottom: 1px solid #c2babac0;
+	border-bottom: 1px solid #c2babac0;
 }
 
 .container .list .item b {
-    color: rgb(251, 251, 251);
-    text-shadow: 1px 1px 1px black;
+	color: rgb(251, 251, 251);
+	text-shadow: 1px 1px 1px black;
 }
 
 .container .list .item .ant-btn b {
-    color: rgba(0, 0, 0, 0.65);
-    /*text-shadow: none;*/
+	color: rgba(0, 0, 0, 0.65);
+	/*text-shadow: none;*/
 }
 
 h4 {
-    font-size: 20px;
+	font-size: 20px;
 }

@@ -11,15 +11,15 @@ interface Props {
 	uuid: string
 	stationName: string
 	categoryName: string
-	onUpload (uuid: string): void
-	onChange (uuid: string, value: string): void
+	onUpload(uuid: string): void
+	onChange(uuid: string, value: string): void
 }
 
 interface State {
 	uploading: boolean
 	successfullUploaded: boolean
 	files: File[]
-	uploadProgress: { [name: string]: { percentage: number, state: 'pending' | 'uploading' | 'done' | 'error'} }
+	uploadProgress: { [name: string]: { percentage: number; state: 'pending' | 'uploading' | 'done' | 'error' } }
 	tries: { [name: string]: number }
 }
 
@@ -27,15 +27,15 @@ interface State {
  * Creates a file upload button.
  */
 export class Upload extends Component<Props, State> {
-	constructor (props: Props) {
-		super (props)
+	constructor(props: Props) {
+		super(props)
 
 		this.state = {
 			files: [],
 			uploading: false,
-			uploadProgress: { },
+			uploadProgress: {},
 			successfullUploaded: false,
-			tries: { }
+			tries: {},
 		}
 
 		this.onFilesAdded = this.onFilesAdded.bind(this)
@@ -43,66 +43,69 @@ export class Upload extends Component<Props, State> {
 		this.sendRequest = this.sendRequest.bind(this)
 	}
 
-	public render () {
+	public render() {
 		return (
-			<div className='Upload'>
-				<div className='Content'>
+			<div className="Upload">
+				<div className="Content">
 					<Dropzone
-						onFilesAdded={ this.onFilesAdded}
-						disabled={ this.state.uploading || this.state.successfullUploaded }
-						format={ this.props.format }
+						onFilesAdded={this.onFilesAdded}
+						disabled={this.state.uploading || this.state.successfullUploaded}
+						format={this.props.format}
 					/>
 				</div>
-				<div className='Files'>
-				{
-					this.state.files.map((file) => {
+				<div className="Files">
+					{this.state.files.map((file) => {
 						return (
-							<div key={ file.name.replace(/\s+/g, '_') } className='Row'>
-								<span className='Filename'><p>{ file.name }</p></span>
-								{ this.renderProgress(file) }
+							<div key={file.name.replace(/\s+/g, '_')} className="Row">
+								<span className="Filename">
+									<p>{file.name}</p>
+								</span>
+								{this.renderProgress(file)}
 							</div>
 						)
-					})
-				}
+					})}
 				</div>
 			</div>
 		)
 	}
 
-	private onFilesAdded (files: File[]) {
+	private onFilesAdded(files: File[]) {
 		this.setState((_prevState) => ({
-		  files
+			files,
 		}))
 
 		setTimeout(() => this.uploadFiles(), 1000)
 	}
 
-	private renderProgress (file: File) {
+	private renderProgress(file: File) {
 		const uploadProgress = this.state.uploadProgress[file.name.replace(/\s+/g, '_')]
 		if (this.state.uploading || this.state.successfullUploaded) {
 			return (
-			<div className='ProgressWrapper'>
-				<Progress progress={ uploadProgress ? uploadProgress.percentage : 0 } />
-				{
-					uploadProgress ? <div className='UploadPercent'><p>{ Math.floor(uploadProgress.percentage) }%</p></div> : undefined
-				}
-				{
-					this.state.tries[file.name.replace(/\s+/g, '_')] > 0 ?
-					this.state.tries[file.name.replace(/\s+/g, '_')] >= 5 ?
-					<div className='UploadFailed'>
-						<p>Uploading failed.</p>
-					</div> :
-					<div>
-						<p>Upload failed, retrying. Attempt: { this.state.tries[file.name.replace(/\s+/g, '_')] + 1 } / 5</p>
-					</div> : undefined
-				}
-			</div>
+				<div className="ProgressWrapper">
+					<Progress progress={uploadProgress ? uploadProgress.percentage : 0} />
+					{uploadProgress ? (
+						<div className="UploadPercent">
+							<p>{Math.floor(uploadProgress.percentage)}%</p>
+						</div>
+					) : undefined}
+					{this.state.tries[file.name.replace(/\s+/g, '_')] > 0 ? (
+						this.state.tries[file.name.replace(/\s+/g, '_')] >= 5 ? (
+							<div className="UploadFailed">
+								<p>Uploading failed.</p>
+							</div>
+						) : (
+							<div>
+								<p>Upload failed, retrying. Attempt: {this.state.tries[file.name.replace(/\s+/g, '_')] + 1} / 5</p>
+							</div>
+						)
+					) : undefined}
+				</div>
 			)
 		}
 	}
 
-	private async uploadFiles () {
-		this.setState({ uploadProgress: { }, uploading: true })
+	private async uploadFiles() {
+		this.setState({ uploadProgress: {}, uploading: true })
 		const promises: Array<Promise<unknown>> = []
 		let valid = true
 		this.state.files.forEach((file) => {
@@ -129,36 +132,38 @@ export class Upload extends Component<Props, State> {
 				this.setState({ successfullUploaded: false, uploading: false })
 			}
 		} else {
-			this.setState({ uploadProgress: { }, uploading: false })
+			this.setState({ uploadProgress: {}, uploading: false })
 
 			this.setState({ files: [] })
 		}
 	}
 
-	private async sendRequest (file: File) {
+	private async sendRequest(file: File) {
 		return new Promise(async (resolve, reject) => {
 			if (file.size <= 10 * 1024 * 1024) {
 				this.setState({
-					uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 1, state: 'uploading'} },
-					uploading: true
+					uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 1, state: 'uploading' } },
+					uploading: true,
 				})
 				let uploading = true
 				let tries = 0
 				while (uploading && tries < 5) {
 					try {
-						return this.uploadSmallFile(file, this.props.stationName, this.props.categoryName).then((id) => {
-							this.props.onChange(this.props.uuid, id.replace(/^id:/, ''))
-							uploading = false
-							this.setState({
-								uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 100, state: 'done'} },
-								uploading: true
+						return this.uploadSmallFile(file, this.props.stationName, this.props.categoryName)
+							.then((id) => {
+								this.props.onChange(this.props.uuid, id.replace(/^id:/, ''))
+								uploading = false
+								this.setState({
+									uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 100, state: 'done' } },
+									uploading: true,
+								})
+								resolve()
 							})
-							resolve()
-						}).catch((err) => {
-							console.log(err)
-							tries++
-							this.setState({ tries: { [file.name.replace(/\s+/g, '_')]: tries } })
-						})
+							.catch((err) => {
+								console.log(err)
+								tries++
+								this.setState({ tries: { [file.name.replace(/\s+/g, '_')]: tries } })
+							})
 					} catch (err) {
 						tries++
 					}
@@ -173,21 +178,20 @@ export class Upload extends Component<Props, State> {
 
 						console.log('Uploading')
 
-						this.setState(
-							{ uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 1, state: 'pending'} }, uploading: true }
-						)
+						this.setState({
+							uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 1, state: 'pending' } },
+							uploading: true,
+						})
 						const sessionId = await this.startUploadSession(chunks[0])
-						this.setState(
-							{
-								uploadProgress: {
-									[file.name.replace(/\s+/g, '_')]: {
-										percentage: (1 / chunks.length) * 100,
-										state: 'uploading'
-									}
+						this.setState({
+							uploadProgress: {
+								[file.name.replace(/\s+/g, '_')]: {
+									percentage: (1 / chunks.length) * 100,
+									state: 'uploading',
 								},
-								uploading: true
-							}
-						)
+							},
+							uploading: true,
+						})
 
 						if (sessionId) {
 							for (let i = 1; i < chunks.length - 1; i++) {
@@ -202,17 +206,15 @@ export class Upload extends Component<Props, State> {
 									this.props.stationName,
 									this.props.categoryName
 								)
-								this.setState(
-									{
-										uploadProgress: {
-											[file.name.replace(/\s+/g, '_')]: {
-												percentage: (i / chunks.length) * 100,
-												state: 'pending'
-											}
+								this.setState({
+									uploadProgress: {
+										[file.name.replace(/\s+/g, '_')]: {
+											percentage: (i / chunks.length) * 100,
+											state: 'pending',
 										},
-										uploading: true
-									}
-								)
+									},
+									uploading: true,
+								})
 							}
 
 							console.log('Appending final chunk')
@@ -227,8 +229,8 @@ export class Upload extends Component<Props, State> {
 								this.props.categoryName
 							)
 							this.setState({
-								uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 100, state: 'done'} },
-								uploading: true
+								uploadProgress: { [file.name.replace(/\s+/g, '_')]: { percentage: 100, state: 'done' } },
+								uploading: true,
 							})
 							uploading = false
 							resolve(id.replace(/^id:/, ''))
@@ -242,23 +244,25 @@ export class Upload extends Component<Props, State> {
 		})
 	}
 
-	private chunkFile (file: File, chunkSize: number = 8 * 1024 * 1024): Blob[] {
-		const chunks = Math.ceil(file.size/chunkSize)
+	private chunkFile(file: File, chunkSize: number = 8 * 1024 * 1024): Blob[] {
+		const chunks = Math.ceil(file.size / chunkSize)
 		const fileparts: Blob[] = []
 
 		for (let i = 0; i < chunks; i++) {
-			fileparts[i] = file.slice(chunkSize*i, chunkSize*i + chunkSize)
+			fileparts[i] = file.slice(chunkSize * i, chunkSize * i + chunkSize)
 		}
 		return fileparts
 	}
 
-	private async uploadSmallFile (file: File, stationName: string, categoryName: string): Promise<string> {
+	private async uploadSmallFile(file: File, stationName: string, categoryName: string): Promise<string> {
 		const b64Encoding = await blobToBase64(file)
 		return new Promise((resolve, reject) => {
 			Meteor.call(
 				'submission.uploadFile',
 				b64Encoding,
-				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${file.name.replace(/$\//, '').replace(/\s+/g, '_')}`,
+				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${file.name
+					.replace(/$\//, '')
+					.replace(/\s+/g, '_')}`,
 
 				(error: any, result: any) => {
 					if (error) reject(error)
@@ -268,7 +272,7 @@ export class Upload extends Component<Props, State> {
 		})
 	}
 
-	private async startUploadSession (chunk: Blob): Promise<string> {
+	private async startUploadSession(chunk: Blob): Promise<string> {
 		const b64Encoding = await blobToBase64(chunk)
 		return new Promise((resolve, reject) => {
 			Meteor.call('submission.startSession', b64Encoding, (error: any, result: any) => {
@@ -278,7 +282,7 @@ export class Upload extends Component<Props, State> {
 		})
 	}
 
-	private async uploadChunk (
+	private async uploadChunk(
 		chunk: Blob,
 		sessionId: string,
 		chunkSize: number,
@@ -297,7 +301,9 @@ export class Upload extends Component<Props, State> {
 				chunkSize,
 				chunkNumber,
 				finish,
-				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${path.replace(/^\/+/, '').replace(/\s/g, '_')}`,
+				`/${categoryName.replace(/\s/g, '_')}_${stationName.replace(/\s/g, '_')}_${path
+					.replace(/^\/+/, '')
+					.replace(/\s/g, '_')}`,
 
 				(error: any, result: any) => {
 					if (error) reject(error)

@@ -6,5 +6,5 @@ import App from '/imports/ui/App'
 import 'antd/dist/antd.css'
 
 Meteor.startup(() => {
-  render(<App />, document.getElementById('react-target'))
+	render(<App />, document.getElementById('react-target'))
 })

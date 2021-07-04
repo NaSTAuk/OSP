@@ -17,7 +17,7 @@ export const Scores = new Mongo.Collection<Score>(Collections.SCORES)
 if (Meteor.isServer) {
 	Meteor.publish(Collections.SCORES, () => {
 		if (Meteor.userId() && UserHasRole([Roles.ADMIN, Roles.HOST, Roles.JUDGE])) {
-			return Scores.find({ })
+			return Scores.find({})
 		}
 	})
 }

@@ -13,64 +13,54 @@ interface Props extends RouteComponentProps {
 }
 
 class SubmitListAwards extends Component<Props> {
-	public render () {
+	public render() {
 		if (this.props.loading) return <div></div>
 		return (
-			<div className='submit'>
-				<Link to='/'>Back</Link>
+			<div className="submit">
+				<Link to="/">Back</Link>
 				<h1>Awards Open For Entry</h1>
-				{
-					this.props.awards.filter((award) => award.active).length > 0 ?
+				{this.props.awards.filter((award) => award.active).length > 0 ? (
 					<List
-						itemLayout='horizontal'
-						dataSource={ this.props.awards.filter((award) => award.active) }
-						renderItem={ (award) => this.renderAward(award, false)}
-						className='list'
-					>
-
-					</List> :
+						itemLayout="horizontal"
+						dataSource={this.props.awards.filter((award) => award.active)}
+						renderItem={(award) => this.renderAward(award, false)}
+						className="list"></List>
+				) : (
 					<h1>There are currently no awards open, check back soon!</h1>
-				}
-				{
-					this.props.awards.some((award) => award.openForReview) ?
+				)}
+				{this.props.awards.some((award) => award.openForReview) ? (
 					<React.Fragment>
 						<h1>Review Entries</h1>
 						<List
-							itemLayout='horizontal'
-							dataSource={ this.props.awards.filter((award) => award.openForReview) }
-							renderItem={ (award) => this.renderAward(award, true)}
-							className='list'
-						>
-
-						</List>
+							itemLayout="horizontal"
+							dataSource={this.props.awards.filter((award) => award.openForReview)}
+							renderItem={(award) => this.renderAward(award, true)}
+							className="list"></List>
 					</React.Fragment>
-					: undefined
-				}
+				) : undefined}
 			</div>
 		)
 	}
 
-	private renderAward (award: Award, review: boolean) {
+	private renderAward(award: Award, review: boolean) {
 		return (
 			<List.Item
-				key={ award._id} className='item'
-				onClick={ () => this.props.history.push(`/${review ? 'review' : 'submit'}/${award._id}`)}
-			>
-				<b>{ award.name }</b>
+				key={award._id}
+				className="item"
+				onClick={() => this.props.history.push(`/${review ? 'review' : 'submit'}/${award._id}`)}>
+				<b>{award.name}</b>
 			</List.Item>
 		)
 	}
 }
 
 export default withTracker(() => {
-	const handles = [
-		Meteor.subscribe(Collections.AWARDS)
-	]
+	const handles = [Meteor.subscribe(Collections.AWARDS)]
 
 	const loading = handles.some((handle) => !handle.ready())
 
 	return {
 		loading,
-		awards: Awards.find().fetch()
+		awards: Awards.find().fetch(),
 	}
 })(withRouter(SubmitListAwards) as any)

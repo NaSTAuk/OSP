@@ -1,512 +1,108 @@
-import { Button, Checkbox, Divider, Drawer, Dropdown, Form, Icon, Input, List, Menu, Tag } from 'antd'
-import { Meteor } from 'meteor/meteor'
+import { Drawer } from 'antd'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { TechSpecIssuesList } from '../elements/TechSpecFailures'
-import { TechSpecsBadge } from '../elements/TechSpecsBadge'
-import { VerificationBadge } from '../elements/VerificationBadge'
-import { SupportingEvidenceList } from '../judge/SupportingEvidenceList'
 import { Award, Awards } from '/imports/api/awards'
-import { Categories, Category } from '/imports/api/categories'
-import { Entries, Entry } from '/imports/api/entries'
-import { Evidence, EvidenceCollection } from '/imports/api/evidence'
-import { Collections, SupportingEvidenceType, VerificationStatus } from '/imports/api/helpers/enums'
-import { EntriesList, EntryListEvidence } from '/imports/api/helpers/interfaces'
-import { Result, Results } from '/imports/api/results'
-import { Score, Scores } from '/imports/api/scores'
-import { Station, Stations } from '/imports/api/stations'
+import CategoryEntriesList from './CategoryEntriesList'
+import EntryPanel from './EntryPanel'
 import '/imports/ui/css/Hosts.css'
+import { Station, Stations } from '/imports/api/stations'
+import { Meteor } from 'meteor/meteor'
+import { Collections } from '/imports/api/helpers/enums'
 
-interface Props {
-	loading?: boolean
-	awards?: Award[]
-	categories?: Category[]
-	entries?: Entry[]
-	stations?: Station[]
-	scores?: Score[]
+interface Props {}
+
+interface TrackedProps {
+	awards: Award[]
+	stations: Station[]
+	loading: boolean
 }
 
 interface State {
-	activeEntry?: EntriesList
-	entriesList: EntriesList[]
+	activeEntryId?: string
 	drawerVisible: boolean
-	sortBy: { [categoryId: string]: 'name' | 'result' }
-	comments: string
 }
 
-class Hosts extends Component<Props, State> {
-
-	public static getDerivedStateFromProps (nextProps: Props, prevState: State): State {
-		if (nextProps.entries && nextProps.entries.length && nextProps.stations) {
-			const entries: Array<{ id: number, entry: EntryListEvidence }> = nextProps.entries.map((entry, index) => {
-				const station = nextProps.stations ?
-					nextProps.stations.find((stat) => stat._id === entry.stationId) :
-					undefined
-
-				if (!station) return
-
-				const evidence: Evidence[] = entry.evidenceIds.map((id) => {
-					return EvidenceCollection.findOne({ _id: id })
-				}).filter((ev) => ev !== undefined) as Evidence[]
-
-				const judgesComments = Scores.findOne({
-					stationId: station._id, categoryId: entry.categoryId
-				}, { sort: { date: -1 } })
-
-				return {
-					id: index,
-					entry: {
-						stationId: entry.stationId,
-						stationName: station ? station.name : '',
-						evidence,
-						judgesComments: judgesComments ? judgesComments.comments : undefined,
-						entry
-					}
-				}
-			}).filter((entry) => entry !== undefined) as Array<{ id: number, entry: EntryListEvidence }>
-
-			const sortBy = prevState.sortBy
-
-			if (nextProps.categories) {
-				nextProps.categories.forEach((cat) => {
-					if (sortBy[cat._id!] === undefined) {
-						sortBy[cat._id!] = 'name'
-					}
-				})
-			}
-
-			let activeEntry = prevState.activeEntry
-
-			if (prevState.activeEntry) {
-				activeEntry = entries.find((entry) => entry.id === prevState.activeEntry?.id)
-			}
-
-			return {
-				...prevState,
-				entriesList: entries,
-				activeEntry,
-				sortBy
-			}
-		}
-
-		return prevState
-	}
-
-	constructor (props: Props) {
+class Hosts extends Component<Props & TrackedProps, State> {
+	constructor(props: Props & TrackedProps) {
 		super(props)
 
 		this.state = {
 			drawerVisible: false,
-			entriesList: [],
-			sortBy: { },
-			comments: ''
 		}
 	}
 
-	public render () {
-		if (this.props.loading) return <div></div>
+	public render() {
+		if (this.props.loading) {
+			return <div className="hosts">Loading...</div>
+		}
+
 		return (
-			<div className='hosts'>
-				<Link to='/'>Back</Link>
+			<div className="hosts">
+				<Link to="/">Back</Link>
 				<h1>Review Entries</h1>
-				{ this.renderAwards() }
-				<Drawer
-					title={ this.state.activeEntry ? this.state.activeEntry.entry.stationName : 'Entry Details' }
-					placement='right'
-					width={ '50%' }
-					closable={ true }
-					visible={ this.state.drawerVisible }
-					onClose={ () => this.drawerClosed() }
-				>
-					{ this.renderEntryPanel() }
-				</Drawer>
+				{this.renderAwards()}
+				{this.state.activeEntryId && (
+					<Drawer
+						title="Entry"
+						placement="right"
+						width={'50%'}
+						closable={true}
+						visible={this.state.drawerVisible}
+						onClose={() => this.drawerClosed()}>
+						<EntryPanel entryId={this.state.activeEntryId} />
+					</Drawer>
+				)}
 			</div>
 		)
 	}
 
-	private setEntryVerificationStatus (entry: Entry, status: VerificationStatus) {
-		Meteor.call('entry:setVerification', entry._id, status)
-	}
-
-	private renderEntryPanel () {
-
-		if(!this.state.activeEntry) return <div></div>
-
-		const translateStatus = (stat: VerificationStatus) => {
-			switch (stat) {
-				case VerificationStatus.DISPUTED:
-					return 'Disputed'
-				case VerificationStatus.REJECTED:
-					return 'Rejected'
-				case VerificationStatus.VERIFIED:
-					return 'Verified'
-				case VerificationStatus.WAITING:
-					return 'Awaiting Verification'
-			}
-		}
-
-		const changeStatus = (stat: VerificationStatus) => {
-			this.setEntryVerificationStatus(this.state.activeEntry!.entry.entry, stat)
-		}
-
-		const verifiedDropdown = (
-			<Menu key='stationDropdown'>
-				<Menu.Item
-					key='verificationDisputed'
-					onClick={ () => changeStatus(VerificationStatus.DISPUTED) }
-				>
-					{ translateStatus(VerificationStatus.DISPUTED) }
-				</Menu.Item>
-				<Menu.Item
-					key='verificationRejected'
-					onClick={ () => changeStatus(VerificationStatus.REJECTED) }
-				>
-					{ translateStatus(VerificationStatus.REJECTED) }
-				</Menu.Item>
-				<Menu.Item
-					key='verificationVerified'
-					onClick={ () => changeStatus(VerificationStatus.VERIFIED) }
-				>
-					{ translateStatus(VerificationStatus.VERIFIED) }
-				</Menu.Item>
-				<Menu.Item
-					key='verificationWaiting'
-					onClick={ () => changeStatus(VerificationStatus.WAITING) }
-				>
-					{ translateStatus(VerificationStatus.WAITING) }
-				</Menu.Item>
-			</Menu>
-		)
-
-		return (
-			<React.Fragment>
-				<h1>Quick actions</h1>
-				<Form>
-					<h4>Set Entry Status</h4>
-					<Dropdown.Button overlay={ verifiedDropdown} icon={ <Icon key='down' type='down' /> }>
-						{
-							translateStatus(
-								this.state.activeEntry.entry.entry.verified ?
-								this.state.activeEntry.entry.entry.verified :
-								VerificationStatus.WAITING
-							)
-						}
-					</Dropdown.Button>
-					<Form.Item>
-						{
-							this.state.activeEntry.entry.evidence.map((evidence) => {
-								return this.renderSupportingEvidenceAproved(evidence)
-							})
-						}
-					</Form.Item>
-				</Form>
-				<Divider />
-				<h1>Host Comments</h1>
-				<Form>
-					<Form.Item>
-						<Input value={ this.state.comments } onChange={ (event) => this.commentChange(event) } />
-					</Form.Item>
-					<Button type='primary' onClick={ () => this.saveComments(this.state.activeEntry!.entry.entry) }>
-						Save Comments
-					</Button>
-				</Form>
-				<Divider />
-				<h1>Judge Comments</h1>
-				{
-					this.state.activeEntry.entry.judgesComments || 'No comments yet'
-				}
-				<Divider />
-				{
-					this.state.activeEntry.entry.evidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) ?
-					<React.Fragment>
-						<h2>Video Tech Specs</h2>
-						<p>
-							{
-								this.state.activeEntry.entry.entry.passesTechSpecs === undefined ?
-								'Awaiting Check' :
-								<React.Fragment>
-									Passes Tech Specs?<Checkbox checked={ !!this.state.activeEntry.entry.entry.passesTechSpecs } />
-								</React.Fragment>
-							}
-							{
-								this.state.activeEntry.entry.entry.techSpecFailures ?
-								<React.Fragment>
-									<h3>Issues Meeting Technical Specifications</h3>
-									<TechSpecIssuesList failures={ this.state.activeEntry.entry.entry.techSpecFailures } />
-								</React.Fragment> : undefined
-							}
-						</p>
-						<Button type='primary' onClick={ () => this.rerunCheck(this.state.activeEntry!.entry.entry) }>Rerun Check</Button>
-					</React.Fragment> : undefined
-				}
-				<Divider />
-				<h1>Entry</h1>
-				<p>
-					Entered at: { new Date(this.state.activeEntry.entry.entry.date).toLocaleString() }
-				</p>
-				<SupportingEvidenceList evidence={ this.state.activeEntry.entry.evidence } />
-				<Divider />
-				<h1>Video Links</h1>
-				<p style={ { wordWrap: 'break-word', whiteSpace: 'pre-wrap' } }>
-					{
-						this.state.activeEntry.entry.entry.videoLinks
-					}
-				</p>
-			</React.Fragment>
-		)
-	}
-
-	private rerunCheck (entry: Entry) {
-		Meteor.call('entry:rechecktech', entry._id)
-	}
-
-	private renderSupportingEvidenceAproved (evidence: Evidence) {
-
-		const translateType = (type: SupportingEvidenceType) => {
-			switch (type) {
-				case SupportingEvidenceType.CALL:
-					return `Call taken place?`
-				case SupportingEvidenceType.PDF:
-					return `PDF Apporoved?`
-				case SupportingEvidenceType.TEXT:
-					return 'Text Approved?'
-				case SupportingEvidenceType.VIDEO:
-					return 'Video Approved?'
-			}
-		}
-
-		return (
-			<div key={ evidence._id }>
-				<b style={ { marginRight: '1%' } }>{ translateType(evidence.type) }</b>
-				<Checkbox checked={ evidence.verified } onChange={ (event) => this.setVerified(evidence, event.target.checked) } />
-			</div>
-		)
-	}
-
-	private commentChange (event: React.ChangeEvent<HTMLInputElement>) {
-		this.setState({
-			comments: event.target.value
-		})
-	}
-
-	private saveComments (entry: Entry) {
-		Meteor.call('entry:savecomment', entry._id, this.state.comments)
-	}
-
-	private async setVerified (evidence: Evidence, verified: boolean) {
-		await Meteor.call('evidence:setVerified', evidence._id, verified)
-		setTimeout(() => this.forceUpdate(), 1000)
-	}
-
-	private drawerClosed () {
+	private drawerClosed() {
 		this.setState({
 			drawerVisible: false,
-			activeEntry: undefined
 		})
 	}
 
-	private renderAwards () {
+	private renderAwards() {
 		if (!this.props.awards || !this.props.awards.length) return <div>No awards in system</div>
 
 		return this.props.awards.map((award) => {
 			return (
-				<div key={ award._id }>
-					<h1>{ award.name }</h1>
-					{ this.renderCategoriesInAward(award) }
+				<div key={award._id}>
+					<h1>{award.name}</h1>
+					{this.renderCategoriesInAward(award)}
 				</div>
 			)
 		})
 	}
 
-	private renderCategoriesInAward (award: Award) {
-		const categories = this.props.categories ?
-			this.props.categories.filter(((cat) => award.categories.includes(cat._id!)))
-			: []
-
-		return categories.map((category) => {
+	private renderCategoriesInAward(award: Award) {
+		return award.categories.map((categoryId) => {
 			return (
-				<div key={ category._id} className='category'>
-					<h2>{ category.name }</h2>
-					<p>
-						Sort By&nbsp;
-						<b className='sort-by' onClick={ () => this.sortCategory(category._id!, 'name') }>Name</b>&nbsp;
-						<b className='sort-by' onClick={ () => this.sortCategory(category._id!, 'result') }>Result</b>
-					</p>
-					{ this.renderEntriesInCategory(category) }
-				</div>
+				<CategoryEntriesList
+					setActiveEntry={(entryId) => this.setActiveEntry(entryId)}
+					key={categoryId}
+					categoryId={categoryId}
+					stations={this.props.stations}
+				/>
 			)
 		})
 	}
 
-	private sortCategory (categoryId: string, sort: 'name' | 'result') {
-		this.setState({
-			sortBy: { ...this.state.sortBy, [categoryId]: sort }
-		})
-	}
-
-	private renderEntriesInCategory (category: Category) {
-		const results = Results.findOne({ categoryId: category._id })
-
-		const list = this.state.entriesList
-			.filter((entry) => entry.entry.entry.categoryId === category._id)
-			.sort((a, b) => {
-				if (this.state.sortBy[category._id!] === 'result') {
-					if (!results) return 0
-					const rankA = results.order[a.entry.stationId]
-					const rankB = results.order[b.entry.stationId]
-
-					if (!rankA && !rankB) return 0
-					if (!rankA) return -1
-					if (!rankB) return 1
-
-					if (rankA > rankB) return 1
-					if (rankA < rankB) return -1
-
-					return 0
-				} else {
-					return a.entry.stationName.localeCompare(b.entry.stationName)
-				}
-			})
-
-		if (!list.length) return <div><Tag color='red'>No Entries</Tag></div>
-
-		return (
-			<List
-				itemLayout='horizontal'
-				dataSource={ list }
-				renderItem={ (entry) => this.renderEntry(entry, results)}
-				className='list'
-			>
-
-			</List>
-		)
-	}
-
-	private renderEntry (entry: EntriesList, result?: Result) {
-		return (
-			<List.Item
-				key={ entry._id} className='item'
-				onClick={
-					() => this.setState({ activeEntry: entry, drawerVisible: true, comments: entry.entry.entry.comments || '' })
-				}
-			>
-				<div className='content'>
-					<b>{ entry.entry.stationName }</b>
-					<span className='badges'>
-						{
-							this.renderJudgedBadge(entry.entry.entry)
-						}
-						{
-							entry.entry.evidence.some((ev) => ev.type === SupportingEvidenceType.VIDEO) ?
-							 <TechSpecsBadge entry={ entry.entry.entry } /> : undefined
-						}
-						{
-							this.renderVerificationBadge(entry.entry.entry)
-						}
-						{
-							this.renderResultBadge(entry.entry.entry, result)
-						}
-					</span>
-				</div>
-			</List.Item>
-		)
-	}
-
-	private renderJudgedBadge (entry: Entry) {
-		if (!this.props.scores) return <Tag color='red'>Not Judged</Tag>
-
-		const score = this.props.scores.find(
-			(sc) => sc.stationId === entry.stationId && sc.categoryId === entry.categoryId
-		)
-
-		if (score) {
-			return (
-				<Tag color='green'>Judged</Tag>
-			)
-		}
-
-		return (
-			<Tag color='red'>Not Judged</Tag>
-		)
-	}
-
-	private renderVerificationBadge (entry: Entry) {
-		return <VerificationBadge entry={ entry } />
-	}
-
-	private renderResultBadge (entry: Entry, result?: Result) {
-		if (!result) return <Tag color='red'>No Result</Tag>
-
-		const place = Object.entries(result.order).find(([id]) => id === entry.stationId)
-
-		if (!place) return <Tag color='red'>No Result</Tag>
-
-		const position = place[1]
-
-		return (
-			<Tag color={ position === 1 ? 'gold' : position === 2 ? 'silver' : position < 5 ? 'green' : 'lime' }>
-				{
-					position < 3 ?
-					<Icon type='trophy'  /> :
-					this.ordinal_suffix_of(position)
-				}
-			</Tag>
-		)
-	}
-
-	private ordinal_suffix_of (i: number): string {
-		const j = i % 10
-		const k = i % 100
-		if (j === 1 && k !== 11) {
-			return i + 'st'
-		}
-		if (j === 2 && k !== 12) {
-			return i + 'nd'
-		}
-		if (j === 3 && k !== 13) {
-			return i + 'rd'
-		}
-		return i + 'th'
+	private setActiveEntry(activeEntryId: string) {
+		this.setState({ activeEntryId, drawerVisible: true })
 	}
 }
 
-export default withTracker((props: Props) => {
+export default withTracker<Props & TrackedProps, Props>((props: Props) => {
+	let handles = [Meteor.subscribe(Collections.AWARDS), Meteor.subscribe(Collections.STATIONS)]
 
-	const handles = [
-		Meteor.subscribe(Collections.AWARDS),
-		Meteor.subscribe(Collections.CATEGORIES),
-		Meteor.subscribe(Collections.ENTRIES),
-		Meteor.subscribe(Collections.STATIONS),
-		Meteor.subscribe(Collections.SCORES),
-		Meteor.subscribe(Collections.RESULTS),
-		Meteor.subscribe(Collections.EVIDENCE)
-	]
-
-	const categories = Categories.find({ }).fetch()
-	const stations = Stations.find({ }).fetch().sort((a, b) => a.name.localeCompare(b.name))
-	const entries: Entry[] = []
-
-	categories.forEach((category) => {
-		stations.forEach((station) => {
-			const entry = Entries.findOne({
-				stationId: station._id,
-				categoryId: category._id
-			}, { sort: { date: -1 } })
-
-			if (entry) entries.push(entry)
-		})
-	})
-
-	const loading = handles.some((handle) => !handle.ready())
+	let loading = handles.some((h) => !h.ready())
 
 	return {
 		...props,
 		loading,
-		awards: Awards.find({ }).fetch(),
-		categories,
-		entries,
-		stations,
-		scores: Scores.find({ }).fetch()
+		awards: Awards.find({}).fetch(),
+		stations: Stations.find({}).fetch(),
 	}
-})(Hosts as any)
+})(Hosts)

@@ -4,7 +4,7 @@ import { GetUserFromId, UserHasRole } from './accounts'
 import { Collections, Roles } from './helpers/enums'
 
 export interface Station {
-	_id?: string
+	_id: string
 	/** Station full name (as written on award). */
 	name: string
 	/** Whether the station is eligible to enter the awards (is affiliated, not disqualified). */
@@ -22,7 +22,7 @@ if (Meteor.isServer) {
 			const user = GetUserFromId()
 			if (user) {
 				if (UserHasRole([Roles.ADMIN, Roles.HOST])) {
-					return Stations.find({ })
+					return Stations.find({})
 				} else if (UserHasRole([Roles.JUDGE, Roles.EDITOR])) {
 					return Stations.find({ name: { $ne: 'NaSTA' } })
 				} else {
@@ -33,7 +33,7 @@ if (Meteor.isServer) {
 	})
 }
 
-export function GetStationForUser (): Station | undefined {
+export function GetStationForUser(): Station | undefined {
 	const id = Meteor.userId()
 	if (id) {
 		const user = GetUserFromId()
@@ -43,10 +43,10 @@ export function GetStationForUser (): Station | undefined {
 	}
 }
 
-export const DEFAULT_STATIONS: Station[] = [
+export const DEFAULT_STATIONS: Omit<Station, '_id'>[] = [
 	{
 		name: 'NaSTA',
 		eligibleForEntry: true,
-		authorizedUsers: []
-	}
+		authorizedUsers: [],
+	},
 ]

@@ -44,9 +44,9 @@ export interface SupportingEvidenceCall extends SupportingEvidenceBase {
 }
 
 export type SupportingEvidence =
-	SupportingEvidenceVideo |
-	SupportingEvidenceText |
-	SupportingEvidencePDF |
-	SupportingEvidenceCall
+	| SupportingEvidenceVideo
+	| SupportingEvidenceText
+	| SupportingEvidencePDF
+	| SupportingEvidenceCall
 
 export const SupportingEvidence = new Mongo.Collection<SupportingEvidence>(Collections.SUPPORTING_EVIDENCE)

@@ -3,7 +3,7 @@ import TextArea from 'antd/lib/input/TextArea'
 import { Meteor } from 'meteor/meteor'
 import { withTracker } from 'meteor/react-meteor-data'
 import React, { Component } from 'react'
-import { RouteComponentProps, withRouter } from 'react-router'
+import { RouteComponentProps, withRouter } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { Categories, Category } from '../../api/categories'
 import { Entries, Entry } from '../../api/entries'
@@ -25,78 +25,66 @@ interface Props extends RouteComponentProps {
 }
 
 interface State {
-	init: boolean,
+	init: boolean
 	comments: string
 }
 
 class JudgeCategory extends Component<Props, State> {
-
-	public static getDerivedStateFromProps (nextProps: Props, prevState: State): State {
+	public static getDerivedStateFromProps(nextProps: Props, prevState: State): State {
 		if (prevState.init && !nextProps.loading) {
 			return {
 				...prevState,
 				comments: nextProps.previousScore ? nextProps.previousScore.comments : '',
-				init: false
+				init: false,
 			}
 		}
 
 		return prevState
 	}
-	constructor (props: Props) {
-		super (props)
+	constructor(props: Props) {
+		super(props)
 
 		this.state = {
 			init: true,
-			comments: ''
+			comments: '',
 		}
 	}
 
-	public render () {
+	public render() {
 		if (this.props.loading) return <div></div>
 		return (
 			<div>
-				<Link to={ `/judge/${this.props.categoryId}` }>Back</Link>
-				<h1>{ this.getTitle() }</h1>
-				{ this.props.evidence ? <SupportingEvidenceList evidence={ this.props.evidence } /> : '' }
-				{ this.renderJudgingForm() }
+				<Link to={`/judge/${this.props.categoryId}`}>Back</Link>
+				<h1>{this.getTitle()}</h1>
+				{this.props.evidence ? <SupportingEvidenceList evidence={this.props.evidence} /> : ''}
+				{this.renderJudgingForm()}
 			</div>
 		)
 	}
 
-	private getTitle () {
+	private getTitle() {
 		return `${
-			this.props.category ?
-			`Judging ${
-				`${this.props.category.name}${
-					this.props.station ? ` for ${this.props.station.name}` : ''
-				}`
-			}` :
-			''
+			this.props.category
+				? `Judging ${`${this.props.category.name}${this.props.station ? ` for ${this.props.station.name}` : ''}`}`
+				: ''
 		}`
 	}
 
-	private renderJudgingForm () {
+	private renderJudgingForm() {
 		return (
-			<div key='judgingForm' style={ { paddingBottom: '300px' }}>
+			<div key="judgingForm" style={{ paddingBottom: '300px' }}>
 				<Form>
 					<Form.Item>
 						<h1>Your Comments</h1>
-						<p>Min 100 characters, current length: { this.state.comments.length }</p>
+						<p>Min 100 characters, current length: {this.state.comments.length}</p>
 						<TextArea
-							value={ this.state.comments }
-							rows={ 20 }
-							placeholder='Comments'
-							onChange={ (event) => this.commentsChange(event)}
-						>
-
-						</TextArea>
+							value={this.state.comments}
+							rows={20}
+							placeholder="Comments"
+							onChange={(event) => this.commentsChange(event)}></TextArea>
 					</Form.Item>
 					<Form.Item>
-						<Button
-							onClick={ (event) => this.judge(event)}
-							type='primary'
-							disabled={ this.state.comments.length < 100 }
-						>
+						<Button onClick={(event) => this.judge(event)} type="primary" disabled={this.state.comments.length < 100}>
 							Submit
 						</Button>
 					</Form.Item>
@@ -105,15 +93,15 @@ class JudgeCategory extends Component<Props, State> {
 		)
 	}
 
-	private commentsChange (event: React.ChangeEvent<HTMLTextAreaElement>) {
+	private commentsChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
 		event.preventDefault()
 
 		this.setState({
-			comments: event.target.value
+			comments: event.target.value,
 		})
 	}
 
-	private async judge (event: React.MouseEvent<HTMLElement, MouseEvent>) {
+	private async judge(event: React.MouseEvent<HTMLElement, MouseEvent>) {
 		event.preventDefault()
 
 		if (this.state.comments.length < 100) return
@@ -136,7 +124,7 @@ export default withTracker((props: Props) => {
 		Meteor.subscribe(Collections.CATEGORIES),
 		Meteor.subscribe(Collections.ENTRIES),
 		Meteor.subscribe(Collections.EVIDENCE),
-		Meteor.subscribe(Collections.SCORES)
+		Meteor.subscribe(Collections.SCORES),
 	]
 
 	const station = Stations.findOne({ _id: props.stationId })
@@ -149,9 +137,12 @@ export default withTracker((props: Props) => {
 
 	const loading = handles.some((handle) => !handle.ready())
 
-	const entry = Entries.findOne({ stationId: props.stationId, categoryId: props.categoryId }, {
-		sort: { date: -1 }
-	})
+	const entry = Entries.findOne(
+		{ stationId: props.stationId, categoryId: props.categoryId },
+		{
+			sort: { date: -1 },
+		}
+	)
 
 	if (!entry) return props
 
@@ -163,10 +154,13 @@ export default withTracker((props: Props) => {
 		if (evd) evidence.push(evd)
 	})
 
-	const previousScore = Scores.findOne({
-		stationId: props.stationId,
-		categoryId: props.categoryId
-	}, { sort: { date: -1 } })
+	const previousScore = Scores.findOne(
+		{
+			stationId: props.stationId,
+			categoryId: props.categoryId,
+		},
+		{ sort: { date: -1 } }
+	)
 
 	return {
 		...props,
@@ -175,6 +169,6 @@ export default withTracker((props: Props) => {
 		category,
 		entry,
 		evidence,
-		previousScore
+		previousScore,
 	}
 })(withRouter(JudgeCategory) as any)

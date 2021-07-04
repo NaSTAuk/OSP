@@ -5,7 +5,7 @@ import '/imports/ui/css/Dropzone.css'
 interface Props {
 	disabled: boolean
 	format: string
-	onFilesAdded (arr: any[]): void
+	onFilesAdded(arr: any[]): void
 }
 
 interface State {
@@ -16,7 +16,7 @@ interface State {
 export class Dropzone extends Component<Props, State> {
 	private fileInputRef: any
 
-	constructor (props: any) {
+	constructor(props: any) {
 		super(props)
 		this.state = { highlight: false }
 		this.fileInputRef = React.createRef()
@@ -27,59 +27,59 @@ export class Dropzone extends Component<Props, State> {
 		this.onDrop = this.onDrop.bind(this)
 	}
 
-	public render () {
+	public render() {
 		return (
-			<div className={ `Dropzone ${this.state.highlight ? 'Highlight' : ''}` }
-				onDragOver={ this.onDragOver }
-				onDragLeave={ this.onDragLeave }
-				onDrop={ this.onDrop }
-				onClick={ this.openFileDialog }
-				style={ { cursor: this.props.disabled ? 'default' : 'pointer' } }
-			>
-				<div className='DropzoneText'>Drag files here or click to upload</div>
+			<div
+				className={`Dropzone ${this.state.highlight ? 'Highlight' : ''}`}
+				onDragOver={this.onDragOver}
+				onDragLeave={this.onDragLeave}
+				onDrop={this.onDrop}
+				onClick={this.openFileDialog}
+				style={{ cursor: this.props.disabled ? 'default' : 'pointer' }}>
+				<div className="DropzoneText">Drag files here or click to upload</div>
 				<input
-					ref={ this.fileInputRef }
-					className='FileInput'
-					type='file'
-					accept={ this.props.format }
-					onChange={ this.onFilesAdded }
-					style={ { display: 'none'} }
+					ref={this.fileInputRef}
+					className="FileInput"
+					type="file"
+					accept={this.props.format}
+					onChange={this.onFilesAdded}
+					style={{ display: 'none' }}
 				/>
 			</div>
 		)
 	}
 
-	private openFileDialog () {
+	private openFileDialog() {
 		if (this.props.disabled) return
 		this.fileInputRef.current.click()
 	}
 
-	private onDragOver (evt: React.DragEvent<Element>) {
+	private onDragOver(evt: React.DragEvent<Element>) {
 		evt.preventDefault()
 
 		if (this.props.disabled) return
 
 		this.setState({ highlight: true })
-	  }
+	}
 
-	private onDragLeave () {
+	private onDragLeave() {
 		this.setState({ highlight: false })
-	  }
+	}
 
-	private onDrop (event: React.DragEvent<HTMLDivElement>) {
+	private onDrop(event: React.DragEvent<HTMLDivElement>) {
 		event.preventDefault()
 
 		if (this.props.disabled) return
 
 		const files = event.dataTransfer.files
 		if (this.props.onFilesAdded) {
-		  const array = this.fileListToArray(files)
-		  this.props.onFilesAdded(array)
+			const array = this.fileListToArray(files)
+			this.props.onFilesAdded(array)
 		}
 		this.setState({ highlight: false })
-	  }
+	}
 
-	private onFilesAdded (evt: ChangeEvent<HTMLInputElement>) {
+	private onFilesAdded(evt: ChangeEvent<HTMLInputElement>) {
 		if (this.props.disabled) return
 		const files = evt.target.files
 		if (this.props.onFilesAdded) {
@@ -88,7 +88,7 @@ export class Dropzone extends Component<Props, State> {
 		}
 	}
 
-	private fileListToArray (list: FileList | null) {
+	private fileListToArray(list: FileList | null) {
 		const array: File[] = []
 		if (list) {
 			for (let i = 0; i < list.length; i++) {

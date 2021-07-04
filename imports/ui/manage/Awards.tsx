@@ -11,22 +11,19 @@ interface Props {
 }
 
 class ManageAwards extends Component<Props> {
-	public render () {
+	public render() {
 		return (
 			<div>
-				<Link to='/manage'>Back</Link>
+				<Link to="/manage">Back</Link>
 				<h1>Awards</h1>
-				{
-					this.props.awards.map((award) => {
-						return this.renderAward(award)
-					})
-				}
+				{this.props.awards.map((award) => {
+					return this.renderAward(award)
+				})}
 			</div>
 		)
 	}
 
-	private renderAward (award: Award) {
-
+	private renderAward(award: Award) {
 		const toggleAward = () => {
 			if (award.active) {
 				message.success('Awards closed')
@@ -39,25 +36,29 @@ class ManageAwards extends Component<Props> {
 
 		return (
 			<React.Fragment>
-				<h1>{ award.name }</h1>
+				<h1>{award.name}</h1>
 				<Form>
 					<Form.Item>
 						<h2>Awards Open</h2>
 						<Popconfirm
-							title={ award.active ? 'Are you sure you want to close these awards?' : ' Are you sure you want to open these awards?' }
-							onConfirm={ () => toggleAward() }
-							okText='Yes'
-							cancelText='No'
-						>
-							<Checkbox checked={ award.active } />
-						</Popconfirm> :
+							title={
+								award.active
+									? 'Are you sure you want to close these awards?'
+									: ' Are you sure you want to open these awards?'
+							}
+							onConfirm={() => toggleAward()}
+							okText="Yes"
+							cancelText="No">
+							<Checkbox checked={award.active} />
+						</Popconfirm>{' '}
+						:
 					</Form.Item>
 				</Form>
 			</React.Fragment>
 		)
 	}
 
-	private async toggleAward (award: Award) {
+	private async toggleAward(award: Award) {
 		Meteor.call('awards:toggleActive', award._id)
 	}
 }
@@ -66,6 +67,6 @@ export default withTracker(() => {
 	Meteor.subscribe(Collections.AWARDS)
 
 	return {
-		awards: Awards.find({ }).fetch()
+		awards: Awards.find({}).fetch(),
 	}
 })(ManageAwards)

@@ -1,11 +1,11 @@
 .wordCount {
-    float: right;
+	float: right;
 }
 
 .wordCount.error {
-    color: #AA0000;
+	color: #aa0000;
 }
 
 .wordCount.warning {
-    color: rgb(226, 118, 17);
+	color: rgb(226, 118, 17);
 }
