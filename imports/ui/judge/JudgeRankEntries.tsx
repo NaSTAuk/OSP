@@ -8,7 +8,7 @@ import { Collections, VerificationStatus } from '/imports/api/helpers/enums'
 import { Station, Stations } from '/imports/api/stations'
 
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import { RouteComponentProps, withRouter } from 'react-router'
+import { RouteComponentProps, withRouter } from 'react-router-dom'
 import { SupportingEvidenceList } from './SupportingEvidenceList'
 import { Categories } from '/imports/api/categories'
 import { Evidence, EvidenceCollection } from '/imports/api/evidence'

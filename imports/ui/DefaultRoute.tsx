@@ -1,5 +1,5 @@
 import React from 'react'
-import { Redirect } from 'react-router'
+import { Redirect } from 'react-router-dom'
 import { UserHasRole } from '../api/accounts'
 import { Roles } from '../api/helpers/enums'
 import { Admin } from './Admin'

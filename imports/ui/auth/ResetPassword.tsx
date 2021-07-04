@@ -1,7 +1,7 @@
 import { Button, Form, Input, message } from 'antd'
 import { Accounts } from 'meteor/accounts-base'
 import React, { Component } from 'react'
-import { RouteComponentProps, withRouter } from 'react-router'
+import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 interface Props extends RouteComponentProps {
 	token: string
